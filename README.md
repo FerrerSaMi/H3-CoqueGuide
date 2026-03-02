@@ -77,21 +77,21 @@ El proyecto se desarrollará bajo la metodología Scrum, organizando el trabajo 
 
 ## Team Roles
 
-### Product Owner - 
+### Product Owner - Ernesto Ovalle
 Responsable de:
 - Definir la visión del producto  
 - Priorizar el Product Backlog  
 - Asegurar alineación con el socio formador  
 - Validar funcionalidades desarrolladas  
 
-### Scrum Master - 
+### Scrum Master - David Cantú
 Responsable de:
 - Asegurar el cumplimiento de la metodología ágil  
 - Coordinar reuniones del equipo  
 - Eliminar impedimentos  
 - Dar seguimiento al progreso del Sprint  
 
-### Developers - 
+### Developers - Santiago Ferrer, Ángel Sanchez
 Responsables de:
 - Diseño y desarrollo de la aplicación  
 - Implementación del chatbot  
