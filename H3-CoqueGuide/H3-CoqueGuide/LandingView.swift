@@ -37,53 +37,18 @@ struct LandingView: View {
                     Spacer()
 
                     // MARK: - Acciones principales (placeholders para futuras historias de usuario)
-                    VStack(spacing: 16) {
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
                         NavigationLink(destination: PlaceholderView(title: "Atracciones")) {
-                            Label("Atracciones", systemImage: "star")
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.accentColor)
-                                .foregroundStyle(.white)
-                                .clipShape(RoundedRectangle(cornerRadius: 14))
+                            GridButton(title: "Atracciones", icon: "star", accent: true)
                         }
-
                         NavigationLink(destination: PlaceholderView(title: "Escaneo")) {
-                            Label("Escaneo", systemImage: "qrcode.viewfinder")
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color(.secondarySystemGroupedBackground))
-                                .foregroundStyle(.primary)
-                                .clipShape(RoundedRectangle(cornerRadius: 14))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 14)
-                                        .stroke(Color(.separator), lineWidth: 1)
-                                )
+                            GridButton(title: "Escaneo", icon: "qrcode.viewfinder")
                         }
-
                         NavigationLink(destination: PlaceholderView(title: "Mapa")) {
-                            Label("Mapa", systemImage: "map")
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color(.secondarySystemGroupedBackground))
-                                .foregroundStyle(.primary)
-                                .clipShape(RoundedRectangle(cornerRadius: 14))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 14)
-                                        .stroke(Color(.separator), lineWidth: 1)
-                                )
+                            GridButton(title: "Mapa", icon: "map")
                         }
-
                         NavigationLink(destination: PlaceholderView(title: "Encuestas")) {
-                            Label("Encuestas", systemImage: "list.clipboard")
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color(.secondarySystemGroupedBackground))
-                                .foregroundStyle(.primary)
-                                .clipShape(RoundedRectangle(cornerRadius: 14))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 14)
-                                        .stroke(Color(.separator), lineWidth: 1)
-                                )
+                            GridButton(title: "Encuestas", icon: "list.clipboard")
                         }
                     }
                     .padding(.horizontal, 24)
@@ -94,18 +59,43 @@ struct LandingView: View {
             .navigationBarHidden(true)
             .overlay(alignment: .bottomTrailing) {
                 NavigationLink(destination: PlaceholderView(title: "Chatbot")) {
-                    Image(systemName: "bubble.left.and.bubble.right.fill")
-                        .font(.title2)
-                        .foregroundStyle(.white)
-                        .frame(width: 60, height: 60)
-                        .background(Color.accentColor)
+                    Image("Coque")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 64, height: 64)
                         .clipShape(Circle())
                         .shadow(radius: 6)
                 }
-                .padding(.trailing, 24)
+                .padding(.trailing, 170)
                 .padding(.bottom, 32)
             }
         }
+    }
+}
+
+// MARK: - Botón de cuadrícula
+struct GridButton: View {
+    let title: String
+    let icon: String
+    var accent: Bool = false
+
+    var body: some View {
+        VStack(spacing: 10) {
+            Image(systemName: icon)
+                .font(.system(size: 32))
+            Text(title)
+                .font(.subheadline)
+                .fontWeight(.semibold)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 110)
+        .background(accent ? Color.accentColor : Color(.secondarySystemGroupedBackground))
+        .foregroundStyle(accent ? .white : .primary)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(accent ? Color.clear : Color(.separator), lineWidth: 1)
+        )
     }
 }
 
