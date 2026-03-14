@@ -47,8 +47,8 @@ struct LandingView: View {
                         NavigationLink(destination: PlaceholderView(title: "Mapa")) {
                             GridButton(title: "Mapa", icon: "map")
                         }
-                        NavigationLink(destination: PlaceholderView(title: "Encuestas")) {
-                            GridButton(title: "Encuestas", icon: "list.clipboard")
+                        NavigationLink(destination: SurveyView()) {
+                            GridButton(title: "Encuesta", icon: "list.clipboard", accent: true)
                         }
                     }
                     .padding(.horizontal, 24)
