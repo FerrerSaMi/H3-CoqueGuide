@@ -41,14 +41,13 @@ struct LandingView: View {
                         NavigationLink(destination: PlaceholderView(title: "Atracciones")) {
                             GridButton(title: "Atracciones", icon: "star", accent: true)
                         }
-                        NavigationLink(destination: PlaceholderView(title: "Escaneo")) {
-                            GridButton(title: "Escaneo", icon: "qrcode.viewfinder")
-                        }
-                        NavigationLink(destination: PlaceholderView(title: "Mapa")) {
+                        NavigationLink(destination: CamScannerView()) {
+                            GridButton(title: "Escaneo", icon: "arkit")
+                        }                        NavigationLink(destination: PlaceholderView(title: "Mapa")) {
                             GridButton(title: "Mapa", icon: "map")
                         }
-                        NavigationLink(destination: PlaceholderView(title: "Encuestas")) {
-                            GridButton(title: "Encuestas", icon: "list.clipboard")
+                        NavigationLink(destination: SurveyView()) {
+                            GridButton(title: "Encuesta", icon: "list.clipboard", accent: true)
                         }
                     }
                     .padding(.horizontal, 24)

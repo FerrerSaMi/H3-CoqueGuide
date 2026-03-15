@@ -1,10 +1,3 @@
-//
-//  H3_CoqueGuideApp.swift
-//  H3-CoqueGuide
-//
-//  Created by David Cantú Cabello on 12/03/26.
-//
-
 
 import SwiftUI
 import SwiftData
@@ -15,7 +8,6 @@ struct H3_CoqueGuideApp: App {
         WindowGroup {
             LandingView()
         }
-        .modelContainer(for: [CoqueGuide.self])
+        .modelContainer(for: [CoqueGuide.self, ExcursionUserProfile.self])
     }
 }
-
