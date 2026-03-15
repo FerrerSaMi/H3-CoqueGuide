@@ -8,6 +8,13 @@
 import SwiftUI
 
 struct LandingView: View {
+
+    // MARK: - CoqueGuide ViewModel
+    // Se declara aquí para ser compartido con todas las pantallas de la app.
+    // Si la app usa TabView o un NavigationStack raíz, muévelo al nivel superior
+    // y pásalo como @EnvironmentObject para que cualquier pantalla lo pueda usar.
+    @StateObject private var coqueGuideVM = CGViewModel()
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -29,14 +36,14 @@ struct LandingView: View {
                             .font(.largeTitle)
                             .fontWeight(.bold)
 
-                        Text("Tu guía definitiva de fundas")
+                        Text("Museo del Acero Horno3")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
 
                     Spacer()
 
-                    // MARK: - Acciones principales (placeholders para futuras historias de usuario)
+                    // MARK: - Acciones principales
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
                         NavigationLink(destination: PlaceholderView(title: "Atracciones")) {
                             GridButton(title: "Atracciones", icon: "star", accent: true)
@@ -57,18 +64,10 @@ struct LandingView: View {
                 }
             }
             .navigationBarHidden(true)
-            .overlay(alignment: .bottomTrailing) {
-                NavigationLink(destination: PlaceholderView(title: "Chatbot")) {
-                    Image("Coque")
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 64, height: 64)
-                        .clipShape(Circle())
-                        .shadow(radius: 6)
-                }
-                .padding(.trailing, 170)
-                .padding(.bottom, 32)
-            }
+            // MARK: - Integración de CoqueGuide
+            // Una sola línea agrega: botón flotante + banner de sugerencias + sheet del panel.
+            // Aplica .coqueGuideOverlay(viewModel:) en cualquier otra pantalla de la app.
+            .coqueGuideOverlay(viewModel: coqueGuideVM)
         }
     }
 }
