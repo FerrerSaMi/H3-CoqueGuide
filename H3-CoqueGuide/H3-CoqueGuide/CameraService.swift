@@ -6,8 +6,10 @@
 //
 
 import AVFoundation
+import Combine
 
-class CameraService: ObservableObject {
+@MainActor
+final class CameraService: ObservableObject {
 
     let session = AVCaptureSession()
 

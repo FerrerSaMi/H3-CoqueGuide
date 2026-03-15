@@ -43,7 +43,8 @@ struct LandingView: View {
                         }
                         NavigationLink(destination: CamScannerView()) {
                             GridButton(title: "Escaneo", icon: "arkit")
-                        }                        NavigationLink(destination: PlaceholderView(title: "Mapa")) {
+                        }
+                        NavigationLink(destination: MapaView()) {
                             GridButton(title: "Mapa", icon: "map")
                         }
                         NavigationLink(destination: SurveyView()) {
