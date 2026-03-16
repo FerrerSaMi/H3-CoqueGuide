@@ -19,20 +19,26 @@ enum CGSender {
 // MARK: - Mensaje de conversación
 
 /// Representa un mensaje individual dentro del panel de CoqueGuide.
+/// Soporta texto plano, tarjetas de acción, o ambos.
 struct CGMessage: Identifiable {
     let id: UUID
-    let content: String
+    let text: String?
+    let cards: [CGActionCard]
     let sender: CGSender
     let timestamp: Date
 
     // MARK: Factories
 
     static func userMessage(_ text: String) -> CGMessage {
-        CGMessage(id: UUID(), content: text, sender: .user, timestamp: Date())
+        CGMessage(id: UUID(), text: text, cards: [], sender: .user, timestamp: Date())
     }
 
     static func guideMessage(_ text: String) -> CGMessage {
-        CGMessage(id: UUID(), content: text, sender: .coqueGuide, timestamp: Date())
+        CGMessage(id: UUID(), text: text, cards: [], sender: .coqueGuide, timestamp: Date())
+    }
+
+    static func guideMessage(_ text: String?, cards: [CGActionCard]) -> CGMessage {
+        CGMessage(id: UUID(), text: text, cards: cards, sender: .coqueGuide, timestamp: Date())
     }
 }
 

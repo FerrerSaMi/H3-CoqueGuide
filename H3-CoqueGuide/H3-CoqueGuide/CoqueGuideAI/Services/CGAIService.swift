@@ -15,28 +15,40 @@
 
 import Foundation
 
+// MARK: - Respuesta estructurada del servicio de IA
+
+/// Respuesta que puede contener texto, tarjetas de acción, o ambos.
+struct CGAIResponse {
+    let text: String?
+    let cards: [CGActionCard]
+
+    static func textOnly(_ text: String) -> CGAIResponse {
+        CGAIResponse(text: text, cards: [])
+    }
+
+    static func withCards(_ text: String?, cards: [CGActionCard]) -> CGAIResponse {
+        CGAIResponse(text: text, cards: cards)
+    }
+}
+
 // MARK: - Protocolo del servicio de IA
 
 /// Contrato que debe cumplir cualquier implementación del servicio de IA.
 /// Permite intercambiar fácilmente la implementación simulada por una real.
 protocol CGAIServiceProtocol {
-    /// Recibe el texto del usuario y devuelve la respuesta generada.
-    func processMessage(_ text: String) async -> String
+    /// Recibe el texto del usuario y devuelve una respuesta estructurada.
+    func processMessage(_ text: String) async -> CGAIResponse
 }
 
 // MARK: - Servicio simulado (sin dependencias externas)
 
 /// Implementación simulada que responde mediante coincidencia de palabras clave.
 /// Incluye un retraso artificial para representar latencia de red.
-///
-/// Para conectar una API real, crea una nueva clase que conforme a
-/// `CGAIServiceProtocol` e inyéctala en `CGViewModel`.
 final class CGSimulatedAIService: CGAIServiceProtocol {
 
     // MARK: - Procesamiento de mensajes
 
-    func processMessage(_ text: String) async -> String {
-        // Simula latencia de red entre 0.7 y 1.5 segundos
+    func processMessage(_ text: String) async -> CGAIResponse {
         let delay = Double.random(in: 0.7...1.5)
         try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
         return buildResponse(for: text.lowercased())
@@ -44,94 +56,113 @@ final class CGSimulatedAIService: CGAIServiceProtocol {
 
     // MARK: - Motor de reglas por palabras clave
 
-    private func buildResponse(for input: String) -> String {
+    private func buildResponse(for input: String) -> CGAIResponse {
         switch true {
 
-        // Orientación y mapa
         case input.containsAny(["mapa", "ubicación", "donde", "dónde", "cómo llego",
                                  "orientación", "plano", "ruta", "perdido", "zona"]):
             return orientationResponse()
 
-        // Eventos y actividades
         case input.containsAny(["evento", "actividad", "show", "visita guiada",
                                  "programa", "agenda", "horario de actividades", "tour"]):
             return eventsResponse()
 
-        // Escaneo de objetos
         case input.containsAny(["escanear", "escaneo", "qr", "código qr",
                                  "código", "objeto", "pieza", "scan", "cámara"]):
             return scanningResponse()
 
-        // Idiomas
         case input.containsAny(["idioma", "language", "inglés", "english",
                                  "español", "francés", "alemán", "traducción", "traducir"]):
-            return languagesResponse()
+            return .textOnly(languagesResponse())
 
-        // Accesibilidad
         case input.containsAny(["accesibilidad", "discapacidad", "silla de ruedas",
                                  "rampa", "audífonos", "braille", "necesidades especiales",
                                  "movilidad reducida"]):
-            return accessibilityResponse()
+            return .textOnly(accessibilityResponse())
 
-        // Horarios y precios de entrada
         case input.containsAny(["horario", "hora de apertura", "abre", "cierra",
                                  "entrada", "precio", "costo", "boleto", "tarifa",
                                  "cuánto", "gratis", "gratuito"]):
-            return admissionResponse()
+            return .textOnly(admissionResponse())
 
-        // Información general del museo
         case input.containsAny(["museo", "horno3", "horno 3", "acero", "industrial",
                                  "historia", "fundación", "monterrey", "fundidora"]):
-            return museumInfoResponse()
+            return .textOnly(museumInfoResponse())
 
-        // Restaurante y servicios
         case input.containsAny(["comer", "comida", "restaurante", "cafetería",
                                  "baño", "sanitario", "tienda", "souvenirs",
                                  "estacionamiento", "parqueo"]):
-            return servicesResponse()
+            return .textOnly(servicesResponse())
 
-        // Saludo inicial
         case input.containsAny(["hola", "buenos días", "buenas tardes", "buenas noches",
                                  "buenas", "hi", "hello", "hey", "qué tal"]):
-            return greetingResponse()
+            return .textOnly(greetingResponse())
 
-        // Agradecimiento
         case input.containsAny(["gracias", "thanks", "thank you", "perfecto",
                                  "excelente", "de acuerdo", "entendido", "ok"]):
-            return "¡Con gusto! Estoy aquí si tienes más preguntas durante tu visita. 😊"
+            return .textOnly("¡Con gusto! Estoy aquí si tienes más preguntas durante tu visita. 😊")
 
-        // Ayuda general
         case input.containsAny(["ayuda", "help", "qué puedes", "qué haces",
                                  "funciones", "capacidades"]):
-            return helpResponse()
+            return .textOnly(helpResponse())
 
-        // Respuesta por defecto
         default:
-            return defaultResponse()
+            return .textOnly(defaultResponse())
         }
     }
 
-    // MARK: - Respuestas por categoría
+    // MARK: - Respuestas con tarjetas de acción
 
-    private func orientationResponse() -> String {
-        [
-            "El museo Horno3 tiene dos niveles principales. 🗺️\n\n**Nivel 1:** Exhibiciones históricas y el Horno Alto original\n**Nivel 2:** Galería industrial y mirador panorámico\n\nPuedes ver el mapa interactivo tocando el ícono de mapa en la pantalla principal.",
-
-            "¡Claro! Puedo orientarte. 📍\n\nEl punto de información principal está en la **entrada principal** (Nivel 1). Desde ahí puedes acceder a todos los niveles mediante rampas y elevadores.\n\nToca 'Ver mapa' en las acciones rápidas para ver el plano detallado."
+    private func orientationResponse() -> CGAIResponse {
+        let text = [
+            "El museo Horno3 tiene dos niveles principales. 🗺️\n\n**Nivel 1:** Exhibiciones históricas y el Horno Alto original\n**Nivel 2:** Galería industrial y mirador panorámico",
+            "¡Claro! Puedo orientarte. 📍\n\nEl punto de información principal está en la **entrada principal** (Nivel 1). Desde ahí puedes acceder a todos los niveles mediante rampas y elevadores."
         ].randomElement()!
+
+        let mapCard = CGActionCard(
+            cardType: .map,
+            title: "Mapa del museo",
+            subtitle: "Niveles 1 y 2",
+            description: "Consulta el plano interactivo del museo",
+            action: .navigate(.map)
+        )
+
+        return .withCards(text, cards: [mapCard])
     }
 
-    private func eventsResponse() -> String {
-        [
-            "🗓️ **Actividades de hoy:**\n\n• 11:00 – Visita guiada al Horno Alto\n• 13:00 – Taller de metalurgia para niños\n• 15:30 – Proyección documental 'Acero y Fuego'\n• 17:00 – Tour fotográfico\n\nPuedes ver el calendario completo en la sección **Atracciones**.",
+    private func eventsResponse() -> CGAIResponse {
+        let events = CGEventService.shared.todaysEvents()
+        let text = "🗓️ **Actividades de hoy en Horno3:**"
 
-            "Hoy hay varias actividades disponibles. 🎯\n\nLa próxima **visita guiada** sale en 45 minutos desde la entrada principal. Cupo limitado, ¡te recomiendo registrarte pronto!\n\n¿Te interesa alguna actividad en particular?"
-        ].randomElement()!
+        let cards = events.map { event in
+            CGActionCard(
+                cardType: .event,
+                title: event.name,
+                subtitle: event.time + " · " + event.location,
+                description: event.description,
+                icon: event.icon,
+                action: .navigate(.events)
+            )
+        }
+
+        return .withCards(text, cards: cards)
     }
 
-    private func scanningResponse() -> String {
-        "Para escanear un objeto del museo: 📷\n\n1. Toca el ícono **Escanear** en la pantalla principal\n2. Apunta la cámara al **código QR** o a la placa informativa del objeto\n3. Recibirás información detallada, historia y contenido multimedia\n\nCasi todas las piezas del museo cuentan con código QR. ¿Necesitas más ayuda con el escaneo?"
+    private func scanningResponse() -> CGAIResponse {
+        let text = "Para escanear un objeto del museo: 📷\n\n1. Apunta la cámara al **código QR** o a la placa informativa\n2. Recibirás información detallada, historia y contenido multimedia"
+
+        let scanCard = CGActionCard(
+            cardType: .scan,
+            title: "Abrir escáner",
+            subtitle: "Escanea códigos QR de las exhibiciones",
+            description: "Casi todas las piezas del museo cuentan con código QR.",
+            action: .navigate(.scanning)
+        )
+
+        return .withCards(text, cards: [scanCard])
     }
+
+    // MARK: - Respuestas de solo texto
 
     private func languagesResponse() -> String {
         "🌍 **Idiomas disponibles en CoqueGuide:**\n\n• 🇲🇽 Español\n• 🇺🇸 English\n• 🇫🇷 Français\n\nPuedes cambiar el idioma tocando **Cambiar idioma** en las acciones rápidas o en los ajustes de la app.\n\nLas cartelas de las exhibiciones también están en **español e inglés**."
@@ -156,7 +187,6 @@ final class CGSimulatedAIService: CGAIServiceProtocol {
     private func greetingResponse() -> String {
         [
             "¡Hola! Soy **CoqueGuide**, tu asistente inteligente en el Museo del Acero Horno3. 👋\n\nPuedo ayudarte con orientación, eventos, escaneo de objetos, accesibilidad y mucho más. ¿En qué te puedo ayudar hoy?",
-
             "¡Bienvenido al **Museo Horno3**! 🏭\n\nEstoy aquí para hacer tu visita más completa y memorable. Puedo orientarte, contarte sobre las exhibiciones y ayudarte con cualquier duda.\n\n¿Por dónde empezamos?"
         ].randomElement()!
     }
@@ -168,9 +198,7 @@ final class CGSimulatedAIService: CGAIServiceProtocol {
     private func defaultResponse() -> String {
         [
             "Entiendo tu pregunta. En este momento puedo ayudarte con orientación, eventos, escaneo de objetos, idiomas y accesibilidad. ¿Quieres explorar alguno de estos temas? 😊",
-
             "No tengo esa información exacta ahora mismo, pero puedes preguntar en el **punto de información** ubicado en la entrada principal. ¿Hay algo más en lo que pueda ayudarte?",
-
             "¡Buena pregunta! Te recomiendo consultar con nuestro equipo en recepción para obtener información más detallada. Mientras tanto, puedo ayudarte con el mapa, eventos o accesibilidad. 🙌"
         ].randomElement()!
     }
@@ -179,7 +207,6 @@ final class CGSimulatedAIService: CGAIServiceProtocol {
 // MARK: - Extensión auxiliar privada
 
 private extension String {
-    /// Devuelve `true` si la cadena contiene alguna de las palabras clave indicadas.
     func containsAny(_ keywords: [String]) -> Bool {
         keywords.contains { self.contains($0) }
     }

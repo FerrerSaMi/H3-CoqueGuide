@@ -28,36 +28,47 @@ struct CGMessageBubble: View {
                     .overlay(Circle().stroke(Color(.separator), lineWidth: 0.5))
             }
 
-            VStack(alignment: isUser ? .trailing : .leading, spacing: 4) {
+            VStack(alignment: isUser ? .trailing : .leading, spacing: 6) {
 
                 // Burbuja con texto
-                Text(message.content)
-                    .font(.body)
-                    .foregroundStyle(isUser ? .white : .primary)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 10)
-                    .background(
-                        Group {
-                            if isUser {
-                                Color.accentColor
-                            } else {
-                                Color(.secondarySystemGroupedBackground)
+                if let text = message.text, !text.isEmpty {
+                    Text(text)
+                        .font(.body)
+                        .foregroundStyle(isUser ? .white : .primary)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
+                        .background(
+                            Group {
+                                if isUser {
+                                    Color.accentColor
+                                } else {
+                                    Color(.secondarySystemGroupedBackground)
+                                }
                             }
+                        )
+                        .clipShape(
+                            BubbleShape(isUser: isUser)
+                        )
+                        .shadow(
+                            color: isUser
+                                ? Color.accentColor.opacity(0.25)
+                                : Color.black.opacity(0.06),
+                            radius: 4, x: 0, y: 2
+                        )
+                        .frame(
+                            maxWidth: UIScreen.main.bounds.width * 0.70,
+                            alignment: isUser ? .trailing : .leading
+                        )
+                }
+
+                // Tarjetas de acción (solo mensajes del asistente)
+                if !message.cards.isEmpty {
+                    VStack(spacing: 8) {
+                        ForEach(message.cards) { card in
+                            CGActionCardView(card: card)
                         }
-                    )
-                    .clipShape(
-                        BubbleShape(isUser: isUser)
-                    )
-                    .shadow(
-                        color: isUser
-                            ? Color.accentColor.opacity(0.25)
-                            : Color.black.opacity(0.06),
-                        radius: 4, x: 0, y: 2
-                    )
-                    .frame(
-                        maxWidth: UIScreen.main.bounds.width * 0.70,
-                        alignment: isUser ? .trailing : .leading
-                    )
+                    }
+                }
 
                 // Timestamp
                 Text(message.timestamp, style: .time)

@@ -10,13 +10,18 @@ import SwiftUI
 struct LandingView: View {
 
     // MARK: - CoqueGuide ViewModel
-    // Se declara aquí para ser compartido con todas las pantallas de la app.
-    // Si la app usa TabView o un NavigationStack raíz, muévelo al nivel superior
-    // y pásalo como @EnvironmentObject para que cualquier pantalla lo pueda usar.
-    @StateObject private var coqueGuideVM = CGViewModel()
+    // Usa Claude API si hay key en Secrets.plist, sino usa servicio simulado
+    @StateObject private var coqueGuideVM: CGViewModel = {
+        let service: CGAIServiceProtocol = ClaudeAIService.fromSecretsPlist() ?? CGSimulatedAIService()
+        return CGViewModel(aiService: service)
+    }()
+
+    // MARK: - Navegación
+    @State private var navigationPath = NavigationPath()
+    @State private var navigationCoordinator = CGNavigationCoordinator()
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             ZStack {
                 Color(.systemGroupedBackground)
                     .ignoresSafeArea()
@@ -45,16 +50,16 @@ struct LandingView: View {
 
                     // MARK: - Acciones principales
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
-                        NavigationLink(destination: PlaceholderView(title: "Atracciones")) {
+                        NavigationLink(value: CGAppDestination.events) {
                             GridButton(title: "Atracciones", icon: "star", accent: true)
                         }
-                        NavigationLink(destination: PlaceholderView(title: "Escaneo")) {
+                        NavigationLink(value: CGAppDestination.scanning) {
                             GridButton(title: "Escaneo", icon: "qrcode.viewfinder")
                         }
-                        NavigationLink(destination: PlaceholderView(title: "Mapa")) {
+                        NavigationLink(value: CGAppDestination.map) {
                             GridButton(title: "Mapa", icon: "map")
                         }
-                        NavigationLink(destination: SurveyView()) {
+                        NavigationLink(value: CGAppDestination.survey) {
                             GridButton(title: "Encuesta", icon: "list.clipboard", accent: true)
                         }
                     }
@@ -64,10 +69,31 @@ struct LandingView: View {
                 }
             }
             .navigationBarHidden(true)
+            .navigationDestination(for: CGAppDestination.self) { destination in
+                switch destination {
+                case .map:
+                    PlaceholderView(title: "Mapa")
+                case .events:
+                    PlaceholderView(title: "Atracciones")
+                case .scanning:
+                    PlaceholderView(title: "Escaneo")
+                case .survey:
+                    SurveyView()
+                }
+            }
             // MARK: - Integración de CoqueGuide
-            // Una sola línea agrega: botón flotante + banner de sugerencias + sheet del panel.
-            // Aplica .coqueGuideOverlay(viewModel:) en cualquier otra pantalla de la app.
             .coqueGuideOverlay(viewModel: coqueGuideVM)
+            .environment(navigationCoordinator)
+            .onChange(of: navigationCoordinator.pendingDestination) { _, newValue in
+                if let destination = newValue {
+                    // Cerrar el panel primero, luego navegar
+                    coqueGuideVM.isPanelOpen = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                        navigationPath.append(destination)
+                        navigationCoordinator.pendingDestination = nil
+                    }
+                }
+            }
         }
     }
 }

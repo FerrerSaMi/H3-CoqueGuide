@@ -115,7 +115,7 @@ final class CGViewModel: ObservableObject {
             let response = await aiService.processMessage(text)
             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                 isThinking = false
-                messages.append(.guideMessage(response))
+                messages.append(.guideMessage(response.text, cards: response.cards))
             }
         }
     }
