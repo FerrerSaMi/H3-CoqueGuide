@@ -6,8 +6,19 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		94BCCD212F67B6230069322A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1A58A5A42F6311E300A27D19 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1A58A5AB2F6311E300A27D19;
+			remoteInfo = "H3-CoqueGuide";
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		1A58A5AC2F6311E300A27D19 /* H3-CoqueGuide.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "H3-CoqueGuide.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		94BCCD1D2F67B6230069322A /* H3-CoqueGuideTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "H3-CoqueGuideTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -16,10 +27,22 @@
 			path = "H3-CoqueGuide";
 			sourceTree = "<group>";
 		};
+		94BCCD1E2F67B6230069322A /* H3-CoqueGuideTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "H3-CoqueGuideTests";
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		1A58A5A92F6311E300A27D19 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		94BCCD1A2F67B6230069322A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -33,6 +56,7 @@
 			isa = PBXGroup;
 			children = (
 				1A58A5AE2F6311E300A27D19 /* H3-CoqueGuide */,
+				94BCCD1E2F67B6230069322A /* H3-CoqueGuideTests */,
 				1A58A5AD2F6311E300A27D19 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				1A58A5AC2F6311E300A27D19 /* H3-CoqueGuide.app */,
+				94BCCD1D2F67B6230069322A /* H3-CoqueGuideTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -70,6 +95,29 @@
 			productReference = 1A58A5AC2F6311E300A27D19 /* H3-CoqueGuide.app */;
 			productType = "com.apple.product-type.application";
 		};
+		94BCCD1C2F67B6230069322A /* H3-CoqueGuideTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 94BCCD232F67B6230069322A /* Build configuration list for PBXNativeTarget "H3-CoqueGuideTests" */;
+			buildPhases = (
+				94BCCD192F67B6230069322A /* Sources */,
+				94BCCD1A2F67B6230069322A /* Frameworks */,
+				94BCCD1B2F67B6230069322A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				94BCCD222F67B6230069322A /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				94BCCD1E2F67B6230069322A /* H3-CoqueGuideTests */,
+			);
+			name = "H3-CoqueGuideTests";
+			packageProductDependencies = (
+			);
+			productName = "H3-CoqueGuideTests";
+			productReference = 94BCCD1D2F67B6230069322A /* H3-CoqueGuideTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -77,11 +125,15 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2630;
+				LastSwiftUpdateCheck = 2620;
 				LastUpgradeCheck = 2630;
 				TargetAttributes = {
 					1A58A5AB2F6311E300A27D19 = {
 						CreatedOnToolsVersion = 26.3;
+					};
+					94BCCD1C2F67B6230069322A = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = 1A58A5AB2F6311E300A27D19;
 					};
 				};
 			};
@@ -100,12 +152,20 @@
 			projectRoot = "";
 			targets = (
 				1A58A5AB2F6311E300A27D19 /* H3-CoqueGuide */,
+				94BCCD1C2F67B6230069322A /* H3-CoqueGuideTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		1A58A5AA2F6311E300A27D19 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		94BCCD1B2F67B6230069322A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -122,7 +182,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		94BCCD192F67B6230069322A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		94BCCD222F67B6230069322A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1A58A5AB2F6311E300A27D19 /* H3-CoqueGuide */;
+			targetProxy = 94BCCD212F67B6230069322A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		1A58A5B52F6311E600A27D19 /* Debug */ = {
@@ -310,6 +385,46 @@
 			};
 			name = Release;
 		};
+		94BCCD242F67B6230069322A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.ernesto.H3-CoqueGuideTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/H3-CoqueGuide.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/H3-CoqueGuide";
+			};
+			name = Debug;
+		};
+		94BCCD252F67B6230069322A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.ernesto.H3-CoqueGuideTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/H3-CoqueGuide.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/H3-CoqueGuide";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -327,6 +442,15 @@
 			buildConfigurations = (
 				1A58A5B82F6311E600A27D19 /* Debug */,
 				1A58A5B92F6311E600A27D19 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		94BCCD232F67B6230069322A /* Build configuration list for PBXNativeTarget "H3-CoqueGuideTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				94BCCD242F67B6230069322A /* Debug */,
+				94BCCD252F67B6230069322A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
