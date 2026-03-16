@@ -53,10 +53,10 @@ struct LandingView: View {
                         NavigationLink(value: CGAppDestination.events) {
                             GridButton(title: "Atracciones", icon: "star", accent: true)
                         }
-                        NavigationLink(value: CGAppDestination.scanning) {
-                            GridButton(title: "Escaneo", icon: "qrcode.viewfinder")
+                        NavigationLink(destination: CamScannerView()) {
+                            GridButton(title: "Escaneo", icon: "arkit")
                         }
-                        NavigationLink(value: CGAppDestination.map) {
+                        NavigationLink(destination: MapaView()) {
                             GridButton(title: "Mapa", icon: "map")
                         }
                         NavigationLink(value: CGAppDestination.survey) {
@@ -72,11 +72,11 @@ struct LandingView: View {
             .navigationDestination(for: CGAppDestination.self) { destination in
                 switch destination {
                 case .map:
-                    PlaceholderView(title: "Mapa")
+                    MapaView()
                 case .events:
                     PlaceholderView(title: "Atracciones")
                 case .scanning:
-                    PlaceholderView(title: "Escaneo")
+                    CamScannerView()
                 case .survey:
                     SurveyView()
                 }
