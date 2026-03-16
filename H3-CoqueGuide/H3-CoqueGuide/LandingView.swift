@@ -8,8 +8,20 @@
 import SwiftUI
 
 struct LandingView: View {
+
+    // MARK: - CoqueGuide ViewModel
+    // Usa Claude API si hay key en Secrets.plist, sino usa servicio simulado
+    @StateObject private var coqueGuideVM: CGViewModel = {
+        let service: CGAIServiceProtocol = ClaudeAIService.fromSecretsPlist() ?? CGSimulatedAIService()
+        return CGViewModel(aiService: service)
+    }()
+
+    // MARK: - Navegación
+    @State private var navigationPath = NavigationPath()
+    @State private var navigationCoordinator = CGNavigationCoordinator()
+
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             ZStack {
                 Color(.systemGroupedBackground)
                     .ignoresSafeArea()
@@ -29,16 +41,16 @@ struct LandingView: View {
                             .font(.largeTitle)
                             .fontWeight(.bold)
 
-                        Text("Tu guía definitiva de fundas")
+                        Text("Museo del Acero Horno3")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
 
                     Spacer()
 
-                    // MARK: - Acciones principales (placeholders para futuras historias de usuario)
+                    // MARK: - Acciones principales
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
-                        NavigationLink(destination: PlaceholderView(title: "Atracciones")) {
+                        NavigationLink(value: CGAppDestination.events) {
                             GridButton(title: "Atracciones", icon: "star", accent: true)
                         }
                         NavigationLink(destination: CamScannerView()) {
@@ -47,7 +59,7 @@ struct LandingView: View {
                         NavigationLink(destination: MapaView()) {
                             GridButton(title: "Mapa", icon: "map")
                         }
-                        NavigationLink(destination: SurveyView()) {
+                        NavigationLink(value: CGAppDestination.survey) {
                             GridButton(title: "Encuesta", icon: "list.clipboard", accent: true)
                         }
                     }
@@ -57,17 +69,30 @@ struct LandingView: View {
                 }
             }
             .navigationBarHidden(true)
-            .overlay(alignment: .bottomTrailing) {
-                NavigationLink(destination: PlaceholderView(title: "Chatbot")) {
-                    Image("Coque")
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 64, height: 64)
-                        .clipShape(Circle())
-                        .shadow(radius: 6)
+            .navigationDestination(for: CGAppDestination.self) { destination in
+                switch destination {
+                case .map:
+                    MapaView()
+                case .events:
+                    PlaceholderView(title: "Atracciones")
+                case .scanning:
+                    CamScannerView()
+                case .survey:
+                    SurveyView()
                 }
-                .padding(.trailing, 170)
-                .padding(.bottom, 32)
+            }
+            // MARK: - Integración de CoqueGuide
+            .coqueGuideOverlay(viewModel: coqueGuideVM)
+            .environment(navigationCoordinator)
+            .onChange(of: navigationCoordinator.pendingDestination) { _, newValue in
+                if let destination = newValue {
+                    // Cerrar el panel primero, luego navegar
+                    coqueGuideVM.isPanelOpen = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                        navigationPath.append(destination)
+                        navigationCoordinator.pendingDestination = nil
+                    }
+                }
             }
         }
     }

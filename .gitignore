@@ -1,0 +1,11 @@
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+*.xcscmblueprint
+
+# API Keys
+Secrets.plist
+
+# macOS
+.DS_Store
