@@ -25,12 +25,12 @@ struct SurveyView: View {
                         TextField("Escribe aqui tu nombre", text: $viewModel.name)
                             .textFieldStyle(.roundedBorder)
 
-                        TextField("Escribe tu edad ej: 21", text: $viewModel.ageText)
+                        TextField("Escribe tu edad (ej: 21)", text: $viewModel.ageText)
                             .keyboardType(.numberPad)
                             .textFieldStyle(.roundedBorder)
 
                         VStack(alignment: .leading, spacing: 10) {
-                            Text("¿Qué prefieres para tu paseo por horno3?")
+                            Text("¿Qué prefieres para tu paseo por Horno3?")
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
 
@@ -48,7 +48,7 @@ struct SurveyView: View {
                             }
                         }
 
-                        TextField("Cuanto tiempo tienes ej: 2 horas y media", text: $viewModel.availableTime)
+                        TextField("Cuanto tiempo tienes (ej: 2 horas y media)", text: $viewModel.availableTime)
                             .textFieldStyle(.roundedBorder)
 
                         TextField("¿Buscas algo en específico?", text: $viewModel.specificSearch, axis: .vertical)
