@@ -144,7 +144,7 @@ struct CGOverlayModifier: ViewModifier {
                     }
                 }
                 .padding(.trailing, 20)
-                .padding(.bottom, 28)
+                .padding(.bottom, 150)
                 .animation(.spring(response: 0.45, dampingFraction: 0.75), value: viewModel.activeSuggestion?.id)
             }
             .sheet(isPresented: $showPanel) {

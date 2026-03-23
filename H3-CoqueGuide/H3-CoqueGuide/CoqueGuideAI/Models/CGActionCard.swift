@@ -14,6 +14,7 @@ enum CGAppDestination: Hashable {
     case events
     case scanning
     case survey
+    case chatbot
 }
 
 // MARK: - Acción al tocar una tarjeta

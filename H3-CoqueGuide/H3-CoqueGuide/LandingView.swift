@@ -19,6 +19,10 @@ struct LandingView: View {
     // MARK: - Navegación
     @State private var navigationPath = NavigationPath()
     @State private var navigationCoordinator = CGNavigationCoordinator()
+    
+    // MARK: - Carrusel
+    @State private var currentGalleryIndex: Int = 0
+    private let galleryImages = ["Galeria1", "Galeria2", "Galeria3", "Galeria4", "Galeria5"]
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
@@ -26,9 +30,7 @@ struct LandingView: View {
                 Color(.systemGroupedBackground)
                     .ignoresSafeArea()
 
-                VStack(spacing: 32) {
-                    Spacer()
-
+                VStack(spacing: 0) {
                     // MARK: - Logo & Title
                     VStack(spacing: 12) {
                         Image(systemName: "shield.lefthalf.filled")
@@ -45,27 +47,49 @@ struct LandingView: View {
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
+                    .padding(.top, 32)
 
-                    Spacer()
-
-                    // MARK: - Acciones principales
-                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
-                        NavigationLink(value: CGAppDestination.events) {
-                            GridButton(title: "Atracciones", icon: "star", accent: true)
-                        }
-                        NavigationLink(destination: CamScannerView()) {
-                            GridButton(title: "Escaneo", icon: "arkit")
-                        }
-                        NavigationLink(destination: MapaView()) {
-                            GridButton(title: "Mapa", icon: "map")
-                        }
-                        NavigationLink(value: CGAppDestination.survey) {
-                            GridButton(title: "Encuesta", icon: "list.clipboard", accent: true)
+                    // MARK: - Carrusel de Galerías
+                    TabView(selection: $currentGalleryIndex) {
+                        ForEach(0..<galleryImages.count, id: \.self) { index in
+                            Image(galleryImages[index])
+                                .resizable()
+                                .scaledToFill()
+                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                                .tag(index)
                         }
                     }
+                    .tabViewStyle(.page(indexDisplayMode: .automatic))
+                    .frame(height: 280)
                     .padding(.horizontal, 24)
+                    .padding(.vertical, 20)
 
                     Spacer()
+
+                    // MARK: - Barra de opciones inferior
+                    VStack(spacing: 0) {
+                        // Separador
+                        Divider()
+
+                        // Grid de 4 botones
+                        HStack(spacing: 12) {
+                            NavigationLink(value: CGAppDestination.events) {
+                                GridButton(title: "Atracciones", icon: "star", accent: true)
+                            }
+                            NavigationLink(destination: CamScannerView()) {
+                                GridButton(title: "Escaneo", icon: "arkit")
+                            }
+                            NavigationLink(destination: MapaView()) {
+                                GridButton(title: "Mapa", icon: "map")
+                            }
+                            NavigationLink(value: CGAppDestination.survey) {
+                                GridButton(title: "Encuesta", icon: "list.clipboard", accent: true)
+                            }
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 12)
+                    }
+                    .background(Color(.systemGroupedBackground))
                 }
             }
             .navigationBarHidden(true)
@@ -79,6 +103,8 @@ struct LandingView: View {
                     CamScannerView()
                 case .survey:
                     SurveyView()
+                case .chatbot:
+                    PlaceholderView(title: "Chatbot")
                 }
             }
             // MARK: - Integración de CoqueGuide
@@ -105,20 +131,20 @@ struct GridButton: View {
     var accent: Bool = false
 
     var body: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 6) {
             Image(systemName: icon)
-                .font(.system(size: 32))
+                .font(.system(size: 24))
             Text(title)
-                .font(.subheadline)
+                .font(.caption2)
                 .fontWeight(.semibold)
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 110)
+        .frame(height: 70)
         .background(accent ? Color.accentColor : Color(.secondarySystemGroupedBackground))
         .foregroundStyle(accent ? .white : .primary)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(
-            RoundedRectangle(cornerRadius: 16)
+            RoundedRectangle(cornerRadius: 12)
                 .stroke(accent ? Color.clear : Color(.separator), lineWidth: 1)
         )
     }

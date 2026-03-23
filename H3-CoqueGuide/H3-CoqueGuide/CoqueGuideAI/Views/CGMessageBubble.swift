@@ -63,10 +63,19 @@ struct CGMessageBubble: View {
 
                 // Tarjetas de acción (solo mensajes del asistente)
                 if !message.cards.isEmpty {
-                    VStack(spacing: 8) {
-                        ForEach(message.cards) { card in
-                            CGActionCardView(card: card)
+                    if message.cards.count == 1 {
+                        // Una sola tarjeta: mostrar directamente
+                        CGActionCardView(card: message.cards[0])
+                    } else {
+                        // Múltiples tarjetas: usar slider/tabview
+                        TabView {
+                            ForEach(message.cards) { card in
+                                CGActionCardView(card: card)
+                                    .tag(card.id)
+                            }
                         }
+                        .tabViewStyle(.page(indexDisplayMode: .automatic))
+                        .frame(height: 140)
                     }
                 }
 
