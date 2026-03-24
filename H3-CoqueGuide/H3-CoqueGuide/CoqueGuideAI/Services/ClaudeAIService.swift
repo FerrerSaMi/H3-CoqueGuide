@@ -123,7 +123,7 @@ final class ClaudeAIService: CGAIServiceProtocol {
                 CGActionCard(
                     cardType: .event,
                     title: event.name,
-                    subtitle: event.time + " · " + event.location,
+                    subtitle: event.location,
                     description: event.description,
                     icon: event.icon,
                     action: .navigate(.events)
@@ -149,7 +149,7 @@ final class ClaudeAIService: CGAIServiceProtocol {
 
     private static func systemPrompt() -> String {
         let events = CGEventService.shared.todaysEvents()
-        let eventsList = events.map { "- \($0.time): \($0.name) (\($0.location))" }.joined(separator: "\n")
+        let eventsList = events.map { "- \($0.name) (\($0.location))" }.joined(separator: "\n")
 
         return """
         Eres "Coque", el asistente inteligente del Museo del Acero Horno3 en Monterrey, México. \

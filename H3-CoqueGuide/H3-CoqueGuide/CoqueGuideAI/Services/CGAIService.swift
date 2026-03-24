@@ -80,11 +80,6 @@ final class CGSimulatedAIService: CGAIServiceProtocol {
                                  "movilidad reducida"]):
             return .textOnly(accessibilityResponse())
 
-        case input.containsAny(["horario", "hora de apertura", "abre", "cierra",
-                                 "entrada", "precio", "costo", "boleto", "tarifa",
-                                 "cuánto", "gratis", "gratuito"]):
-            return .textOnly(admissionResponse())
-
         case input.containsAny(["museo", "horno3", "horno 3", "acero", "industrial",
                                  "historia", "fundación", "monterrey", "fundidora"]):
             return .textOnly(museumInfoResponse())
@@ -138,7 +133,7 @@ final class CGSimulatedAIService: CGAIServiceProtocol {
             CGActionCard(
                 cardType: .event,
                 title: event.name,
-                subtitle: event.time + " · " + event.location,
+                subtitle: event.location,
                 description: event.description,
                 icon: event.icon,
                 action: .navigate(.events)
@@ -172,10 +167,6 @@ final class CGSimulatedAIService: CGAIServiceProtocol {
         "♿ **Servicios de accesibilidad en Horno3:**\n\n• Rampas y elevadores en todos los niveles\n• Audioguías disponibles en recepción (sin costo adicional)\n• Material en braille en exhibiciones seleccionadas\n• Estacionamiento preferencial en la entrada\n• Personal de apoyo disponible en recepción\n• Sanitarios adaptados en cada nivel\n\n¿Necesitas algún servicio específico? Nuestro equipo puede asistirte en la entrada."
     }
 
-    private func admissionResponse() -> String {
-        "🎟️ **Horarios y tarifas de Horno3:**\n\n**Horario:**\n• Martes a Domingo: 10:00 – 18:00 h\n• Lunes: Cerrado\n\n**Precios de entrada:**\n• General: $80 MXN\n• Niños (3–12 años): $40 MXN\n• Adultos mayores: $40 MXN\n• Menores de 3 años: **Gratis**\n• Grupos (+15 personas): Consultar en taquilla\n\n¿Necesitas información sobre visitas especiales o grupos escolares?"
-    }
-
     private func museumInfoResponse() -> String {
         "🏭 **Museo del Acero Horno3**\n\nEspacio cultural único construido sobre el antiguo **Horno Alto Número 3** de la Fundidora de Monterrey. Inaugurado en 2007, combina historia industrial, arte contemporáneo y tecnología interactiva.\n\nEl horno fue operado entre **1910 y 1986**, y es parte fundamental de la identidad industrial de México y de Monterrey."
     }
@@ -192,7 +183,7 @@ final class CGSimulatedAIService: CGAIServiceProtocol {
     }
 
     private func helpResponse() -> String {
-        "Puedo ayudarte con: 💡\n\n• 🗺️ **Orientación** dentro del museo\n• 🗓️ **Eventos** y actividades del día\n• 📷 **Escaneo** de objetos y piezas\n• 🌍 **Idiomas** disponibles\n• ♿ **Accesibilidad** y servicios\n• 🎟️ **Horarios** y precios de entrada\n• 🏭 **Historia** del museo\n\nEscribe tu pregunta o usa los botones de acciones rápidas."
+        "Puedo ayudarte con: 💡\n\n• 🗺️ **Orientación** dentro del museo\n• 🗓️ **Eventos** y actividades del día\n• 📷 **Escaneo** de objetos y piezas\n• 🌍 **Idiomas** disponibles\n• ♿ **Accesibilidad** y servicios\n• 🏭 **Historia** del museo\n\nEscribe tu pregunta o usa los botones de acciones rápidas."
     }
 
     private func defaultResponse() -> String {
