@@ -1,0 +1,31 @@
+{
+  "levels": [
+    {
+      "id": 1,
+      "imageName": "MapaN1",
+      "locations": [
+        {"id": 1, "name": "Laboratorio de Innovación", "x": 348, "y": 810},
+        {"id": 2, "name": "Laboratorio Una Ventana a la Ciencia", "x": 475, "y": 810},
+        {"id": 3, "name": "Lobby", "x": 595, "y": 785},
+        {"id": 4, "name": "Vestíbulo de la Galería de la Historia", "x": 555, "y": 465},
+        {"id": 5, "name": "Vestíbulo de la Galería del Acero", "x": 425, "y": 535},
+        {"id": 6, "name": "Núcleo Científico", "x": 372, "y": 415},
+        {"id": 7, "name": "Salones (Newton, Galilei, Curie)", "x": 278, "y": 205},
+        {"id": 8, "name": "Explanada Estufas", "x": 692, "y": 305},
+        {"id": 9, "name": "Patio de Demostraciones", "x": 692, "y": 485},
+        {"id": 10, "name": "Andador a El Lingote", "x": 812, "y": 805},
+        {"id": 11, "name": "Salón Ciencia en Vivo", "x": 922, "y": 915},
+        {"id": 12, "name": "Salón Diseño y Simulación", "x": 822, "y": 915},
+        {"id": 13, "name": "Salón Manufactura Inteligente", "x": 715, "y": 915}
+      ]
+    },
+    {
+      "id": 2,
+      "imageName": "MapaN2",
+      "locations": [
+        {"id": 14, "name": "Terraza verde", "x": 162, "y": 442},
+        {"id": 15, "name": "Salón Show del horno", "x": 388, "y": 355}
+      ]
+    }
+  ]
+}
