@@ -18,6 +18,7 @@ final class SurveyViewModel: ObservableObject {
     @Published var availableTime: String = ""
     @Published var specificSearch: String = ""
     @Published var preferredLanguage: String = "Español"
+    @Published var selectedCoquePersonality: String = "Neutral"
     @Published var aiDescription: String = ""
 
     @Published var isLoading: Bool = false
@@ -25,6 +26,7 @@ final class SurveyViewModel: ObservableObject {
 
     let allPreferences = ["Interactuar", "Ver", "Escuchar", "Shows", "Todos"]
     let languageOptions = ["Español", "English", "Français", "Português", "Japanese", "Korean"]
+    let coquePersonalityOptions = ["Formal", "Neutral", "Con datos curiosos", "Chistes", "Para niños"]
 
     private let aiService = SurveyAIService()
 
@@ -43,6 +45,7 @@ final class SurveyViewModel: ObservableObject {
             availableTime = latest.availableTime
             specificSearch = latest.specificSearch
             preferredLanguage = latest.preferredLanguage
+            selectedCoquePersonality = latest.coquePersonality
             aiDescription = latest.aiDescriptionText
         } catch {
             errorMessage = "No se pudo cargar la encuesta guardada."
@@ -81,6 +84,7 @@ final class SurveyViewModel: ObservableObject {
             profile.availableTime = availableTime.trimmingCharacters(in: .whitespacesAndNewlines)
             profile.specificSearch = specificSearch.trimmingCharacters(in: .whitespacesAndNewlines)
             profile.preferredLanguage = preferredLanguage
+            profile.coquePersonality = selectedCoquePersonality
             profile.updatedAt = .now
 
             let generatedDescription = try await aiService.generateDescription(for: profile)
@@ -111,6 +115,11 @@ final class SurveyViewModel: ObservableObject {
 
         if preferredLanguage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             errorMessage = "Selecciona un idioma."
+            return false
+        }
+        
+        if selectedCoquePersonality.isEmpty {
+            errorMessage = "Selecciona una personalidad."
             return false
         }
 
