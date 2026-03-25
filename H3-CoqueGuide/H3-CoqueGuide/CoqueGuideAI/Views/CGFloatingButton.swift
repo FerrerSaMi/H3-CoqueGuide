@@ -30,7 +30,7 @@ struct CGFloatingButton: View {
                     .scaledToFill()
                     .frame(width: 64, height: 64)
                     .clipShape(Circle())
-                    .shadow(color: .black.opacity(0.25), radius: 8, x: 0, y: 4)
+                    .shadow(color: .black.opacity(0.25), radius: 5, x: 0, y: 3)
                     .overlay(
                         Circle()
                             .stroke(Color.accentColor.opacity(0.4), lineWidth: 2)
@@ -109,8 +109,8 @@ extension View {
     /// MyView()
     ///     .coqueGuideOverlay(viewModel: coqueGuideVM)
     /// ```
-    func coqueGuideOverlay(viewModel: CGViewModel) -> some View {
-        self.modifier(CGOverlayModifier(viewModel: viewModel))
+    func coqueGuideOverlay(viewModel: CGViewModel, hideFloatingButton: Bool = false) -> some View {
+        self.modifier(CGOverlayModifier(viewModel: viewModel, hideFloatingButton: hideFloatingButton))
     }
 }
 
@@ -119,6 +119,7 @@ extension View {
 struct CGOverlayModifier: ViewModifier {
 
     @ObservedObject var viewModel: CGViewModel
+    let hideFloatingButton: Bool
     @State private var showPanel: Bool = false
 
     func body(content: Content) -> some View {
@@ -138,13 +139,15 @@ struct CGOverlayModifier: ViewModifier {
                     }
 
                     // Botón flotante principal
-                    CGFloatingButton(viewModel: viewModel) {
-                        viewModel.openPanel()
-                        showPanel = true
+                    if !hideFloatingButton {
+                        CGFloatingButton(viewModel: viewModel) {
+                            viewModel.openPanel()
+                            showPanel = true
+                        }
                     }
                 }
                 .padding(.trailing, 20)
-                .padding(.bottom, 150)
+                .padding(.bottom, 88)
                 .animation(.spring(response: 0.45, dampingFraction: 0.75), value: viewModel.activeSuggestion?.id)
             }
             .sheet(isPresented: $showPanel) {
@@ -153,7 +156,7 @@ struct CGOverlayModifier: ViewModifier {
                     .presentationDetents([.large])
             }
             .onChange(of: viewModel.isPanelOpen) { _, isOpen in
-                if !isOpen { showPanel = false }
+                showPanel = isOpen
             }
     }
 }

@@ -23,76 +23,106 @@ struct LandingView: View {
     // MARK: - Carrusel
     @State private var currentGalleryIndex: Int = 0
     private let galleryImages = ["Galeria1", "Galeria2", "Galeria3", "Galeria4", "Galeria5"]
+    
+    // MARK: - TabView
+    @State private var selectedTab: Int = 0
+
+    private let homeInviteContent = CGHomeInviteContent.default
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
-            ZStack {
-                Color(.systemGroupedBackground)
-                    .ignoresSafeArea()
-
-                VStack(spacing: 0) {
-                    // MARK: - Logo & Title
-                    VStack(spacing: 12) {
-                        Image(systemName: "shield.lefthalf.filled")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 90, height: 90)
-                            .foregroundStyle(.tint)
-
-                        Text("CoqueGuide")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-
-                        Text("Museo del Acero Horno3")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+            TabView(selection: $selectedTab) {
+                // TAB 0: Inicio
+                atraccionesTab
+                    .tabItem {
+                        Label("Inicio", systemImage: "house.fill")
                     }
-                    .padding(.top, 32)
-
-                    // MARK: - Carrusel de Galerías
-                    TabView(selection: $currentGalleryIndex) {
-                        ForEach(0..<galleryImages.count, id: \.self) { index in
-                            Image(galleryImages[index])
-                                .resizable()
-                                .scaledToFill()
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
-                                .tag(index)
-                        }
+                    .tag(0)
+                
+                // TAB 1: Escaneo
+                CamScannerView()
+                    .tabItem {
+                        Label("Escaneo", systemImage: "qrcode.viewfinder")
                     }
-                    .tabViewStyle(.page(indexDisplayMode: .automatic))
-                    .frame(height: 280)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 20)
-
-                    Spacer()
-
-                    // MARK: - Barra de opciones inferior
-                    VStack(spacing: 0) {
-                        // Separador
-                        Divider()
-
-                        // Grid de 4 botones
-                        HStack(spacing: 12) {
-                            NavigationLink(value: CGAppDestination.events) {
-                                GridButton(title: "Atracciones", icon: "star", accent: true)
-                            }
-                            NavigationLink(destination: CamScannerView()) {
-                                GridButton(title: "Escaneo", icon: "arkit")
-                            }
-                            NavigationLink(destination: MapaView()) {
-                                GridButton(title: "Mapa", icon: "map")
-                            }
-                            NavigationLink(value: CGAppDestination.survey) {
-                                GridButton(title: "Encuesta", icon: "list.clipboard", accent: true)
-                            }
-                        }
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 12)
+                    .tag(1)
+                
+                // TAB 2: Mapa
+                MapaView()
+                    .tabItem {
+                        Label("Mapa", systemImage: "map.fill")
                     }
-                    .background(Color(.systemGroupedBackground))
+                    .tag(2)
+                
+                // TAB 3: Encuesta
+                SurveyView()
+                    .tabItem {
+                        Label("Encuesta", systemImage: "checklist")
+                    }
+                    .tag(3)
+            }
+            .tint(Color.accentColor)
+            .environment(navigationCoordinator)
+            .coqueGuideOverlay(viewModel: coqueGuideVM, hideFloatingButton: selectedTab == 0)
+            .onChange(of: navigationCoordinator.pendingDestination) { _, newValue in
+                if let destination = newValue {
+                    coqueGuideVM.isPanelOpen = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                        navigationPath.append(destination)
+                        navigationCoordinator.pendingDestination = nil
+                    }
                 }
             }
-            .navigationBarHidden(true)
+        }
+    }
+    
+    // MARK: - Tab Content: Atracciones
+    private var atraccionesTab: some View {
+        NavigationStack(path: $navigationPath) {
+            ScrollView {
+                VStack(alignment: .center, spacing: 20) {
+                    // MARK: - Logo
+                    Image("horno3Logo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 90, height: 90)
+                        .padding(.top, 20)
+
+                    // MARK: - Carrusel de Galerías
+                    VStack(spacing: 12) {
+                        TabView(selection: $currentGalleryIndex) {
+                            ForEach(0..<galleryImages.count, id: \.self) { index in
+                                CarouselCard(imageName: galleryImages[index])
+                                    .tag(index)
+                            }
+                        }
+                        .frame(height: 280)
+                        .tabViewStyle(.page(indexDisplayMode: .never))
+                        .padding(.horizontal, 24)
+
+                        // MARK: - Indicadores personalizados del carrusel
+                        HStack(spacing: 8) {
+                            ForEach(0..<galleryImages.count, id: \.self) { index in
+                                Capsule()
+                                    .fill(index == currentGalleryIndex ? Color.accentColor : Color.gray.opacity(0.3))
+                                    .frame(width: index == currentGalleryIndex ? 24 : 8, height: 6)
+                                    .animation(.easeInOut(duration: 0.3), value: currentGalleryIndex)
+                            }
+                        }
+                        .padding(.horizontal, 24)
+                    }
+
+                    coqueGuideInviteCard
+                        .padding(.horizontal, 20)
+                        .padding(.top, 6)
+
+                    Spacer(minLength: 20)
+                }
+                .frame(maxWidth: .infinity)
+                .background(Color(.systemGroupedBackground))
+            }
+            .navigationTitle("CoqueGuide")
+            .navigationSubtitle("Museo del Acero Horno3")
+            .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(for: CGAppDestination.self) { destination in
                 switch destination {
                 case .map:
@@ -107,46 +137,70 @@ struct LandingView: View {
                     PlaceholderView(title: "Chatbot")
                 }
             }
-            // MARK: - Integración de CoqueGuide
-            .coqueGuideOverlay(viewModel: coqueGuideVM)
-            .environment(navigationCoordinator)
-            .onChange(of: navigationCoordinator.pendingDestination) { _, newValue in
-                if let destination = newValue {
-                    // Cerrar el panel primero, luego navegar
-                    coqueGuideVM.isPanelOpen = false
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                        navigationPath.append(destination)
-                        navigationCoordinator.pendingDestination = nil
+        }
+    }
+
+    private var coqueGuideInviteCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 10) {
+                Circle()
+                    .fill(Color.accentColor.opacity(0.22))
+                    .frame(width: 24, height: 24)
+
+                Text(homeInviteContent.title)
+                    .font(.title3)
+                    .fontWeight(.semibold)
+            }
+
+            Text(homeInviteContent.message)
+                .font(.headline)
+                .foregroundStyle(Color.accentColor)
+
+            LazyVGrid(
+                columns: [GridItem(.adaptive(minimum: 120), spacing: 10, alignment: .leading)],
+                alignment: .leading,
+                spacing: 10
+            ) {
+                ForEach(homeInviteContent.quickActions) { action in
+                    quickActionChip(action.title) {
+                        if action.icon == "map" {
+                            navigationPath.append(CGAppDestination.map)
+                        } else if action.icon == "message.fill" {
+                            coqueGuideVM.openPanel()
+                        } else {
+                            coqueGuideVM.openPanel()
+                            coqueGuideVM.handleQuickAction(action)
+                        }
                     }
                 }
             }
         }
-    }
-}
-
-// MARK: - Botón de cuadrícula
-struct GridButton: View {
-    let title: String
-    let icon: String
-    var accent: Bool = false
-
-    var body: some View {
-        VStack(spacing: 6) {
-            Image(systemName: icon)
-                .font(.system(size: 24))
-            Text(title)
-                .font(.caption2)
-                .fontWeight(.semibold)
-        }
-        .frame(maxWidth: .infinity)
-        .frame(height: 70)
-        .background(accent ? Color.accentColor : Color(.secondarySystemGroupedBackground))
-        .foregroundStyle(accent ? .white : .primary)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(accent ? Color.clear : Color(.separator), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(Color.accentColor.opacity(0.25), lineWidth: 1)
         )
+    }
+
+    private func quickActionChip(_ title: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .foregroundStyle(.primary)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(Color.white)
+                .clipShape(Capsule())
+                .overlay(
+                    Capsule()
+                        .stroke(Color.accentColor.opacity(0.25), lineWidth: 1)
+                )
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -168,6 +222,44 @@ struct PlaceholderView: View {
         }
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+// MARK: - Tarjeta del Carrusel
+struct CarouselCard: View {
+    let imageName: String
+
+    var body: some View {
+        ZStack(alignment: Alignment(horizontal: .center, vertical: .bottom)) {
+            // Imagen de fondo
+            Image(imageName)
+                .resizable()
+                .scaledToFill()
+                .clipShape(RoundedRectangle(cornerRadius: 20))
+
+            // Overlay gradiente oscuro en la parte inferior
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color.black.opacity(0),
+                    Color.black.opacity(0.7)
+                ]),
+                startPoint: .center,
+                endPoint: .bottom
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 20))
+
+            // Texto contextual
+            VStack(alignment: .center, spacing: 4) {
+                Text("Galería")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                Text("Desliza para explorar")
+                    .font(.caption)
+                    .opacity(0.8)
+            }
+            .foregroundStyle(.white)
+            .padding(.bottom, 16)
+        }
     }
 }
 
