@@ -108,3 +108,39 @@ extension CGQuickAction {
         ),
     ]
 }
+
+// MARK: - Contenido de tarjeta invitadora Home
+
+/// Contenido reutilizable para la tarjeta de invitacion de CoqueGuide en la pantalla de inicio.
+struct CGHomeInviteContent {
+    let title: String
+    let message: String
+    let quickActions: [CGQuickAction]
+
+    static let `default` = CGHomeInviteContent(
+        title: "CoqueGuide",
+        message: "!Bienvenido! ¿Como puedo ayudarte en tu visita?",
+        quickActions: [
+            CGQuickAction(
+                title: "Asistente",
+                icon: "message.fill",
+                message: ""
+            ),
+            CGQuickAction(
+                title: "¿Donde estoy?",
+                icon: "location",
+                message: "¿Donde estoy en el museo?"
+            ),
+            CGQuickAction(
+                title: "Ver mapa",
+                icon: "map",
+                message: "¿Puedes mostrarme el mapa del museo?"
+            ),
+            CGQuickAction(
+                title: "Proximo evento",
+                icon: "calendar",
+                message: "¿Cual es el proximo evento?"
+            )
+        ]
+    )
+}
