@@ -61,6 +61,13 @@ struct SurveyView: View {
                             }
                         }
                         .pickerStyle(.menu)
+                        
+                        Picker("Personalidad preferida", selection: $viewModel.selectedCoquePersonality) {
+                            ForEach(viewModel.coquePersonalityOptions, id: \.self) { option in
+                                Text(option).tag(option)
+                            }
+                        }
+                        .pickerStyle(.menu)
                     }
                     .padding(.top, 8)
                 }

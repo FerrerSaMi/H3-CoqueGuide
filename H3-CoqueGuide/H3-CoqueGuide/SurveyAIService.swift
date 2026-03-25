@@ -52,6 +52,7 @@ struct SurveyAIService {
         - Preferencias para la excursion: \(preferencesText)
         - Busca algo especifico: \(specificSearchText)
         - Idioma preferido: \(profile.preferredLanguage)
+        - Personalidad de Coque preferida: \(profile.coquePersonality)
 
         La respuesta debe integrar todos esos datos de forma natural.
         """

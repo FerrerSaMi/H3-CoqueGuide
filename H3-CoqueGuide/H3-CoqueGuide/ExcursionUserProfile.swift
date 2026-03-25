@@ -17,6 +17,7 @@ final class ExcursionUserProfile {
     var availableTime: String
     var specificSearch: String
     var preferredLanguage: String
+    var coquePersonality: String
     var aiDescriptionText: String
     var updatedAt: Date
 
@@ -28,6 +29,7 @@ final class ExcursionUserProfile {
         availableTime: String = "",
         specificSearch: String = "",
         preferredLanguage: String = "",
+        coquePersonality: String = "",
         aiDescriptionText: String = "",
         updatedAt: Date = .now
     ) {
@@ -38,6 +40,7 @@ final class ExcursionUserProfile {
         self.availableTime = availableTime
         self.specificSearch = specificSearch
         self.preferredLanguage = preferredLanguage
+        self.coquePersonality = coquePersonality
         self.aiDescriptionText = aiDescriptionText
         self.updatedAt = updatedAt
     }
