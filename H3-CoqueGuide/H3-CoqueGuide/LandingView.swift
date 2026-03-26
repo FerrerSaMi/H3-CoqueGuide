@@ -10,9 +10,9 @@ import SwiftUI
 struct LandingView: View {
 
     // MARK: - CoqueGuide ViewModel
-    // Usa Claude API si hay key en Secrets.plist, sino usa servicio simulado
+    // Usa Gemini API si hay key en Secrets.plist, sino usa servicio simulado
     @StateObject private var coqueGuideVM: CGViewModel = {
-        let service: CGAIServiceProtocol = ClaudeAIService.fromSecretsPlist() ?? CGSimulatedAIService()
+        let service: CGAIServiceProtocol = GeminiAIService.fromSecretsPlist() ?? CGSimulatedAIService()
         return CGViewModel(aiService: service)
     }()
 
@@ -62,7 +62,7 @@ struct LandingView: View {
             }
             .tint(Color.accentColor)
             .environment(navigationCoordinator)
-            .coqueGuideOverlay(viewModel: coqueGuideVM, hideFloatingButton: selectedTab == 0)
+            .coqueGuideOverlay(viewModel: coqueGuideVM, hideFloatingButton: selectedTab == 0, navigator: navigationCoordinator)
             .onChange(of: navigationCoordinator.pendingDestination) { _, newValue in
                 if let destination = newValue {
                     coqueGuideVM.isPanelOpen = false
