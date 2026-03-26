@@ -22,10 +22,6 @@ struct MapaView: View {
         mapConfig.allLocations
     }
 
-    private var allLocationNumbers: [Int] {
-        locations.keys.sorted()
-    }
-
     private var currentLevelID: Int {
         showingFirstMap ? 1 : 2
     }
@@ -73,27 +69,6 @@ struct MapaView: View {
                         RoundedRectangle(cornerRadius: 12)
                             .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
                     )
-
-                Text("Selecciona un numero del mapa")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 5), spacing: 8) {
-                    ForEach(allLocationNumbers, id: \.self) { number in
-                        Button {
-                            selectedLocationNumber = number
-                        } label: {
-                            Text("\(number)")
-                                .font(.subheadline)
-                                .fontWeight(.bold)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 10)
-                                .background(selectedLocationNumber == number ? Color.accentColor : Color(.secondarySystemGroupedBackground))
-                                .foregroundStyle(selectedLocationNumber == number ? .white : .primary)
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                        }
-                    }
-                }
 
                 if let selectedLocationNumber,
                    let locationName = locations[selectedLocationNumber] {
