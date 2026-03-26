@@ -37,8 +37,6 @@ private struct CGQuickActionChip: View {
     let action: CGQuickAction
     let onTap: () -> Void
 
-    @State private var isPressed: Bool = false
-
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 6) {
@@ -58,15 +56,15 @@ private struct CGQuickActionChip: View {
                 Capsule()
                     .stroke(Color.accentColor.opacity(0.25), lineWidth: 1)
             )
-            .scaleEffect(isPressed ? 0.94 : 1.0)
-            .animation(.spring(response: 0.2, dampingFraction: 0.65), value: isPressed)
         }
-        .buttonStyle(.plain)
-        // Efecto press manual para mayor control visual
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { _ in isPressed = true }
-                .onEnded { _ in isPressed = false }
-        )
+        .buttonStyle(CGPressableChipButtonStyle())
+    }
+}
+
+private struct CGPressableChipButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .animation(.spring(response: 0.2, dampingFraction: 0.65), value: configuration.isPressed)
     }
 }
