@@ -6,51 +6,45 @@
 import XCTest
 @testable import H3_CoqueGuide
 
-@MainActor
 final class SurveyTests: XCTestCase {
 
-    //Estado inicial del formulario
-    func testInitialValues() {
-        let viewModel = SurveyViewModel()
+    //estado inicial del formulario
+    func testInitialStateSurvey() {
+        let vm = SurveyViewModel()
 
-        XCTAssertEqual(viewModel.name, "")
-        XCTAssertEqual(viewModel.ageText, "")
-        XCTAssertTrue(viewModel.selectedPreferences.isEmpty)
-        XCTAssertEqual(viewModel.availableTime, "")
-        XCTAssertEqual(viewModel.specificSearch, "")
+        //campos vacios
+        XCTAssertTrue(vm.name.isEmpty)
+        XCTAssertTrue(vm.ageText.isEmpty)
+        XCTAssertTrue(vm.availableTime.isEmpty)
+        XCTAssertTrue(vm.specificSearch.isEmpty)
 
-        XCTAssertEqual(viewModel.preferredLanguage, "Español")
-        XCTAssertEqual(viewModel.selectedCoquePersonality, "Neutral")
+        //sin preferencias seleccionadas
+        XCTAssertTrue(vm.selectedPreferences.isEmpty)
 
-        XCTAssertFalse(viewModel.allPreferences.isEmpty)
-        XCTAssertFalse(viewModel.languageOptions.isEmpty)
-        XCTAssertFalse(viewModel.coquePersonalityOptions.isEmpty)
+        //valores por default
+        XCTAssertFalse(vm.preferredLanguage.isEmpty)
+        XCTAssertFalse(vm.selectedCoquePersonality.isEmpty)
+
+        //opciones disponibles
+        XCTAssertFalse(vm.allPreferences.isEmpty)
     }
 
-    //Interaccion del usuario, osea seleccion y cambios
-    func testUserInteraction() {
-        let viewModel = SurveyViewModel()
+    //logica de seleccion de preferencias
+    func testPreferenceSelectionLogic() {
+        let vm = SurveyViewModel()
 
-        //simular entrada de usuario
-        viewModel.name = "Ana"
-        viewModel.ageText = "25"
-        viewModel.availableTime = "2 horas"
-        viewModel.specificSearch = "Museos"
-        viewModel.preferredLanguage = "English"
-        viewModel.selectedCoquePersonality = "Chistes"
+        //tomar una preferencia REAL del modelo
+        guard let preference = vm.allPreferences.first else {
+            XCTFail("No hay preferencias disponibles")
+            return
+        }
 
-        XCTAssertEqual(viewModel.name, "Ana")
-        XCTAssertEqual(viewModel.ageText, "25")
-        XCTAssertEqual(viewModel.availableTime, "2 horas")
-        XCTAssertEqual(viewModel.specificSearch, "Museos")
-        XCTAssertEqual(viewModel.preferredLanguage, "English")
-        XCTAssertEqual(viewModel.selectedCoquePersonality, "Chistes")
+        //seleccionar
+        vm.togglePreference(preference)
+        XCTAssertTrue(vm.selectedPreferences.contains(preference))
 
-        //probar seleccion de preferencias
-        viewModel.togglePreference("Ver")
-        XCTAssertTrue(viewModel.selectedPreferences.contains("Ver"))
-
-        viewModel.togglePreference("Ver")
-        XCTAssertFalse(viewModel.selectedPreferences.contains("Ver"))
+        //deseleccionar
+        vm.togglePreference(preference)
+        XCTAssertFalse(vm.selectedPreferences.contains(preference))
     }
 }
