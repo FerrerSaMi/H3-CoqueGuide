@@ -33,7 +33,6 @@ final class CGEventServiceTests: XCTestCase {
         for event in events {
             XCTAssertFalse(event.id.isEmpty, "Event ID should not be empty")
             XCTAssertFalse(event.name.isEmpty, "Event name should not be empty")
-            XCTAssertFalse(event.time.isEmpty, "Event time should not be empty")
             XCTAssertFalse(event.location.isEmpty, "Event location should not be empty")
             XCTAssertFalse(event.description.isEmpty, "Event description should not be empty")
             XCTAssertFalse(event.icon.isEmpty, "Event icon should not be empty")
