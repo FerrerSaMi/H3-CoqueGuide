@@ -4,7 +4,6 @@
 //
 //  Created by Santiago ferrer on 13/03/26.
 //
-
 import SwiftUI
 import SwiftData
 
@@ -12,118 +11,302 @@ struct SurveyView: View {
     @Environment(\.modelContext) private var modelContext
     @StateObject private var viewModel = SurveyViewModel()
 
+    private let optionColors: [Color] = [
+        Color.orange.opacity(0.95),
+        Color.orange.opacity(0.82),
+        Color.orange.opacity(0.72),
+        Color.orange.opacity(0.62),
+        Color.orange.opacity(0.88),
+        Color.orange.opacity(0.76),
+        Color.orange.opacity(0.68),
+        Color.orange.opacity(0.58)
+    ]
+
     var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                Text("Encuesta para mejor experiencia")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+        ZStack {
+            Color(.systemBackground).ignoresSafeArea()
 
-                GroupBox("TUS DATOS") {
-                    VStack(spacing: 14) {
-                        TextField("Escribe aqui tu nombre", text: $viewModel.name)
-                            .textFieldStyle(.roundedBorder)
+            switch viewModel.currentScreen {
+            case .home:
+                homeContent
 
-                        TextField("Escribe tu edad (ej: 21)", text: $viewModel.ageText)
-                            .keyboardType(.numberPad)
-                            .textFieldStyle(.roundedBorder)
+            case .question:
+                questionContent
 
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text("¿Qué prefieres para tu paseo por Horno3?")
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
-
-                            ForEach(viewModel.allPreferences, id: \.self) { preference in
-                                Button {
-                                    viewModel.togglePreference(preference)
-                                } label: {
-                                    HStack {
-                                        Image(systemName: viewModel.selectedPreferences.contains(preference) ? "checkmark.square.fill" : "square")
-                                        Text(preference)
-                                        Spacer()
-                                    }
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-
-                        TextField("Cuanto tiempo tienes (ej: 2 horas y media)", text: $viewModel.availableTime)
-                            .textFieldStyle(.roundedBorder)
-
-                        TextField("¿Buscas algo en específico?", text: $viewModel.specificSearch, axis: .vertical)
-                            .lineLimit(3...5)
-                            .textFieldStyle(.roundedBorder)
-
-                        Picker("Idioma preferido", selection: $viewModel.preferredLanguage) {
-                            ForEach(viewModel.languageOptions, id: \.self) { language in
-                                Text(language).tag(language)
-                            }
-                        }
-                        .pickerStyle(.menu)
-                        
-                        Picker("Personalidad preferida", selection: $viewModel.selectedCoquePersonality) {
-                            ForEach(viewModel.coquePersonalityOptions, id: \.self) { option in
-                                Text(option).tag(option)
-                            }
-                        }
-                        .pickerStyle(.menu)
-                    }
-                    .padding(.top, 8)
-                }
-
-                if let errorMessage = viewModel.errorMessage {
-                    Text(errorMessage)
-                        .foregroundStyle(.red)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-
-                Button {
-                    Task {
-                        await viewModel.saveSurvey(in: modelContext)
-                    }
-                } label: {
-                    HStack {
-                        if viewModel.isLoading {
-                            ProgressView()
-                                .tint(.white)
-                        }
-                        Text("Guardar y generar descripcion del usuario")
-                            .fontWeight(.semibold)
-                    }
-                    .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .disabled(viewModel.isLoading)
-
-                Button("Volver a tomar encuesta") {
-                    Task {
-                        await viewModel.saveSurvey(in: modelContext)
-                    }
-                }
-                .buttonStyle(.bordered)
-
-                if !viewModel.aiDescription.isEmpty {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Descripcion:")
-                            .font(.headline)
-
-                        Text(viewModel.aiDescription)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding()
-                            .background(Color(.secondarySystemGroupedBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
+            case .description:
+                descriptionContent
             }
-            .padding()
         }
         .navigationTitle("Encuesta")
         .navigationBarTitleDisplayMode(.inline)
         .task {
             viewModel.loadExistingProfile(from: modelContext)
         }
+    }
+}
+
+private extension SurveyView {
+    var homeContent: some View {
+        VStack(spacing: 24) {
+            Spacer()
+
+            Image("Coque")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 180, height: 180)
+                .shadow(radius: 10)
+
+            Text("Encuesta para mejor experiencia")
+                .font(.title2)
+                .fontWeight(.bold)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+                .foregroundStyle(.primary)
+
+            Text("Elige una opción para comenzar")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+
+            VStack(spacing: 16) {
+                Button {
+                    viewModel.startSurvey()
+                } label: {
+                    homeButton(title: "Hacer encuesta", icon: "play.fill")
+                }
+                .buttonStyle(.plain)
+
+                Button {
+                    viewModel.openDescription()
+                } label: {
+                    homeButton(title: "Ver descripción del usuario", icon: "person.text.rectangle.fill")
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, 24)
+
+            Spacer()
+        }
+    }
+
+    var questionContent: some View {
+        VStack(spacing: 18) {
+            HStack {
+                Button {
+                    viewModel.goBackOneStepOrHome()
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.headline)
+                        .foregroundStyle(.primary)
+                        .frame(width: 42, height: 42)
+                        .background(Color.orange.opacity(0.22))
+                        .clipShape(Circle())
+                }
+
+                Spacer()
+
+                Text(viewModel.progressText)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.secondary)
+
+                Spacer()
+
+                Color.clear
+                    .frame(width: 42, height: 42)
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 12)
+
+            VStack(spacing: 10) {
+                Text(viewModel.currentStep.title)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(.primary)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 22)
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: 26, style: .continuous)
+                            .fill(Color.orange.opacity(0.16))
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 26, style: .continuous)
+                            .stroke(Color.orange.opacity(0.35), lineWidth: 1)
+                    )
+
+                if viewModel.currentStep == .attractionPreference {
+                    Text("Si eliges “Recomendado”, se elegirá una opción según tus respuestas.")
+                        .font(.footnote)
+                        .multilineTextAlignment(.center)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal)
+                }
+            }
+            .padding(.horizontal, 20)
+
+            if viewModel.isLoading {
+                Spacer()
+                ProgressView("Generando descripción...")
+                    .font(.headline)
+                Spacer()
+            } else {
+                LazyVGrid(
+                    columns: Array(
+                        repeating: GridItem(.flexible(), spacing: 14),
+                        count: viewModel.currentStep.columns
+                    ),
+                    spacing: 14
+                ) {
+                    ForEach(Array(viewModel.currentStep.options.enumerated()), id: \.element) { index, option in
+                        Button {
+                            viewModel.selectOption(option, in: modelContext)
+                        } label: {
+                            optionCard(
+                                title: option,
+                                color: optionColors[index % optionColors.count],
+                                isSelected: viewModel.optionIsSelected(option)
+                            )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 8)
+
+                Spacer()
+            }
+
+            if let errorMessage = viewModel.errorMessage {
+                Text(errorMessage)
+                    .font(.footnote)
+                    .foregroundStyle(.red)
+                    .padding(.horizontal)
+                    .padding(.bottom, 8)
+            }
+        }
+    }
+
+    var descriptionContent: some View {
+        ScrollView {
+            VStack(spacing: 22) {
+                Image("Coque")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 170, height: 170)
+                    .padding(.top, 10)
+                    .shadow(radius: 12)
+
+                Text("Descripción del usuario")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.primary)
+
+                Group {
+                    if viewModel.aiDescription.isEmpty {
+                        Text("Todavía no hay una descripción generada. Primero realiza la encuesta.")
+                            .multilineTextAlignment(.center)
+                            .foregroundStyle(.secondary)
+                            .padding()
+                    } else {
+                        Text(viewModel.aiDescription)
+                            .font(.body)
+                            .foregroundStyle(.primary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(20)
+                            .background(
+                                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                                    .fill(Color.orange.opacity(0.12))
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                                    .stroke(Color.orange.opacity(0.28), lineWidth: 1)
+                            )
+                    }
+                }
+                .padding(.horizontal, 20)
+
+                Button {
+                } label: {
+                    Text("Mandársela a Coque")
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                .fill(Color.orange)
+                        )
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, 20)
+
+                Button {
+                    viewModel.backToHome()
+                } label: {
+                    Text("Volver")
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.orange)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(
+                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                .fill(Color.orange.opacity(0.12))
+                        )
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 30)
+            }
+            .frame(maxWidth: .infinity)
+        }
+    }
+
+    func homeButton(title: String, icon: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.headline)
+
+            Text(title)
+                .font(.headline)
+                .fontWeight(.semibold)
+        }
+        .foregroundStyle(.white)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 18)
+        .background(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .fill(Color.orange)
+        )
+        .shadow(color: .orange.opacity(0.24), radius: 8, x: 0, y: 6)
+    }
+
+    func optionCard(title: String, color: Color, isSelected: Bool) -> some View {
+        VStack {
+            Spacer()
+
+            Text(title)
+                .font(.headline)
+                .fontWeight(.bold)
+                .multilineTextAlignment(.center)
+                .foregroundStyle(.white)
+                .padding(.horizontal, 8)
+
+            Spacer()
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 115)
+        .background(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(color)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(isSelected ? Color.primary.opacity(0.45) : Color.clear, lineWidth: 3)
+        )
+        .shadow(color: .orange.opacity(0.16), radius: 8, x: 0, y: 5)
+        .scaleEffect(isSelected ? 0.98 : 1.0)
+        .animation(.easeInOut(duration: 0.18), value: isSelected)
     }
 }
 

@@ -3,48 +3,62 @@
 //  H3-CoqueGuideTests
 //
 
+
 import XCTest
 @testable import H3_CoqueGuide
 
-final class SurveyTests: XCTestCase {
+@MainActor
+final class AISurveyTest: XCTestCase {
 
-    //estado inicial del formulario
-    func testInitialStateSurvey() {
-        let vm = SurveyViewModel()
+    func testInitialStateIsCorrect() {
+        let viewModel = SurveyViewModel()
 
-        //campos vacios
-        XCTAssertTrue(vm.name.isEmpty)
-        XCTAssertTrue(vm.ageText.isEmpty)
-        XCTAssertTrue(vm.availableTime.isEmpty)
-        XCTAssertTrue(vm.specificSearch.isEmpty)
+        XCTAssertEqual(viewModel.currentScreen, .home)
+        XCTAssertEqual(viewModel.currentStepIndex, 0)
 
-        //sin preferencias seleccionadas
-        XCTAssertTrue(vm.selectedPreferences.isEmpty)
+        XCTAssertEqual(viewModel.gender, "")
+        XCTAssertEqual(viewModel.ageRange, "")
+        XCTAssertEqual(viewModel.plannedTime, "")
+        XCTAssertEqual(viewModel.attractionPreference, "")
+        XCTAssertEqual(viewModel.resolvedAttractionPreference, "")
+        XCTAssertEqual(viewModel.specificAttraction, "")
+        XCTAssertEqual(viewModel.preferredLanguage, "Español")
+        XCTAssertEqual(viewModel.selectedCoquePersonality, "Neutral")
 
-        //valores por default
-        XCTAssertFalse(vm.preferredLanguage.isEmpty)
-        XCTAssertFalse(vm.selectedCoquePersonality.isEmpty)
-
-        //opciones disponibles
-        XCTAssertFalse(vm.allPreferences.isEmpty)
+        XCTAssertEqual(viewModel.aiDescription, "")
+        XCTAssertFalse(viewModel.isLoading)
+        XCTAssertNil(viewModel.errorMessage)
     }
 
-    //logica de seleccion de preferencias
-    func testPreferenceSelectionLogic() {
-        let vm = SurveyViewModel()
+    func testStartSurveyResetsAnswersAndMovesToQuestionScreen() {
+        let viewModel = SurveyViewModel()
 
-        //tomar una preferencia REAL del modelo
-        guard let preference = vm.allPreferences.first else {
-            XCTFail("No hay preferencias disponibles")
-            return
-        }
+        viewModel.gender = "Mujer"
+        viewModel.ageRange = "19 - 29"
+        viewModel.plannedTime = "1 - 2 horas"
+        viewModel.attractionPreference = "Shows"
+        viewModel.resolvedAttractionPreference = "Shows"
+        viewModel.specificAttraction = "Mirador"
+        viewModel.preferredLanguage = "English"
+        viewModel.selectedCoquePersonality = "Divertido"
+        viewModel.currentStepIndex = 4
+        viewModel.currentScreen = .description
+        viewModel.errorMessage = "Error previo"
 
-        //seleccionar
-        vm.togglePreference(preference)
-        XCTAssertTrue(vm.selectedPreferences.contains(preference))
+        viewModel.startSurvey()
 
-        //deseleccionar
-        vm.togglePreference(preference)
-        XCTAssertFalse(vm.selectedPreferences.contains(preference))
+        XCTAssertEqual(viewModel.currentScreen, .question)
+        XCTAssertEqual(viewModel.currentStepIndex, 0)
+
+        XCTAssertEqual(viewModel.gender, "")
+        XCTAssertEqual(viewModel.ageRange, "")
+        XCTAssertEqual(viewModel.plannedTime, "")
+        XCTAssertEqual(viewModel.attractionPreference, "")
+        XCTAssertEqual(viewModel.resolvedAttractionPreference, "")
+        XCTAssertEqual(viewModel.specificAttraction, "")
+        XCTAssertEqual(viewModel.preferredLanguage, "Español")
+        XCTAssertEqual(viewModel.selectedCoquePersonality, "Neutral")
+        XCTAssertNil(viewModel.errorMessage)
     }
 }
+

@@ -25,40 +25,79 @@ struct SurveyAIService {
             throw SurveyAIError.unavailable
         }
 
+        let languageInstruction = outputLanguageInstruction(for: profile.preferredLanguage)
+
         let instructions = """
-        Eres un asistente que analiza el perfil de un visitante para una excursion al museo Horno3.
-        Debes responder con un solo parrafo claro, natural y util.
-        Resume exactamente lo que la persona busca para vivir una mejor experiencia.
-        Redacta la respuesta en el idioma preferido del usuario.
+        You are an assistant that creates a visitor profile summary for a museum experience at Horno3.
+        Write exactly one paragraph.
+        Make it natural, attractive, and useful.
+        Mention the type of experience they would probably enjoy, the pace of visit, and the kind of guidance style they prefer.
+        \(languageInstruction)
         """
 
         let session = LanguageModelSession(instructions: instructions)
 
-        let preferencesText = profile.excursionPreferences.isEmpty
-        ? "No especifico preferencias"
-        : profile.excursionPreferences.joined(separator: ", ")
-
-        let specificSearchText = profile.specificSearch.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        ? "No indico algo específico"
-        : profile.specificSearch
-
         let prompt = """
-        Haz una descripción de un parrafo mostrando lo que el usuario busca y detallando todo lo que necesita.
+        Create one paragraph describing this museum visitor.
 
-        Datos del usuario:
-        - Nombre: \(profile.name)
-        - Edad: \(profile.age)
-        - Tiempo disponible para la excursion: \(profile.availableTime)
-        - Preferencias para la excursion: \(preferencesText)
-        - Busca algo especifico: \(specificSearchText)
-        - Idioma preferido: \(profile.preferredLanguage)
-        - Personalidad de Coque preferida: \(profile.coquePersonality)
+        Visitor data:
+        - Gender: \(profile.gender)
+        - Age range: \(profile.ageRange)
+        - Planned visit time: \(profile.plannedTime)
+        - Attraction preference selected: \(profile.attractionPreference)
+        - Final attraction style to use: \(profile.resolvedAttractionPreference)
+        - Specific attraction requested: \(profile.specificAttraction)
+        - Preferred language: \(profile.preferredLanguage)
+        - Preferred Coque personality: \(profile.coquePersonality)
 
-        La respuesta debe integrar todos esos datos de forma natural.
+        Rules:
+        - If the selected preference was "Recomendado", use the resolved attraction style naturally.
+        - If the visitor selected "No" for a specific attraction, do not invent one.
+        - Keep the result to one paragraph only.
+        - The paragraph must be written only in this language: \(outputLanguageName(for: profile.preferredLanguage)).
+        - Do not mix languages.
         """
 
         let response = try await session.respond(to: prompt)
         return response.content.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private func outputLanguageInstruction(for language: String) -> String {
+        switch language {
+        case "Español":
+            return "Write the entire paragraph only in Spanish."
+        case "English":
+            return "Write the entire paragraph only in English."
+        case "Français":
+            return "Write the entire paragraph only in French."
+        case "Português":
+            return "Write the entire paragraph only in Portuguese."
+        case "Korean":
+            return "Write the entire paragraph only in Korean."
+        case "Arabic":
+            return "Write the entire paragraph only in Arabic."
+        default:
+            return "Write the entire paragraph only in Spanish."
+        }
+    }
+
+    private func outputLanguageName(for language: String) -> String {
+        switch language {
+        case "Español":
+            return "Spanish"
+        case "English":
+            return "English"
+        case "Français":
+            return "French"
+        case "Português":
+            return "Portuguese"
+        case "Korean":
+            return "Korean"
+        case "Arabic":
+            return "Arabic"
+        default:
+            return "Spanish"
+        }
     }
 }
 
@@ -73,11 +112,11 @@ enum SurveyAIError: LocalizedError {
         case .deviceNotEligible:
             return "Este dispositivo no es compatible con Apple Intelligence."
         case .appleIntelligenceNotEnabled:
-            return "Apple Intelligence no está activado en Configuracion."
+            return "Apple Intelligence no está activado en Configuración."
         case .modelNotReady:
-            return "El modelo aun no está listo. Intenta de nuevo en un momento."
+            return "El modelo aún no está listo. Intenta de nuevo en un momento."
         case .unavailable:
-            return "La IA no esta disponible en este momento."
+            return "La IA no está disponible en este momento."
         }
     }
 }

@@ -6,29 +6,39 @@
 //
 
 import Foundation
+import Combine
 import SwiftData
 import SwiftUI
-import Combine
 
 @MainActor
 final class SurveyViewModel: ObservableObject {
-    @Published var name: String = ""
-    @Published var ageText: String = ""
-    @Published var selectedPreferences: Set<String> = []
-    @Published var availableTime: String = ""
-    @Published var specificSearch: String = ""
+    @Published var currentScreen: SurveyScreen = .home
+    @Published var currentStepIndex: Int = 0
+
+    @Published var gender: String = ""
+    @Published var ageRange: String = ""
+    @Published var plannedTime: String = ""
+    @Published var attractionPreference: String = ""
+    @Published var resolvedAttractionPreference: String = ""
+    @Published var specificAttraction: String = ""
     @Published var preferredLanguage: String = "Español"
     @Published var selectedCoquePersonality: String = "Neutral"
-    @Published var aiDescription: String = ""
 
+    @Published var aiDescription: String = ""
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
 
-    let allPreferences = ["Interactuar", "Ver", "Escuchar", "Shows", "Todos"]
-    let languageOptions = ["Español", "English", "Français", "Português", "Japanese", "Korean"]
-    let coquePersonalityOptions = ["Formal", "Neutral", "Con datos curiosos", "Chistes", "Para niños"]
-
     private let aiService = SurveyAIService()
+
+    let steps = SurveyStep.allCases
+
+    var currentStep: SurveyStep {
+        steps[currentStepIndex]
+    }
+
+    var progressText: String {
+        "Pregunta \(currentStepIndex + 1) de \(steps.count)"
+    }
 
     func loadExistingProfile(from context: ModelContext) {
         let descriptor = FetchDescriptor<ExcursionUserProfile>(
@@ -39,11 +49,12 @@ final class SurveyViewModel: ObservableObject {
             let profiles = try context.fetch(descriptor)
             guard let latest = profiles.first else { return }
 
-            name = latest.name
-            ageText = latest.age > 0 ? "\(latest.age)" : ""
-            selectedPreferences = Set(latest.excursionPreferences)
-            availableTime = latest.availableTime
-            specificSearch = latest.specificSearch
+            gender = latest.gender
+            ageRange = latest.ageRange
+            plannedTime = latest.plannedTime
+            attractionPreference = latest.attractionPreference
+            resolvedAttractionPreference = latest.resolvedAttractionPreference
+            specificAttraction = latest.specificAttraction
             preferredLanguage = latest.preferredLanguage
             selectedCoquePersonality = latest.coquePersonality
             aiDescription = latest.aiDescriptionText
@@ -52,14 +63,90 @@ final class SurveyViewModel: ObservableObject {
         }
     }
 
-    func saveSurvey(in context: ModelContext) async {
+    func startSurvey() {
+        resetAnswers()
+        currentStepIndex = 0
+        errorMessage = nil
+        currentScreen = .question
+    }
+
+    func openDescription() {
+        currentScreen = .description
+    }
+
+    func backToHome() {
+        currentScreen = .home
+    }
+
+    func goBackOneStepOrHome() {
         errorMessage = nil
 
-        guard validateFields() else { return }
-        guard let age = Int(ageText), age > 0 else {
-            errorMessage = "Ingresa una edad valida."
-            return
+        if currentStepIndex > 0 {
+            currentStepIndex -= 1
+        } else {
+            currentScreen = .home
         }
+    }
+
+    func selectOption(_ option: String, in context: ModelContext) {
+        errorMessage = nil
+
+        switch currentStep {
+        case .gender:
+            gender = option
+
+        case .ageRange:
+            ageRange = option
+
+        case .plannedTime:
+            plannedTime = option
+
+        case .attractionPreference:
+            attractionPreference = option
+            resolvedAttractionPreference = option == "Recomendado"
+                ? recommendedAttractionPreference()
+                : option
+
+        case .specificAttraction:
+            specificAttraction = option
+
+        case .language:
+            preferredLanguage = option
+
+        case .coquePersonality:
+            selectedCoquePersonality = option
+        }
+
+        if currentStepIndex < steps.count - 1 {
+            currentStepIndex += 1
+        } else {
+            Task {
+                await finishSurvey(in: context)
+            }
+        }
+    }
+
+    func optionIsSelected(_ option: String) -> Bool {
+        switch currentStep {
+        case .gender:
+            return gender == option
+        case .ageRange:
+            return ageRange == option
+        case .plannedTime:
+            return plannedTime == option
+        case .attractionPreference:
+            return attractionPreference == option
+        case .specificAttraction:
+            return specificAttraction == option
+        case .language:
+            return preferredLanguage == option
+        case .coquePersonality:
+            return selectedCoquePersonality == option
+        }
+    }
+
+    private func finishSurvey(in context: ModelContext) async {
+        guard validateAnswers() else { return }
 
         isLoading = true
         defer { isLoading = false }
@@ -68,6 +155,7 @@ final class SurveyViewModel: ObservableObject {
             let descriptor = FetchDescriptor<ExcursionUserProfile>(
                 sortBy: [SortDescriptor(\.updatedAt, order: .reverse)]
             )
+
             let profiles = try context.fetch(descriptor)
 
             let profile: ExcursionUserProfile
@@ -78,59 +166,99 @@ final class SurveyViewModel: ObservableObject {
                 context.insert(profile)
             }
 
-            profile.name = name.trimmingCharacters(in: .whitespacesAndNewlines)
-            profile.age = age
-            profile.excursionPreferences = Array(selectedPreferences)
-            profile.availableTime = availableTime.trimmingCharacters(in: .whitespacesAndNewlines)
-            profile.specificSearch = specificSearch.trimmingCharacters(in: .whitespacesAndNewlines)
+            profile.gender = gender
+            profile.ageRange = ageRange
+            profile.plannedTime = plannedTime
+            profile.attractionPreference = attractionPreference
+            profile.resolvedAttractionPreference = resolvedAttractionPreference
+            profile.specificAttraction = specificAttraction
             profile.preferredLanguage = preferredLanguage
             profile.coquePersonality = selectedCoquePersonality
             profile.updatedAt = .now
+            profile.aiDescriptionText = ""
 
             let generatedDescription = try await aiService.generateDescription(for: profile)
             profile.aiDescriptionText = generatedDescription
             aiDescription = generatedDescription
 
             try context.save()
+            currentScreen = .description
         } catch {
             errorMessage = error.localizedDescription
         }
     }
 
-    private func validateFields() -> Bool {
-        if name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            errorMessage = "Escribe tu nombre."
+    private func validateAnswers() -> Bool {
+        if gender.isEmpty {
+            errorMessage = "Falta seleccionar el género."
             return false
         }
 
-        if ageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            errorMessage = "Escribe tu edad."
+        if ageRange.isEmpty {
+            errorMessage = "Falta seleccionar el rango de edad."
             return false
         }
 
-        if availableTime.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            errorMessage = "Escribe cuanto tiempo tienes para la excursion."
+        if plannedTime.isEmpty {
+            errorMessage = "Falta seleccionar el tiempo del recorrido."
             return false
         }
 
-        if preferredLanguage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            errorMessage = "Selecciona un idioma."
+        if attractionPreference.isEmpty {
+            errorMessage = "Falta seleccionar la preferencia de atracciones."
             return false
         }
-        
+
+        if specificAttraction.isEmpty {
+            errorMessage = "Falta seleccionar si buscas algo específico."
+            return false
+        }
+
+        if preferredLanguage.isEmpty {
+            errorMessage = "Falta seleccionar el idioma."
+            return false
+        }
+
         if selectedCoquePersonality.isEmpty {
-            errorMessage = "Selecciona una personalidad."
+            errorMessage = "Falta seleccionar la personalidad de Coque."
             return false
         }
 
         return true
     }
 
-    func togglePreference(_ preference: String) {
-        if selectedPreferences.contains(preference) {
-            selectedPreferences.remove(preference)
-        } else {
-            selectedPreferences.insert(preference)
+    private func resetAnswers() {
+        gender = ""
+        ageRange = ""
+        plannedTime = ""
+        attractionPreference = ""
+        resolvedAttractionPreference = ""
+        specificAttraction = ""
+        preferredLanguage = "Español"
+        selectedCoquePersonality = "Neutral"
+    }
+
+    private func recommendedAttractionPreference() -> String {
+        if selectedCoquePersonality == "Para niños" || ageRange == "18 o menos" {
+            return "Interacción"
         }
+
+        if selectedCoquePersonality == "Historiador" {
+            return "Escuchar historia"
+        }
+
+        if plannedTime == "1 hora o menos" {
+            return "Shows"
+        }
+
+        if plannedTime == "3 horas o más" {
+            return "Todos"
+        }
+
+        if selectedCoquePersonality == "Datos curiosos" {
+            return "Galerías de objetos"
+        }
+
+        return "Interacción"
     }
 }
