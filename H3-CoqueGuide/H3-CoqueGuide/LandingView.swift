@@ -10,9 +10,9 @@ import SwiftUI
 struct LandingView: View {
 
     // MARK: - CoqueGuide ViewModel
-    // Usa Claude API si hay key en Secrets.plist, sino usa servicio simulado
+    // Usa Gemini API si hay key en Secrets.plist, sino usa servicio simulado
     @StateObject private var coqueGuideVM: CGViewModel = {
-        let service: CGAIServiceProtocol = ClaudeAIService.fromSecretsPlist() ?? CGSimulatedAIService()
+        let service: CGAIServiceProtocol = GeminiAIService.fromSecretsPlist() ?? CGSimulatedAIService()
         return CGViewModel(aiService: service)
     }()
 
@@ -26,6 +26,7 @@ struct LandingView: View {
     
     // MARK: - TabView
     @State private var selectedTab: Int = 0
+    @AppStorage("isDarkModeEnabled") private var isDarkModeEnabled: Bool = false
 
     private let homeInviteContent = CGHomeInviteContent.default
 
@@ -62,7 +63,7 @@ struct LandingView: View {
             }
             .tint(Color.accentColor)
             .environment(navigationCoordinator)
-            .coqueGuideOverlay(viewModel: coqueGuideVM, hideFloatingButton: selectedTab == 0)
+            .coqueGuideOverlay(viewModel: coqueGuideVM, hideFloatingButton: selectedTab == 0, navigator: navigationCoordinator)
             .onChange(of: navigationCoordinator.pendingDestination) { _, newValue in
                 if let destination = newValue {
                     coqueGuideVM.isPanelOpen = false
@@ -73,52 +74,77 @@ struct LandingView: View {
                 }
             }
         }
+        .preferredColorScheme(isDarkModeEnabled ? .dark : .light)
     }
     
     // MARK: - Tab Content: Atracciones
     private var atraccionesTab: some View {
         NavigationStack(path: $navigationPath) {
-            ScrollView {
-                VStack(alignment: .center, spacing: 20) {
-                    // MARK: - Logo
-                    Image("horno3Logo")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 90, height: 90)
-                        .padding(.top, 20)
+            GeometryReader { proxy in
+                let isLandscape = proxy.size.width > proxy.size.height
 
-                    // MARK: - Carrusel de Galerías
-                    VStack(spacing: 12) {
-                        TabView(selection: $currentGalleryIndex) {
-                            ForEach(0..<galleryImages.count, id: \.self) { index in
-                                CarouselCard(imageName: galleryImages[index])
-                                    .tag(index)
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 28) {
+                        // MARK: - Logo in top-right corner
+                        HStack {
+                            Button {
+                                isDarkModeEnabled.toggle()
+                            } label: {
+                                Label(
+                                    isDarkModeEnabled ? "Light" : "Dark",
+                                    systemImage: isDarkModeEnabled ? "sun.max.fill" : "moon.fill"
+                                )
+                                .font(.subheadline.weight(.semibold))
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(Color(.secondarySystemGroupedBackground))
+                                .clipShape(Capsule())
                             }
-                        }
-                        .frame(height: 280)
-                        .tabViewStyle(.page(indexDisplayMode: .never))
-                        .padding(.horizontal, 24)
+                            .buttonStyle(.plain)
+                            .padding(.leading, 20)
+                            .padding(.top, 20)
 
-                        // MARK: - Indicadores personalizados del carrusel
-                        HStack(spacing: 8) {
-                            ForEach(0..<galleryImages.count, id: \.self) { index in
-                                Capsule()
-                                    .fill(index == currentGalleryIndex ? Color.accentColor : Color.gray.opacity(0.3))
-                                    .frame(width: index == currentGalleryIndex ? 24 : 8, height: 6)
-                                    .animation(.easeInOut(duration: 0.3), value: currentGalleryIndex)
-                            }
+                            Spacer()
+                            Image("horno3Logo")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 90, height: 90)
+                                .padding(.top, 20)
+                                .padding(.trailing, 20)
                         }
-                        .padding(.horizontal, 24)
+
+                        // MARK: - Carrusel de Galerías
+                        VStack(spacing: 12) {
+                            TabView(selection: $currentGalleryIndex) {
+                                ForEach(0..<galleryImages.count, id: \.self) { index in
+                                    CarouselCard(imageName: galleryImages[index])
+                                        .tag(index)
+                                }
+                            }
+                            .frame(height: isLandscape ? max(320, proxy.size.height * 0.62) : 280)
+                            .tabViewStyle(.page(indexDisplayMode: .never))
+                            .padding(.horizontal, isLandscape ? 0 : 24)
+
+                            HStack(spacing: 8) {
+                                ForEach(0..<galleryImages.count, id: \.self) { index in
+                                    Capsule()
+                                        .fill(index == currentGalleryIndex ? Color.accentColor : Color.gray.opacity(0.3))
+                                        .frame(width: index == currentGalleryIndex ? 24 : 8, height: 6)
+                                        .animation(.easeInOut(duration: 0.3), value: currentGalleryIndex)
+                                }
+                            }
+                            .padding(.horizontal, isLandscape ? 0 : 24)
+                        }
+
+                        coqueGuideInviteCard
+                            .padding(.horizontal, 20)
+                            .padding(.top, 14)
+
+                        Spacer(minLength: 20)
                     }
-
-                    coqueGuideInviteCard
-                        .padding(.horizontal, 20)
-                        .padding(.top, 6)
-
-                    Spacer(minLength: 20)
+                    .frame(maxWidth: .infinity)
+                    .background(Color(.systemGroupedBackground))
                 }
-                .frame(maxWidth: .infinity)
-                .background(Color(.systemGroupedBackground))
             }
             .navigationTitle("CoqueGuide")
             .navigationSubtitle("Museo del Acero Horno3")
@@ -144,17 +170,18 @@ struct LandingView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
                 Circle()
-                    .fill(Color.accentColor.opacity(0.22))
+                    .fill(Color.white.opacity(0.3))
                     .frame(width: 24, height: 24)
 
                 Text(homeInviteContent.title)
                     .font(.title3)
                     .fontWeight(.semibold)
+                    .foregroundStyle(.white)
             }
 
             Text(homeInviteContent.message)
                 .font(.headline)
-                .foregroundStyle(Color.accentColor)
+                .foregroundStyle(.white)
 
             LazyVGrid(
                 columns: [GridItem(.adaptive(minimum: 120), spacing: 10, alignment: .leading)],
@@ -177,11 +204,11 @@ struct LandingView: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.secondarySystemGroupedBackground))
+        .background(Color.accentColor)
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .stroke(Color.accentColor.opacity(0.25), lineWidth: 1)
+                .stroke(Color.accentColor.opacity(0.5), lineWidth: 1)
         )
     }
 
@@ -248,17 +275,7 @@ struct CarouselCard: View {
             )
             .clipShape(RoundedRectangle(cornerRadius: 20))
 
-            // Texto contextual
-            VStack(alignment: .center, spacing: 4) {
-                Text("Galería")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                Text("Desliza para explorar")
-                    .font(.caption)
-                    .opacity(0.8)
-            }
-            .foregroundStyle(.white)
-            .padding(.bottom, 16)
+
         }
     }
 }

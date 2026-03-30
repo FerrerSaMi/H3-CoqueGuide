@@ -109,8 +109,8 @@ extension View {
     /// MyView()
     ///     .coqueGuideOverlay(viewModel: coqueGuideVM)
     /// ```
-    func coqueGuideOverlay(viewModel: CGViewModel, hideFloatingButton: Bool = false) -> some View {
-        self.modifier(CGOverlayModifier(viewModel: viewModel, hideFloatingButton: hideFloatingButton))
+    func coqueGuideOverlay(viewModel: CGViewModel, hideFloatingButton: Bool = false, navigator: CGNavigationCoordinator) -> some View {
+        self.modifier(CGOverlayModifier(viewModel: viewModel, hideFloatingButton: hideFloatingButton, navigator: navigator))
     }
 }
 
@@ -120,6 +120,7 @@ struct CGOverlayModifier: ViewModifier {
 
     @ObservedObject var viewModel: CGViewModel
     let hideFloatingButton: Bool
+    let navigator: CGNavigationCoordinator
     @State private var showPanel: Bool = false
 
     func body(content: Content) -> some View {
@@ -152,8 +153,9 @@ struct CGOverlayModifier: ViewModifier {
             }
             .sheet(isPresented: $showPanel) {
                 CGPanelView(viewModel: viewModel)
+                    .environment(navigator)
                     .presentationDragIndicator(.visible)
-                    .presentationDetents([.large])
+                    .presentationDetents([.medium, .large])
             }
             .onChange(of: viewModel.isPanelOpen) { _, isOpen in
                 showPanel = isOpen

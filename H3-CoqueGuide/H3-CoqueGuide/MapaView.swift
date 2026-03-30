@@ -12,6 +12,7 @@ struct MapaView: View {
     private let pinButtonSize: CGFloat = 27
     @State private var showingFirstMap: Bool = true
     @State private var selectedLocationNumber: Int? = nil
+    @State private var selectedLocationInfo: SelectedLocationInfo? = nil
     @State private var mapScale: CGFloat = 1.0
     @State private var lastMapScale: CGFloat = 1.0
     @State private var mapOffset: CGSize = .zero
@@ -20,10 +21,6 @@ struct MapaView: View {
 
     private var locations: [Int: String] {
         mapConfig.allLocations
-    }
-
-    private var allLocationNumbers: [Int] {
-        locations.keys.sorted()
     }
 
     private var currentLevelID: Int {
@@ -43,76 +40,69 @@ struct MapaView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                HStack {
-                    Button {
-                        showingFirstMap.toggle()
-                        resetMapTransform()
-                    } label: {
-                        Text(showingFirstMap ? "Cambiar a Nivel 2" : "Cambiar a Nivel 1")
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                    }
-                    .buttonStyle(.borderedProminent)
-
-                    Button {
-                        resetMapTransform()
-                    } label: {
-                        Label("Reset Zoom", systemImage: "arrow.counterclockwise")
-                            .font(.subheadline)
-                    }
-                    .buttonStyle(.bordered)
-
-                    Spacer()
-                }
-
-                mapCanvas
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
-                    )
-
-                Text("Selecciona un numero del mapa")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 5), spacing: 8) {
-                    ForEach(allLocationNumbers, id: \.self) { number in
+        ZStack {
+            ScrollView {
+                VStack(spacing: 16) {
+                    HStack {
                         Button {
-                            selectedLocationNumber = number
+                            showingFirstMap.toggle()
+                            resetMapTransform()
                         } label: {
-                            Text("\(number)")
+                            Text(showingFirstMap ? "Cambiar a Nivel 2" : "Cambiar a Nivel 1")
                                 .font(.subheadline)
-                                .fontWeight(.bold)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 10)
-                                .background(selectedLocationNumber == number ? Color.accentColor : Color(.secondarySystemGroupedBackground))
-                                .foregroundStyle(selectedLocationNumber == number ? .white : .primary)
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                .fontWeight(.semibold)
                         }
-                    }
-                }
+                        .buttonStyle(.borderedProminent)
 
-                if let selectedLocationNumber,
-                   let locationName = locations[selectedLocationNumber] {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Punto \(selectedLocationNumber)")
-                            .font(.headline)
-                        Text(locationName)
-                            .font(.body)
+                        Button {
+                            resetMapTransform()
+                        } label: {
+                            Label("Reset Zoom", systemImage: "arrow.counterclockwise")
+                                .font(.subheadline)
+                        }
+                        .buttonStyle(.bordered)
+
+                        Spacer()
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-                    .background(Color(.secondarySystemGroupedBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                    mapCanvas
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
+                        )
                 }
+                .padding()
             }
-            .padding()
+
+            if let selectedLocationInfo {
+                Color.black.opacity(0.28)
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        self.selectedLocationInfo = nil
+                    }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Punto \(selectedLocationInfo.id)")
+                        .font(.headline)
+                    Text(selectedLocationInfo.name)
+                        .font(.body)
+                }
+                .frame(maxWidth: 320, alignment: .leading)
+                .padding(16)
+                .background(.regularMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
+                )
+                .padding(.horizontal, 20)
+                .transition(.opacity.combined(with: .scale(scale: 0.96)))
+            }
         }
         .navigationTitle("Mapa")
         .navigationBarTitleDisplayMode(.inline)
+        .animation(.easeInOut(duration: 0.2), value: selectedLocationInfo != nil)
     }
 
     private var mapCanvas: some View {
@@ -132,6 +122,9 @@ struct MapaView: View {
                 ForEach(currentPins) { pin in
                     Button {
                         selectedLocationNumber = pin.number
+                        if let name = locations[pin.number] {
+                            selectedLocationInfo = SelectedLocationInfo(id: pin.number, name: name)
+                        }
                     } label: {
                         ZStack {
                             Circle()
@@ -234,7 +227,7 @@ struct MapaView: View {
     }
 }
 
-private struct MapPin: Identifiable {
+struct MapPin: Identifiable {
     let number: Int
     let x: CGFloat
     let y: CGFloat
@@ -242,7 +235,12 @@ private struct MapPin: Identifiable {
     var id: Int { number }
 }
 
-private struct MapLocationsConfig: Decodable {
+private struct SelectedLocationInfo: Identifiable {
+    let id: Int
+    let name: String
+}
+
+struct MapLocationsConfig: Decodable {
     let levels: [MapLevel]
 
     var allLocations: [Int: String] {
@@ -299,7 +297,7 @@ private struct MapLocationsConfig: Decodable {
     ])
 }
 
-private struct MapLevel: Decodable {
+struct MapLevel: Decodable {
     let id: Int
     let imageName: String
     let locations: [MapLocation]
@@ -313,17 +311,25 @@ private struct MapLevel: Decodable {
             return []
         }
 
+        return normalizedPins(forImageSize: image.size)
+    }
+
+    func normalizedPins(forImageSize imageSize: CGSize) -> [MapPin] {
+        guard imageSize.width > 0, imageSize.height > 0 else {
+            return []
+        }
+
         return locations.map { location in
             MapPin(
                 number: location.id,
-                x: min(max((location.x * xAxisScaleFactor) / image.size.width, 0), 1),
-                y: min(max(location.y / image.size.height, 0), 1)
+                x: min(max((location.x * xAxisScaleFactor) / imageSize.width, 0), 1),
+                y: min(max(location.y / imageSize.height, 0), 1)
             )
         }
     }
 }
 
-private struct MapLocation: Decodable {
+struct MapLocation: Decodable {
     let id: Int
     let name: String
     let x: CGFloat
