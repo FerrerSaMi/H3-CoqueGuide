@@ -11,11 +11,12 @@ import SwiftData
 @Model
 final class ExcursionUserProfile {
     var id: UUID
-    var name: String
-    var age: Int
-    var excursionPreferences: [String]
-    var availableTime: String
-    var specificSearch: String
+    var gender: String
+    var ageRange: String
+    var plannedTime: String
+    var attractionPreference: String
+    var resolvedAttractionPreference: String
+    var specificAttraction: String
     var preferredLanguage: String
     var coquePersonality: String
     var aiDescriptionText: String
@@ -23,22 +24,24 @@ final class ExcursionUserProfile {
 
     init(
         id: UUID = UUID(),
-        name: String = "",
-        age: Int = 0,
-        excursionPreferences: [String] = [],
-        availableTime: String = "",
-        specificSearch: String = "",
+        gender: String = "",
+        ageRange: String = "",
+        plannedTime: String = "",
+        attractionPreference: String = "",
+        resolvedAttractionPreference: String = "",
+        specificAttraction: String = "",
         preferredLanguage: String = "",
         coquePersonality: String = "",
         aiDescriptionText: String = "",
         updatedAt: Date = .now
     ) {
         self.id = id
-        self.name = name
-        self.age = age
-        self.excursionPreferences = excursionPreferences
-        self.availableTime = availableTime
-        self.specificSearch = specificSearch
+        self.gender = gender
+        self.ageRange = ageRange
+        self.plannedTime = plannedTime
+        self.attractionPreference = attractionPreference
+        self.resolvedAttractionPreference = resolvedAttractionPreference
+        self.specificAttraction = specificAttraction
         self.preferredLanguage = preferredLanguage
         self.coquePersonality = coquePersonality
         self.aiDescriptionText = aiDescriptionText
