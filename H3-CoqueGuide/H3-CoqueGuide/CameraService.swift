@@ -8,6 +8,8 @@
 import AVFoundation
 import Combine
 import UIKit
+import Vision
+import CoreML
 
 // MARK: - Errors
 
@@ -16,6 +18,7 @@ enum CameraError: LocalizedError, Equatable {
     case deviceUnavailable
     case inputError
     case captureError(String)
+    case classificationFailed(String)
 
     var errorDescription: String? {
         switch self {
@@ -23,6 +26,7 @@ enum CameraError: LocalizedError, Equatable {
         case .deviceUnavailable:   return "No se encontró la cámara trasera."
         case .inputError:          return "Error al configurar la entrada de cámara."
         case .captureError(let m): return m
+        case .classificationFailed(let m): return "Error de clasificación: \(m)"
         }
     }
 }
@@ -99,6 +103,11 @@ final class CameraService: NSObject, ObservableObject {
         }
     }
 
+    func classifyCurrentFrame() async throws -> (label: String, confidence: Double) {
+        let image = try await capturePhoto()
+        return try await classify(image: image)
+    }
+
     // MARK: - Private helpers
 
     private func configureAndStart() {
@@ -146,6 +155,52 @@ final class CameraService: NSObject, ObservableObject {
         DispatchQueue.main.async { [weak self] in
             self?.cameraError        = error
             self?.isPermissionDenied = (error == .permissionDenied)
+        }
+    }
+
+    private func classify(image: UIImage) async throws -> (label: String, confidence: Double) {
+        guard let cgImage = image.cgImage else {
+            throw CameraError.classificationFailed("No se pudo convertir la imagen.")
+        }
+
+        return try await withCheckedThrowingContinuation { continuation in
+            sessionQueue.async { [weak self] in
+                guard let self else {
+                    continuation.resume(throwing: CameraError.classificationFailed("Servicio liberado."))
+                    return
+                }
+
+                do {
+                    let modelURL = Bundle.main.url(forResource: "ClassificationObjectsH3", withExtension: "mlmodelc")
+                        ?? Bundle.main.url(forResource: "ClassificationObjectsH3", withExtension: "mlmodel")
+
+                    guard let modelURL else {
+                        throw CameraError.classificationFailed("No se encontró el modelo ML.")
+                    }
+
+                    let mlModel = try MLModel(contentsOf: modelURL)
+                    let visionModel = try VNCoreMLModel(for: mlModel)
+
+                    let request = VNCoreMLRequest(model: visionModel) { request, error in
+                        if let error {
+                            continuation.resume(throwing: CameraError.classificationFailed(error.localizedDescription))
+                            return
+                        }
+                        guard let observations = request.results as? [VNClassificationObservation], let topResult = observations.first else {
+                            continuation.resume(throwing: CameraError.classificationFailed("No se obtuvieron resultados de clasificación."))
+                            return
+                        }
+
+                        continuation.resume(returning: (label: topResult.identifier, confidence: Double(topResult.confidence)))
+                    }
+                    request.imageCropAndScaleOption = .centerCrop
+
+                    let handler = VNImageRequestHandler(cgImage: cgImage, orientation: .up)
+                    try handler.perform([request])
+                } catch {
+                    continuation.resume(throwing: error)
+                }
+            }
         }
     }
 }
