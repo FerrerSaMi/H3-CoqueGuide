@@ -1,0 +1,51 @@
+{
+  "activityEntities" : [
+    "dataSourceMetrics",
+    [
+      {
+        "createdDate" : "2026-04-06T08:17:45Z",
+        "event" : "dataSourceMetrics",
+        "id" : "11274D09-7520-4851-85BB-1E45D18C3E87",
+        "subtitle" : "18 Classes, 109 Items",
+        "title" : "Data Summary"
+      }
+    ],
+    "dataSourceCreated",
+    [
+      {
+        "createdDate" : "2026-04-06T08:17:30Z",
+        "event" : "dataSourceCreated",
+        "id" : "F41160E0-7BB2-47E3-A654-A50BE02C373E",
+        "subtitle" : "ObjetosH3",
+        "title" : "Data Source Created"
+      }
+    ],
+    "dataSourceTrainingStarted",
+    [
+      {
+        "createdDate" : "2026-04-06T08:17:45Z",
+        "event" : "dataSourceTrainingStarted",
+        "id" : "C65A880F-EF33-426A-8CB9-B29FF004199F",
+        "subtitle" : "ClassificationObjectsH3 1",
+        "title" : "Used By"
+      }
+    ]
+  ],
+  "createdDate" : "2026-04-06T08:17:30Z",
+  "dataPathRelativeToProjectURL" : "../../../../../../Downloads/ObjetosH3/",
+  "dataResult" : {
+    "createdDate" : "2026-04-06T08:17:30Z",
+    "dataSourceID" : "490A5709-06F7-4F2F-AB04-7A8D1A3EA316",
+    "dataURL" : "file:///Users/sroa/Downloads/ObjetosH3/"
+  },
+  "dataURL" : "file:///Users/sroa/Downloads/ObjetosH3/",
+  "experimentIDs" : [
+    "39D749FE-AE84-4EC0-9B6B-16EB800412E6"
+  ],
+  "id" : "490A5709-06F7-4F2F-AB04-7A8D1A3EA316",
+  "modifiedDate" : "2026-04-06T08:17:45Z",
+  "pathType" : 0,
+  "preferredFilename" : "ObjetosH3",
+  "title" : "ObjetosH3",
+  "version" : "1.0"
+}

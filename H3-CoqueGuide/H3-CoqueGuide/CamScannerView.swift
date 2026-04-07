@@ -52,7 +52,6 @@ struct CamScannerView: View {
         }
         .onAppear {
             camera.startSession()
-            startScanSimulation()
         }
         .onDisappear {
             camera.stopSession()
@@ -111,10 +110,10 @@ struct CamScannerView: View {
             if let obj = detectedObject {
                 infoPanel(obj)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
-                    .padding(.bottom, 12)
+                    .padding(.bottom, 4)
             }
             shutterButton
-                .padding(.bottom, 44)
+                .padding(.bottom, 16)
         }
         .animation(.spring(response: 0.45, dampingFraction: 0.82), value: detectedObject != nil)
     }
@@ -277,23 +276,39 @@ struct CamScannerView: View {
 
     // MARK: - Scan Logic
 
-    /// Simulación Sprint 1. En Sprint 2 se reemplaza por llamada a CoqueGuideAI.
-    private func startScanSimulation() {
-        isScanning = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-            isScanning = false
-            withAnimation {
-                detectedObject = MuseumObject.sampleHorno3
-            }
-        }
-    }
-
     private func triggerScan() {
         guard !isScanning else { return }
         speech.stop()           // Cancela cualquier audio al re-escanear
         detectedObject  = nil
         isPanelExpanded = false
-        startScanSimulation()
+        isScanning = true
+
+        Task {
+            do {
+                let result = try await camera.classifyCurrentFrame()
+                await MainActor.run {
+                    withAnimation {
+                        detectedObject = MuseumObject(
+                            title: result.label,
+                            era: "Etiquetado ML",
+                            description: "No hay información adicional disponible en la base de datos. Esta etiqueta proviene del modelo de clasificación.",
+                            confidence: result.confidence
+                        )
+                    }
+                    isScanning = false
+                }
+            } catch {
+                await MainActor.run {
+                    isScanning = false
+                    detectedObject = MuseumObject(
+                        title: "Desconocido",
+                        era: "Etiquetado ML",
+                        description: "No se pudo obtener una etiqueta del modelo. Intenta escanear nuevamente.",
+                        confidence: 0.0
+                    )
+                }
+            }
+        }
     }
 }
 
