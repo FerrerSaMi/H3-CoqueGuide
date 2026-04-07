@@ -1,0 +1,2185 @@
+{
+  "activityEntities" : [
+    "trainingDataAdded",
+    [
+      {
+        "createdDate" : "2026-04-06T08:17:31Z",
+        "event" : "trainingDataAdded",
+        "id" : "6C4D134C-AE52-4A45-8259-9B59ECAD8A74",
+        "subtitle" : "ObjetosH3",
+        "title" : "Training Data Added"
+      }
+    ],
+    "experimentCreated",
+    [
+      {
+        "createdDate" : "2026-04-01T09:34:10Z",
+        "event" : "experimentCreated",
+        "id" : "C6592980-221B-4042-87C9-516A7C59A481",
+        "subtitle" : "ClassificationObjectsH3 1",
+        "title" : "Model Source Created"
+      }
+    ],
+    "trainingFinished",
+    [
+      {
+        "createdDate" : "2026-04-06T08:17:49Z",
+        "event" : "trainingFinished",
+        "id" : "3E2816AF-B487-4193-B13A-8EFE050A6BBF",
+        "subtitle" : "Model converged at 18 iterations",
+        "title" : "Training Completed"
+      }
+    ],
+    "trainingStarted",
+    [
+      {
+        "createdDate" : "2026-04-06T08:17:45Z",
+        "event" : "trainingStarted",
+        "id" : "D0644A81-8982-4B98-9A7D-207811C4C7A8",
+        "subtitle" : "25 iterations",
+        "title" : "Training Started"
+      }
+    ]
+  ],
+  "contentDataResult" : {
+    "createdDate" : "2026-04-06T08:17:30Z"
+  },
+  "createdDate" : "2026-04-01T09:34:10Z",
+  "evaluationContainerEntity" : {
+    "createdDate" : "2026-04-06T08:17:49Z",
+    "evaluationEntities" : [
+      {
+        "analysedDataType" : "none",
+        "createdDate" : "2026-04-06T08:17:49Z",
+        "dataResult" : {
+
+        },
+        "id" : "f19d33fa-8d60-4d27-9001-2303270d931f"
+      }
+    ],
+    "id" : "c5184721-64be-4e6d-9939-ed47585768f2",
+    "modifiedDate" : "2026-04-06T08:17:49Z",
+    "previewType" : "imageClassifier",
+    "testingEvaluationEntity" : {
+      "analysedDataType" : "none",
+      "createdDate" : "2026-04-01T09:34:10Z",
+      "dataResult" : {
+        "createdDate" : "2026-04-06T08:17:30Z"
+      },
+      "id" : "2803de15-7f17-4b0c-bd60-a945b303cfbc"
+    },
+    "trainingEvaluationEntity" : {
+      "analysedDataType" : "none",
+      "createdDate" : "2026-04-01T09:34:10Z",
+      "dataResult" : {
+        "classesCount" : 18,
+        "createdDate" : "2026-04-06T08:17:30Z",
+        "dataAnalysis" : {
+          "classifierAnalysis" : {
+            "details" : [
+              "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20fundicio%CC%81n%20/IMG_4983.HEIC",
+              [
+                "Cuchara de fundición "
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5103.HEIC",
+              [
+                "Chevrolet 3100"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Tenazas%20de%20Garra%20Industrial/IMG_5047.HEIC",
+              [
+                "Tenazas de Garra Industrial"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Elevador%20de%20Carga/IMG_5109.HEIC",
+              [
+                "Elevador de Carga"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Reloj%20Checador/IMG_5030.HEIC",
+              [
+                "Reloj Checador"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Molino%20Mezclador/IMG_5064.HEIC",
+              [
+                "Molino Mezclador"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Acropora%20Pimienta/IMG_4991.HEIC",
+              [
+                "Acropora Pimienta"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Coche%20de%20muchos%20acabados/IMG_5011.HEIC",
+              [
+                "Coche de muchos acabados"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5072.HEIC",
+              [
+                "Maqueta Modelo Horno 3"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Acropora%20Pimienta/IMG_4992.HEIC",
+              [
+                "Acropora Pimienta"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Vago%CC%81n%20Torpedo/IMG_5054.HEIC",
+              [
+                "Vagón Torpedo"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Estrella%2004/IMG_4986.HEIC",
+              [
+                "Estrella 04"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5095.HEIC",
+              [
+                "Chevrolet 3100"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Televisor%20Antiguo/IMG_5039.HEIC",
+              [
+                "Televisor Antiguo"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5084.HEIC",
+              [
+                "Maqueta Modelo Horno 3"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5104.HEIC",
+              [
+                "Chevrolet 3100"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Acropora%20Pimienta/IMG_4990.HEIC",
+              [
+                "Acropora Pimienta"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5099.HEIC",
+              [
+                "Chevrolet 3100"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Carretilla%20de%20fundicio%CC%81n%20/IMG_5061.HEIC",
+              [
+                "Carretilla de fundición "
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Elevador%20de%20Carga/IMG_5110.HEIC",
+              [
+                "Elevador de Carga"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5094.HEIC",
+              [
+                "Chevrolet 3100"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Reloj%20Checador/IMG_5033.HEIC",
+              [
+                "Reloj Checador"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5080.HEIC",
+              [
+                "Maqueta Modelo Horno 3"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20fundicio%CC%81n%20/IMG_4979.HEIC",
+              [
+                "Cuchara de fundición "
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Vago%CC%81n%20Torpedo/IMG_5057.HEIC",
+              [
+                "Vagón Torpedo"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Elevador%20de%20Carga/IMG_5108.HEIC",
+              [
+                "Elevador de Carga"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5086.HEIC",
+              [
+                "Maqueta Modelo Horno 3"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Rueda%20Inglesa/IMG_5051.HEIC",
+              [
+                "Rueda Inglesa"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Elevador%20de%20Carga/IMG_5107.HEIC",
+              [
+                "Elevador de Carga"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Televisor%20Antiguo/IMG_5040.HEIC",
+              [
+                "Televisor Antiguo"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5097.HEIC",
+              [
+                "Chevrolet 3100"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Molde%20de%20fundicio%CC%81n%20/IMG_5035.HEIC",
+              [
+                "Molde de fundición "
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Molino%20Mezclador/IMG_5065.HEIC",
+              [
+                "Molino Mezclador"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20fundicio%CC%81n%20/IMG_4975.HEIC",
+              [
+                "Cuchara de fundición "
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20fundicio%CC%81n%20/IMG_4978.HEIC",
+              [
+                "Cuchara de fundición "
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Televisor%20Antiguo/IMG_5041.HEIC",
+              [
+                "Televisor Antiguo"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5098.HEIC",
+              [
+                "Chevrolet 3100"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Tenazas%20de%20Garra%20Industrial/IMG_5046.HEIC",
+              [
+                "Tenazas de Garra Industrial"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5102.HEIC",
+              [
+                "Chevrolet 3100"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Museo%20Horno%203/IMG_5114.HEIC",
+              [
+                "Museo Horno 3"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Rueda%20Inglesa/IMG_5052.HEIC",
+              [
+                "Rueda Inglesa"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Museo%20Horno%203/IMG_5112.HEIC",
+              [
+                "Museo Horno 3"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Rueda%20Inglesa/IMG_5049.HEIC",
+              [
+                "Rueda Inglesa"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20fundicio%CC%81n%20/IMG_4980.HEIC",
+              [
+                "Cuchara de fundición "
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5083.HEIC",
+              [
+                "Maqueta Modelo Horno 3"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5101.HEIC",
+              [
+                "Chevrolet 3100"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5093.HEIC",
+              [
+                "Chevrolet 3100"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5082.HEIC",
+              [
+                "Maqueta Modelo Horno 3"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Molde%20de%20fundicio%CC%81n%20/IMG_5037.HEIC",
+              [
+                "Molde de fundición "
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Vago%CC%81n%20Torpedo/IMG_5053.HEIC",
+              [
+                "Vagón Torpedo"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Rueda%20Inglesa/IMG_5048.HEIC",
+              [
+                "Rueda Inglesa"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20fundicio%CC%81n%20/IMG_4981.HEIC",
+              [
+                "Cuchara de fundición "
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Vago%CC%81n%20Torpedo/IMG_5055.HEIC",
+              [
+                "Vagón Torpedo"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Tenazas%20de%20Garra%20Industrial/IMG_5045.HEIC",
+              [
+                "Tenazas de Garra Industrial"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Tenazas%20de%20Garra%20Industrial/IMG_5044.HEIC",
+              [
+                "Tenazas de Garra Industrial"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Molino%20Mezclador/IMG_5066.HEIC",
+              [
+                "Molino Mezclador"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Carretilla%20de%20fundicio%CC%81n%20/IMG_5060.HEIC",
+              [
+                "Carretilla de fundición "
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5078.HEIC",
+              [
+                "Maqueta Modelo Horno 3"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Coche%20de%20muchos%20acabados/IMG_5008.HEIC",
+              [
+                "Coche de muchos acabados"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Televisor%20Antiguo/IMG_5042.HEIC",
+              [
+                "Televisor Antiguo"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20Almeja/IMG_5001.HEIC",
+              [
+                "Cuchara de Almeja"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Molde%20de%20fundicio%CC%81n%20/IMG_5034.HEIC",
+              [
+                "Molde de fundición "
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20Volteo/IMG_5026.HEIC",
+              [
+                "Cuchara de Volteo"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5100.HEIC",
+              [
+                "Chevrolet 3100"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Carretilla%20de%20fundicio%CC%81n%20/IMG_5062.HEIC",
+              [
+                "Carretilla de fundición "
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20fundicio%CC%81n%20/IMG_4977.HEIC",
+              [
+                "Cuchara de fundición "
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Molino%20Mezclador/IMG_5067.HEIC",
+              [
+                "Molino Mezclador"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5091.HEIC",
+              [
+                "Chevrolet 3100"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5081.HEIC",
+              [
+                "Maqueta Modelo Horno 3"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5076.HEIC",
+              [
+                "Maqueta Modelo Horno 3"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20fundicio%CC%81n%20/IMG_4984.HEIC",
+              [
+                "Cuchara de fundición "
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5079.HEIC",
+              [
+                "Maqueta Modelo Horno 3"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5085.HEIC",
+              [
+                "Maqueta Modelo Horno 3"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5106.HEIC",
+              [
+                "Chevrolet 3100"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Molde%20de%20fundicio%CC%81n%20/IMG_5036.HEIC",
+              [
+                "Molde de fundición "
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Molino%20Mezclador/IMG_5068.HEIC",
+              [
+                "Molino Mezclador"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Estrella%2004/IMG_4988.HEIC",
+              [
+                "Estrella 04"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Coche%20de%20muchos%20acabados/IMG_5012.HEIC",
+              [
+                "Coche de muchos acabados"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5092.HEIC",
+              [
+                "Chevrolet 3100"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Estrella%2004/IMG_4987.HEIC",
+              [
+                "Estrella 04"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Molino%20Mezclador/IMG_5063.HEIC",
+              [
+                "Molino Mezclador"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Molde%20de%20fundicio%CC%81n%20/IMG_5038.HEIC",
+              [
+                "Molde de fundición "
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Vago%CC%81n%20Torpedo/IMG_5056.HEIC",
+              [
+                "Vagón Torpedo"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20Volteo/IMG_5028.HEIC",
+              [
+                "Cuchara de Volteo"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5105.HEIC",
+              [
+                "Chevrolet 3100"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5071.HEIC",
+              [
+                "Maqueta Modelo Horno 3"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Reloj%20Checador/IMG_5032.HEIC",
+              [
+                "Reloj Checador"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Televisor%20Antiguo/IMG_5043.HEIC",
+              [
+                "Televisor Antiguo"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20Volteo/IMG_5027.HEIC",
+              [
+                "Cuchara de Volteo"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Reloj%20Checador/IMG_5031.HEIC",
+              [
+                "Reloj Checador"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5077.HEIC",
+              [
+                "Maqueta Modelo Horno 3"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Museo%20Horno%203/IMG_5113.HEIC",
+              [
+                "Museo Horno 3"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5073.HEIC",
+              [
+                "Maqueta Modelo Horno 3"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Coche%20de%20muchos%20acabados/IMG_5009.HEIC",
+              [
+                "Coche de muchos acabados"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5075.HEIC",
+              [
+                "Maqueta Modelo Horno 3"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Rueda%20Inglesa/IMG_5050.HEIC",
+              [
+                "Rueda Inglesa"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20Volteo/IMG_5024.HEIC",
+              [
+                "Cuchara de Volteo"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Molino%20Mezclador/IMG_5069.HEIC",
+              [
+                "Molino Mezclador"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20Almeja/IMG_5002.HEIC",
+              [
+                "Cuchara de Almeja"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20fundicio%CC%81n%20/IMG_4976.HEIC",
+              [
+                "Cuchara de fundición "
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20Almeja/IMG_4998.HEIC",
+              [
+                "Cuchara de Almeja"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20fundicio%CC%81n%20/IMG_4985.HEIC",
+              [
+                "Cuchara de fundición "
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Carretilla%20de%20fundicio%CC%81n%20/IMG_5058.HEIC",
+              [
+                "Carretilla de fundición "
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20fundicio%CC%81n%20/IMG_4982.HEIC",
+              [
+                "Cuchara de fundición "
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Coche%20de%20muchos%20acabados/IMG_5010.HEIC",
+              [
+                "Coche de muchos acabados"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5074.HEIC",
+              [
+                "Maqueta Modelo Horno 3"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Carretilla%20de%20fundicio%CC%81n%20/IMG_5059.HEIC",
+              [
+                "Carretilla de fundición "
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Reloj%20Checador/IMG_5029.HEIC",
+              [
+                "Reloj Checador"
+              ],
+              "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20Volteo/IMG_5025.HEIC",
+              [
+                "Cuchara de Volteo"
+              ]
+            ],
+            "labelStats" : {
+              "Acropora Pimienta" : 3,
+              "Carretilla de fundición " : 5,
+              "Chevrolet 3100" : 15,
+              "Coche de muchos acabados" : 5,
+              "Cuchara de Almeja" : 3,
+              "Cuchara de Volteo" : 5,
+              "Cuchara de fundición " : 11,
+              "Elevador de Carga" : 4,
+              "Estrella 04" : 3,
+              "Maqueta Modelo Horno 3" : 16,
+              "Molde de fundición " : 5,
+              "Molino Mezclador" : 7,
+              "Museo Horno 3" : 3,
+              "Reloj Checador" : 5,
+              "Rueda Inglesa" : 5,
+              "Televisor Antiguo" : 5,
+              "Tenazas de Garra Industrial" : 4,
+              "Vagón Torpedo" : 5
+            }
+          },
+          "issues" : [
+            {
+              "description" : "18 classes found, including Maqueta Modelo Horno 3, Chevrolet 3100, Cuchara de fundición ",
+              "severity" : "debug"
+            },
+            {
+              "description" : "109 images found, automatically creating validation set",
+              "severity" : "good"
+            },
+            {
+              "description" : "Smallest class is \"Estrella 04\" with 3 images",
+              "severity" : "debug"
+            },
+            {
+              "description" : "Largest class is \"Maqueta Modelo Horno 3\" with 16 images",
+              "severity" : "debug"
+            }
+          ],
+          "objectDetectorAnalysis" : {
+            "details" : {
+
+            }
+          },
+          "summary" : {
+            "canUseValidation" : 1,
+            "classCount" : 18,
+            "sampleCount" : 109
+          }
+        },
+        "dataSourceID" : "490A5709-06F7-4F2F-AB04-7A8D1A3EA316",
+        "dataURL" : "file:///Users/sroa/Downloads/ObjetosH3/",
+        "itemsCount" : 109
+      },
+      "dataSourceID" : "490A5709-06F7-4F2F-AB04-7A8D1A3EA316",
+      "evaluationResult" : {
+        "imageClassifier" : {
+          "accuracy" : 1,
+          "confusionMatrix" : [
+            {
+              "actual" : "Acropora Pimienta",
+              "count" : 3,
+              "expected" : "Acropora Pimienta"
+            },
+            {
+              "actual" : "Carretilla de fundición ",
+              "count" : 5,
+              "expected" : "Carretilla de fundición "
+            },
+            {
+              "actual" : "Chevrolet 3100",
+              "count" : 13,
+              "expected" : "Chevrolet 3100"
+            },
+            {
+              "actual" : "Coche de muchos acabados",
+              "count" : 5,
+              "expected" : "Coche de muchos acabados"
+            },
+            {
+              "actual" : "Cuchara de Almeja",
+              "count" : 3,
+              "expected" : "Cuchara de Almeja"
+            },
+            {
+              "actual" : "Cuchara de Volteo",
+              "count" : 5,
+              "expected" : "Cuchara de Volteo"
+            },
+            {
+              "actual" : "Cuchara de fundición ",
+              "count" : 10,
+              "expected" : "Cuchara de fundición "
+            },
+            {
+              "actual" : "Elevador de Carga",
+              "count" : 4,
+              "expected" : "Elevador de Carga"
+            },
+            {
+              "actual" : "Estrella 04",
+              "count" : 3,
+              "expected" : "Estrella 04"
+            },
+            {
+              "actual" : "Maqueta Modelo Horno 3",
+              "count" : 14,
+              "expected" : "Maqueta Modelo Horno 3"
+            },
+            {
+              "actual" : "Molde de fundición ",
+              "count" : 4,
+              "expected" : "Molde de fundición "
+            },
+            {
+              "actual" : "Molino Mezclador",
+              "count" : 6,
+              "expected" : "Molino Mezclador"
+            },
+            {
+              "actual" : "Museo Horno 3",
+              "count" : 3,
+              "expected" : "Museo Horno 3"
+            },
+            {
+              "actual" : "Reloj Checador",
+              "count" : 5,
+              "expected" : "Reloj Checador"
+            },
+            {
+              "actual" : "Rueda Inglesa",
+              "count" : 5,
+              "expected" : "Rueda Inglesa"
+            },
+            {
+              "actual" : "Televisor Antiguo",
+              "count" : 4,
+              "expected" : "Televisor Antiguo"
+            },
+            {
+              "actual" : "Tenazas de Garra Industrial",
+              "count" : 4,
+              "expected" : "Tenazas de Garra Industrial"
+            },
+            {
+              "actual" : "Vagón Torpedo",
+              "count" : 4,
+              "expected" : "Vagón Torpedo"
+            }
+          ],
+          "statsByLabel" : {
+            "Acropora Pimienta" : {
+              "count" : 3,
+              "precisionRecall" : {
+                "success" : {
+                  "precision" : 1,
+                  "recall" : 1
+                }
+              }
+            },
+            "Carretilla de fundición " : {
+              "count" : 5,
+              "precisionRecall" : {
+                "success" : {
+                  "precision" : 1,
+                  "recall" : 1
+                }
+              }
+            },
+            "Chevrolet 3100" : {
+              "count" : 13,
+              "precisionRecall" : {
+                "success" : {
+                  "precision" : 1,
+                  "recall" : 1
+                }
+              }
+            },
+            "Coche de muchos acabados" : {
+              "count" : 5,
+              "precisionRecall" : {
+                "success" : {
+                  "precision" : 1,
+                  "recall" : 1
+                }
+              }
+            },
+            "Cuchara de Almeja" : {
+              "count" : 3,
+              "precisionRecall" : {
+                "success" : {
+                  "precision" : 1,
+                  "recall" : 1
+                }
+              }
+            },
+            "Cuchara de Volteo" : {
+              "count" : 5,
+              "precisionRecall" : {
+                "success" : {
+                  "precision" : 1,
+                  "recall" : 1
+                }
+              }
+            },
+            "Cuchara de fundición " : {
+              "count" : 10,
+              "precisionRecall" : {
+                "success" : {
+                  "precision" : 1,
+                  "recall" : 1
+                }
+              }
+            },
+            "Elevador de Carga" : {
+              "count" : 4,
+              "precisionRecall" : {
+                "success" : {
+                  "precision" : 1,
+                  "recall" : 1
+                }
+              }
+            },
+            "Estrella 04" : {
+              "count" : 3,
+              "precisionRecall" : {
+                "success" : {
+                  "precision" : 1,
+                  "recall" : 1
+                }
+              }
+            },
+            "Maqueta Modelo Horno 3" : {
+              "count" : 14,
+              "precisionRecall" : {
+                "success" : {
+                  "precision" : 1,
+                  "recall" : 1
+                }
+              }
+            },
+            "Molde de fundición " : {
+              "count" : 4,
+              "precisionRecall" : {
+                "success" : {
+                  "precision" : 1,
+                  "recall" : 1
+                }
+              }
+            },
+            "Molino Mezclador" : {
+              "count" : 6,
+              "precisionRecall" : {
+                "success" : {
+                  "precision" : 1,
+                  "recall" : 1
+                }
+              }
+            },
+            "Museo Horno 3" : {
+              "count" : 3,
+              "precisionRecall" : {
+                "success" : {
+                  "precision" : 1,
+                  "recall" : 1
+                }
+              }
+            },
+            "Reloj Checador" : {
+              "count" : 5,
+              "precisionRecall" : {
+                "success" : {
+                  "precision" : 1,
+                  "recall" : 1
+                }
+              }
+            },
+            "Rueda Inglesa" : {
+              "count" : 5,
+              "precisionRecall" : {
+                "success" : {
+                  "precision" : 1,
+                  "recall" : 1
+                }
+              }
+            },
+            "Televisor Antiguo" : {
+              "count" : 4,
+              "precisionRecall" : {
+                "success" : {
+                  "precision" : 1,
+                  "recall" : 1
+                }
+              }
+            },
+            "Tenazas de Garra Industrial" : {
+              "count" : 4,
+              "precisionRecall" : {
+                "success" : {
+                  "precision" : 1,
+                  "recall" : 1
+                }
+              }
+            },
+            "Vagón Torpedo" : {
+              "count" : 4,
+              "precisionRecall" : {
+                "success" : {
+                  "precision" : 1,
+                  "recall" : 1
+                }
+              }
+            }
+          }
+        }
+      },
+      "id" : "85895fe5-40b6-4059-b441-7e9489a703ff"
+    },
+    "validationEvaluationEntity" : {
+      "analysedDataType" : "auto",
+      "createdDate" : "2026-04-01T09:34:10Z",
+      "dataResult" : {
+        "createdDate" : "2026-04-06T08:17:30Z"
+      },
+      "evaluationResult" : {
+        "imageClassifier" : {
+          "accuracy" : 1,
+          "confusionMatrix" : [
+            {
+              "actual" : "Chevrolet 3100",
+              "count" : 2,
+              "expected" : "Chevrolet 3100"
+            },
+            {
+              "actual" : "Cuchara de fundición ",
+              "count" : 1,
+              "expected" : "Cuchara de fundición "
+            },
+            {
+              "actual" : "Maqueta Modelo Horno 3",
+              "count" : 2,
+              "expected" : "Maqueta Modelo Horno 3"
+            },
+            {
+              "actual" : "Molde de fundición ",
+              "count" : 1,
+              "expected" : "Molde de fundición "
+            },
+            {
+              "actual" : "Molino Mezclador",
+              "count" : 1,
+              "expected" : "Molino Mezclador"
+            },
+            {
+              "actual" : "Televisor Antiguo",
+              "count" : 1,
+              "expected" : "Televisor Antiguo"
+            },
+            {
+              "actual" : "Vagón Torpedo",
+              "count" : 1,
+              "expected" : "Vagón Torpedo"
+            }
+          ],
+          "statsByLabel" : {
+            "Chevrolet 3100" : {
+              "count" : 2,
+              "precisionRecall" : {
+                "success" : {
+                  "precision" : 1,
+                  "recall" : 1
+                }
+              }
+            },
+            "Cuchara de fundición " : {
+              "count" : 1,
+              "precisionRecall" : {
+                "success" : {
+                  "precision" : 1,
+                  "recall" : 1
+                }
+              }
+            },
+            "Maqueta Modelo Horno 3" : {
+              "count" : 2,
+              "precisionRecall" : {
+                "success" : {
+                  "precision" : 1,
+                  "recall" : 1
+                }
+              }
+            },
+            "Molde de fundición " : {
+              "count" : 1,
+              "precisionRecall" : {
+                "success" : {
+                  "precision" : 1,
+                  "recall" : 1
+                }
+              }
+            },
+            "Molino Mezclador" : {
+              "count" : 1,
+              "precisionRecall" : {
+                "success" : {
+                  "precision" : 1,
+                  "recall" : 1
+                }
+              }
+            },
+            "Televisor Antiguo" : {
+              "count" : 1,
+              "precisionRecall" : {
+                "success" : {
+                  "precision" : 1,
+                  "recall" : 1
+                }
+              }
+            },
+            "Vagón Torpedo" : {
+              "count" : 1,
+              "precisionRecall" : {
+                "success" : {
+                  "precision" : 1,
+                  "recall" : 1
+                }
+              }
+            }
+          }
+        }
+      },
+      "id" : "f1fb20ae-8016-4861-90a5-fd013bec4643"
+    }
+  },
+  "evaluationEntity" : {
+    "analysedDataType" : "none",
+    "dataResult" : {
+
+    },
+    "id" : "938f6e8e-1171-4123-8a28-f50c89cf3a12"
+  },
+  "evaluationState" : "uninitialized",
+  "id" : "39D749FE-AE84-4EC0-9B6B-16EB800412E6",
+  "modelEntity" : {
+    "createdDate" : "2026-04-01T09:34:10Z",
+    "experimentID" : "39D749FE-AE84-4EC0-9B6B-16EB800412E6",
+    "id" : "3AB6E1AE-FA3A-467C-BF44-5ACA9E2C44CE",
+    "modelURL" : "Models/ClassificationObjectsH3%201.mlmodel",
+    "modifiedDate" : "2026-04-01T09:34:10Z",
+    "title" : "",
+    "version" : "1.0"
+  },
+  "modifiedDate" : "2026-04-06T08:17:49Z",
+  "preferredFilename" : "ClassificationObjectsH3 1",
+  "settingEntity" : {
+    "algorithmType" : "maxEnt",
+    "augmentations" : [
+
+    ],
+    "featureExtractorType" : "scenePrintV1",
+    "featureNames" : [
+
+    ],
+    "handActionClassifierAugmentations" : [
+
+    ],
+    "handPoseClassifierAugmentations" : [
+
+    ],
+    "harVideoAugmentations" : 0,
+    "iterationCount" : 25,
+    "seedType" : "default",
+    "styleTransferAlgorithmType" : "image",
+    "taskType" : "imageClassifier",
+    "transferLearningEmbeddingType" : "dynamic"
+  },
+  "snapshotRole" : {
+    "withoutSnapshots" : 0
+  },
+  "state" : "trained",
+  "title" : "ClassificationObjectsH3 1",
+  "trainingEntity" : {
+    "analysedDataType" : "datasource",
+    "checkpointMetrics" : {
+      "25" : {
+        "createdDate" : "2026-04-06T08:17:49Z",
+        "iteration" : 25,
+        "metrics" : {
+
+        }
+      }
+    },
+    "dataResult" : {
+      "classesCount" : 18,
+      "createdDate" : "2026-04-06T08:17:30Z",
+      "dataAnalysis" : {
+        "classifierAnalysis" : {
+          "details" : [
+            "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20fundicio%CC%81n%20/IMG_4983.HEIC",
+            [
+              "Cuchara de fundición "
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5103.HEIC",
+            [
+              "Chevrolet 3100"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Tenazas%20de%20Garra%20Industrial/IMG_5047.HEIC",
+            [
+              "Tenazas de Garra Industrial"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Elevador%20de%20Carga/IMG_5109.HEIC",
+            [
+              "Elevador de Carga"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Reloj%20Checador/IMG_5030.HEIC",
+            [
+              "Reloj Checador"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Molino%20Mezclador/IMG_5064.HEIC",
+            [
+              "Molino Mezclador"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Acropora%20Pimienta/IMG_4991.HEIC",
+            [
+              "Acropora Pimienta"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Coche%20de%20muchos%20acabados/IMG_5011.HEIC",
+            [
+              "Coche de muchos acabados"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5072.HEIC",
+            [
+              "Maqueta Modelo Horno 3"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Acropora%20Pimienta/IMG_4992.HEIC",
+            [
+              "Acropora Pimienta"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Vago%CC%81n%20Torpedo/IMG_5054.HEIC",
+            [
+              "Vagón Torpedo"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Estrella%2004/IMG_4986.HEIC",
+            [
+              "Estrella 04"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5095.HEIC",
+            [
+              "Chevrolet 3100"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Televisor%20Antiguo/IMG_5039.HEIC",
+            [
+              "Televisor Antiguo"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5084.HEIC",
+            [
+              "Maqueta Modelo Horno 3"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5104.HEIC",
+            [
+              "Chevrolet 3100"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Acropora%20Pimienta/IMG_4990.HEIC",
+            [
+              "Acropora Pimienta"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5099.HEIC",
+            [
+              "Chevrolet 3100"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Carretilla%20de%20fundicio%CC%81n%20/IMG_5061.HEIC",
+            [
+              "Carretilla de fundición "
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Elevador%20de%20Carga/IMG_5110.HEIC",
+            [
+              "Elevador de Carga"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5094.HEIC",
+            [
+              "Chevrolet 3100"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Reloj%20Checador/IMG_5033.HEIC",
+            [
+              "Reloj Checador"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5080.HEIC",
+            [
+              "Maqueta Modelo Horno 3"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20fundicio%CC%81n%20/IMG_4979.HEIC",
+            [
+              "Cuchara de fundición "
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Vago%CC%81n%20Torpedo/IMG_5057.HEIC",
+            [
+              "Vagón Torpedo"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Elevador%20de%20Carga/IMG_5108.HEIC",
+            [
+              "Elevador de Carga"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5086.HEIC",
+            [
+              "Maqueta Modelo Horno 3"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Rueda%20Inglesa/IMG_5051.HEIC",
+            [
+              "Rueda Inglesa"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Elevador%20de%20Carga/IMG_5107.HEIC",
+            [
+              "Elevador de Carga"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Televisor%20Antiguo/IMG_5040.HEIC",
+            [
+              "Televisor Antiguo"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5097.HEIC",
+            [
+              "Chevrolet 3100"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Molde%20de%20fundicio%CC%81n%20/IMG_5035.HEIC",
+            [
+              "Molde de fundición "
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Molino%20Mezclador/IMG_5065.HEIC",
+            [
+              "Molino Mezclador"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20fundicio%CC%81n%20/IMG_4975.HEIC",
+            [
+              "Cuchara de fundición "
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20fundicio%CC%81n%20/IMG_4978.HEIC",
+            [
+              "Cuchara de fundición "
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Televisor%20Antiguo/IMG_5041.HEIC",
+            [
+              "Televisor Antiguo"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5098.HEIC",
+            [
+              "Chevrolet 3100"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Tenazas%20de%20Garra%20Industrial/IMG_5046.HEIC",
+            [
+              "Tenazas de Garra Industrial"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5102.HEIC",
+            [
+              "Chevrolet 3100"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Museo%20Horno%203/IMG_5114.HEIC",
+            [
+              "Museo Horno 3"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Rueda%20Inglesa/IMG_5052.HEIC",
+            [
+              "Rueda Inglesa"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Museo%20Horno%203/IMG_5112.HEIC",
+            [
+              "Museo Horno 3"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Rueda%20Inglesa/IMG_5049.HEIC",
+            [
+              "Rueda Inglesa"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20fundicio%CC%81n%20/IMG_4980.HEIC",
+            [
+              "Cuchara de fundición "
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5083.HEIC",
+            [
+              "Maqueta Modelo Horno 3"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5101.HEIC",
+            [
+              "Chevrolet 3100"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5093.HEIC",
+            [
+              "Chevrolet 3100"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5082.HEIC",
+            [
+              "Maqueta Modelo Horno 3"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Molde%20de%20fundicio%CC%81n%20/IMG_5037.HEIC",
+            [
+              "Molde de fundición "
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Vago%CC%81n%20Torpedo/IMG_5053.HEIC",
+            [
+              "Vagón Torpedo"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Rueda%20Inglesa/IMG_5048.HEIC",
+            [
+              "Rueda Inglesa"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20fundicio%CC%81n%20/IMG_4981.HEIC",
+            [
+              "Cuchara de fundición "
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Vago%CC%81n%20Torpedo/IMG_5055.HEIC",
+            [
+              "Vagón Torpedo"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Tenazas%20de%20Garra%20Industrial/IMG_5045.HEIC",
+            [
+              "Tenazas de Garra Industrial"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Tenazas%20de%20Garra%20Industrial/IMG_5044.HEIC",
+            [
+              "Tenazas de Garra Industrial"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Molino%20Mezclador/IMG_5066.HEIC",
+            [
+              "Molino Mezclador"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Carretilla%20de%20fundicio%CC%81n%20/IMG_5060.HEIC",
+            [
+              "Carretilla de fundición "
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5078.HEIC",
+            [
+              "Maqueta Modelo Horno 3"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Coche%20de%20muchos%20acabados/IMG_5008.HEIC",
+            [
+              "Coche de muchos acabados"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Televisor%20Antiguo/IMG_5042.HEIC",
+            [
+              "Televisor Antiguo"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20Almeja/IMG_5001.HEIC",
+            [
+              "Cuchara de Almeja"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Molde%20de%20fundicio%CC%81n%20/IMG_5034.HEIC",
+            [
+              "Molde de fundición "
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20Volteo/IMG_5026.HEIC",
+            [
+              "Cuchara de Volteo"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5100.HEIC",
+            [
+              "Chevrolet 3100"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Carretilla%20de%20fundicio%CC%81n%20/IMG_5062.HEIC",
+            [
+              "Carretilla de fundición "
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20fundicio%CC%81n%20/IMG_4977.HEIC",
+            [
+              "Cuchara de fundición "
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Molino%20Mezclador/IMG_5067.HEIC",
+            [
+              "Molino Mezclador"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5091.HEIC",
+            [
+              "Chevrolet 3100"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5081.HEIC",
+            [
+              "Maqueta Modelo Horno 3"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5076.HEIC",
+            [
+              "Maqueta Modelo Horno 3"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20fundicio%CC%81n%20/IMG_4984.HEIC",
+            [
+              "Cuchara de fundición "
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5079.HEIC",
+            [
+              "Maqueta Modelo Horno 3"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5085.HEIC",
+            [
+              "Maqueta Modelo Horno 3"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5106.HEIC",
+            [
+              "Chevrolet 3100"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Molde%20de%20fundicio%CC%81n%20/IMG_5036.HEIC",
+            [
+              "Molde de fundición "
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Molino%20Mezclador/IMG_5068.HEIC",
+            [
+              "Molino Mezclador"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Estrella%2004/IMG_4988.HEIC",
+            [
+              "Estrella 04"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Coche%20de%20muchos%20acabados/IMG_5012.HEIC",
+            [
+              "Coche de muchos acabados"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5092.HEIC",
+            [
+              "Chevrolet 3100"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Estrella%2004/IMG_4987.HEIC",
+            [
+              "Estrella 04"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Molino%20Mezclador/IMG_5063.HEIC",
+            [
+              "Molino Mezclador"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Molde%20de%20fundicio%CC%81n%20/IMG_5038.HEIC",
+            [
+              "Molde de fundición "
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Vago%CC%81n%20Torpedo/IMG_5056.HEIC",
+            [
+              "Vagón Torpedo"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20Volteo/IMG_5028.HEIC",
+            [
+              "Cuchara de Volteo"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Chevrolet%203100/IMG_5105.HEIC",
+            [
+              "Chevrolet 3100"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5071.HEIC",
+            [
+              "Maqueta Modelo Horno 3"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Reloj%20Checador/IMG_5032.HEIC",
+            [
+              "Reloj Checador"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Televisor%20Antiguo/IMG_5043.HEIC",
+            [
+              "Televisor Antiguo"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20Volteo/IMG_5027.HEIC",
+            [
+              "Cuchara de Volteo"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Reloj%20Checador/IMG_5031.HEIC",
+            [
+              "Reloj Checador"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5077.HEIC",
+            [
+              "Maqueta Modelo Horno 3"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Museo%20Horno%203/IMG_5113.HEIC",
+            [
+              "Museo Horno 3"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5073.HEIC",
+            [
+              "Maqueta Modelo Horno 3"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Coche%20de%20muchos%20acabados/IMG_5009.HEIC",
+            [
+              "Coche de muchos acabados"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5075.HEIC",
+            [
+              "Maqueta Modelo Horno 3"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Rueda%20Inglesa/IMG_5050.HEIC",
+            [
+              "Rueda Inglesa"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20Volteo/IMG_5024.HEIC",
+            [
+              "Cuchara de Volteo"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Molino%20Mezclador/IMG_5069.HEIC",
+            [
+              "Molino Mezclador"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20Almeja/IMG_5002.HEIC",
+            [
+              "Cuchara de Almeja"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20fundicio%CC%81n%20/IMG_4976.HEIC",
+            [
+              "Cuchara de fundición "
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20Almeja/IMG_4998.HEIC",
+            [
+              "Cuchara de Almeja"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20fundicio%CC%81n%20/IMG_4985.HEIC",
+            [
+              "Cuchara de fundición "
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Carretilla%20de%20fundicio%CC%81n%20/IMG_5058.HEIC",
+            [
+              "Carretilla de fundición "
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20fundicio%CC%81n%20/IMG_4982.HEIC",
+            [
+              "Cuchara de fundición "
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Coche%20de%20muchos%20acabados/IMG_5010.HEIC",
+            [
+              "Coche de muchos acabados"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Maqueta%20Modelo%20Horno%203/IMG_5074.HEIC",
+            [
+              "Maqueta Modelo Horno 3"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Carretilla%20de%20fundicio%CC%81n%20/IMG_5059.HEIC",
+            [
+              "Carretilla de fundición "
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Reloj%20Checador/IMG_5029.HEIC",
+            [
+              "Reloj Checador"
+            ],
+            "file:///Users/sroa/Downloads/ObjetosH3/Cuchara%20de%20Volteo/IMG_5025.HEIC",
+            [
+              "Cuchara de Volteo"
+            ]
+          ],
+          "labelStats" : {
+            "Acropora Pimienta" : 3,
+            "Carretilla de fundición " : 5,
+            "Chevrolet 3100" : 15,
+            "Coche de muchos acabados" : 5,
+            "Cuchara de Almeja" : 3,
+            "Cuchara de Volteo" : 5,
+            "Cuchara de fundición " : 11,
+            "Elevador de Carga" : 4,
+            "Estrella 04" : 3,
+            "Maqueta Modelo Horno 3" : 16,
+            "Molde de fundición " : 5,
+            "Molino Mezclador" : 7,
+            "Museo Horno 3" : 3,
+            "Reloj Checador" : 5,
+            "Rueda Inglesa" : 5,
+            "Televisor Antiguo" : 5,
+            "Tenazas de Garra Industrial" : 4,
+            "Vagón Torpedo" : 5
+          }
+        },
+        "issues" : [
+          {
+            "description" : "18 classes found, including Maqueta Modelo Horno 3, Chevrolet 3100, Cuchara de fundición ",
+            "severity" : "debug"
+          },
+          {
+            "description" : "109 images found, automatically creating validation set",
+            "severity" : "good"
+          },
+          {
+            "description" : "Smallest class is \"Estrella 04\" with 3 images",
+            "severity" : "debug"
+          },
+          {
+            "description" : "Largest class is \"Maqueta Modelo Horno 3\" with 16 images",
+            "severity" : "debug"
+          }
+        ],
+        "objectDetectorAnalysis" : {
+          "details" : {
+
+          }
+        },
+        "summary" : {
+          "canUseValidation" : 1,
+          "classCount" : 18,
+          "sampleCount" : 109
+        }
+      },
+      "dataSourceID" : "490A5709-06F7-4F2F-AB04-7A8D1A3EA316",
+      "dataURL" : "file:///Users/sroa/Downloads/ObjetosH3/",
+      "itemsCount" : 109
+    },
+    "dataSourceID" : "490A5709-06F7-4F2F-AB04-7A8D1A3EA316",
+    "featureExtractionCheckpointMayBeAvailable" : false,
+    "finishTime" : "2026-04-06T08:17:49Z",
+    "progress" : [
+      {
+        "count" : 0,
+        "currentRowIndex" : 0,
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : false,
+        "tableIndex" : 0
+      },
+      {
+        "count" : 1,
+        "currentRowIndex" : 0,
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : false,
+        "tableIndex" : 1
+      },
+      {
+        "count" : 2,
+        "currentRowIndex" : 0,
+        "icTrainingColumnHeader" : {
+          "elapsedTime" : 0.09231197834014893,
+          "hasValidation" : true,
+          "iterationCount" : 2,
+          "trainingAccuracy" : 0.27,
+          "validationAccuracy" : 0.4444444444444444
+        },
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : false,
+        "tableIndex" : 0
+      },
+      {
+        "count" : 3,
+        "currentRowIndex" : 0,
+        "icTrainingColumnHeader" : {
+          "elapsedTime" : 0.12189102172851562,
+          "hasValidation" : true,
+          "iterationCount" : 3,
+          "trainingAccuracy" : 0.28,
+          "validationAccuracy" : 0.4444444444444444
+        },
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : false,
+        "tableIndex" : 0
+      },
+      {
+        "count" : 4,
+        "currentRowIndex" : 0,
+        "icTrainingColumnHeader" : {
+          "elapsedTime" : 0.1877509355545044,
+          "hasValidation" : true,
+          "iterationCount" : 4,
+          "trainingAccuracy" : 0.5,
+          "validationAccuracy" : 0.5555555555555556
+        },
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : false,
+        "tableIndex" : 0
+      },
+      {
+        "count" : 5,
+        "currentRowIndex" : 0,
+        "icTrainingColumnHeader" : {
+          "elapsedTime" : 0.221221923828125,
+          "hasValidation" : true,
+          "iterationCount" : 5,
+          "trainingAccuracy" : 0.61,
+          "validationAccuracy" : 0.6666666666666666
+        },
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : false,
+        "tableIndex" : 0
+      },
+      {
+        "count" : 10,
+        "currentRowIndex" : 0,
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : false,
+        "tableIndex" : 0
+      },
+      {
+        "count" : 11,
+        "currentRowIndex" : 0,
+        "icTrainingColumnHeader" : {
+          "elapsedTime" : 0.4771089553833008,
+          "hasValidation" : true,
+          "iterationCount" : 11,
+          "trainingAccuracy" : 1,
+          "validationAccuracy" : 1
+        },
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : false,
+        "tableIndex" : 0
+      },
+      {
+        "count" : 15,
+        "currentRowIndex" : 0,
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : false,
+        "tableIndex" : 0
+      },
+      {
+        "count" : 18,
+        "currentRowIndex" : 0,
+        "icTrainingColumnHeader" : {
+          "elapsedTime" : 0.7874679565429688,
+          "hasValidation" : true,
+          "iterationCount" : 18,
+          "trainingAccuracy" : 1,
+          "validationAccuracy" : 1
+        },
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : true,
+        "tableIndex" : 0
+      },
+      {
+        "count" : 20,
+        "currentRowIndex" : 0,
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : false,
+        "tableIndex" : 0
+      },
+      {
+        "count" : 25,
+        "currentRowIndex" : 0,
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : true,
+        "tableIndex" : 1
+      },
+      {
+        "count" : 30,
+        "currentRowIndex" : 0,
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : false,
+        "tableIndex" : 0
+      },
+      {
+        "count" : 35,
+        "currentRowIndex" : 0,
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : false,
+        "tableIndex" : 0
+      },
+      {
+        "count" : 40,
+        "currentRowIndex" : 0,
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : false,
+        "tableIndex" : 0
+      },
+      {
+        "count" : 45,
+        "currentRowIndex" : 0,
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : false,
+        "tableIndex" : 0
+      },
+      {
+        "count" : 50,
+        "currentRowIndex" : 0,
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : false,
+        "tableIndex" : 0
+      },
+      {
+        "count" : 55,
+        "currentRowIndex" : 0,
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : false,
+        "tableIndex" : 0
+      },
+      {
+        "count" : 60,
+        "currentRowIndex" : 0,
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : false,
+        "tableIndex" : 0
+      },
+      {
+        "count" : 65,
+        "currentRowIndex" : 0,
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : false,
+        "tableIndex" : 0
+      },
+      {
+        "count" : 70,
+        "currentRowIndex" : 0,
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : false,
+        "tableIndex" : 0
+      },
+      {
+        "count" : 75,
+        "currentRowIndex" : 0,
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : false,
+        "tableIndex" : 0
+      },
+      {
+        "count" : 80,
+        "currentRowIndex" : 0,
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : false,
+        "tableIndex" : 0
+      },
+      {
+        "count" : 85,
+        "currentRowIndex" : 0,
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : false,
+        "tableIndex" : 0
+      },
+      {
+        "count" : 90,
+        "currentRowIndex" : 0,
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : false,
+        "tableIndex" : 0
+      },
+      {
+        "count" : 95,
+        "currentRowIndex" : 0,
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : false,
+        "tableIndex" : 0
+      },
+      {
+        "count" : 100,
+        "currentRowIndex" : 0,
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : false,
+        "tableIndex" : 0
+      },
+      {
+        "count" : 105,
+        "currentRowIndex" : 0,
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : false,
+        "tableIndex" : 0
+      },
+      {
+        "count" : 109,
+        "currentRowIndex" : 0,
+        "isLast" : false,
+        "percentComplete" : 0,
+        "tableDone" : true,
+        "tableIndex" : 0
+      }
+    ],
+    "resumableCheckpoint" : {
+      "checkpointURL" : "file:///Users/sroa/Library/Caches/com.apple.dt.createml/projects/D4E4DF20-C61F-4E8C-8B06-DA9018A927D60566143e845b53fd09b3a4a300e321de93f61742/sessions/checkpoint.sessions/39D749FE-AE84-4EC0-9B6B-16EB800412E6/training-000000025.checkpoint",
+      "createdDate" : "2026-04-06T08:17:49Z",
+      "iteration" : 25
+    },
+    "resumableCheckpointURL" : "Checkpoints/39D749FE-AE84-4EC0-9B6B-16EB800412E6.ClassificationObjectsH31.checkpoint",
+    "snapshottableCheckpointModelURL" : "Checkpoints/39D749FE-AE84-4EC0-9B6B-16EB800412E6.ClassificationObjectsH31.checkpoint/training-000000025.checkpoint.model/checkpointModel.mlmodel",
+    "snapshottableCheckpoints" : {
+      "25" : {
+        "createdDate" : "2026-04-06T08:17:49Z",
+        "iteration" : 25,
+        "modelURL" : "file:///Users/sroa/Library/Caches/com.apple.dt.createml/projects/D4E4DF20-C61F-4E8C-8B06-DA9018A927D60566143e845b53fd09b3a4a300e321de93f61742/sessions/checkpoint.sessions/39D749FE-AE84-4EC0-9B6B-16EB800412E6/training-000000025.checkpoint.model/checkpointModel.mlmodel"
+      }
+    },
+    "startTime" : "2026-04-06T08:17:45Z",
+    "trainingAccuracy" : 1,
+    "trainingResults" : {
+      "imageClassifier" : {
+        "accuracy" : 1,
+        "confusionMatrix" : [
+          {
+            "actual" : "Acropora Pimienta",
+            "count" : 3,
+            "expected" : "Acropora Pimienta"
+          },
+          {
+            "actual" : "Carretilla de fundición ",
+            "count" : 5,
+            "expected" : "Carretilla de fundición "
+          },
+          {
+            "actual" : "Chevrolet 3100",
+            "count" : 13,
+            "expected" : "Chevrolet 3100"
+          },
+          {
+            "actual" : "Coche de muchos acabados",
+            "count" : 5,
+            "expected" : "Coche de muchos acabados"
+          },
+          {
+            "actual" : "Cuchara de Almeja",
+            "count" : 3,
+            "expected" : "Cuchara de Almeja"
+          },
+          {
+            "actual" : "Cuchara de Volteo",
+            "count" : 5,
+            "expected" : "Cuchara de Volteo"
+          },
+          {
+            "actual" : "Cuchara de fundición ",
+            "count" : 10,
+            "expected" : "Cuchara de fundición "
+          },
+          {
+            "actual" : "Elevador de Carga",
+            "count" : 4,
+            "expected" : "Elevador de Carga"
+          },
+          {
+            "actual" : "Estrella 04",
+            "count" : 3,
+            "expected" : "Estrella 04"
+          },
+          {
+            "actual" : "Maqueta Modelo Horno 3",
+            "count" : 14,
+            "expected" : "Maqueta Modelo Horno 3"
+          },
+          {
+            "actual" : "Molde de fundición ",
+            "count" : 4,
+            "expected" : "Molde de fundición "
+          },
+          {
+            "actual" : "Molino Mezclador",
+            "count" : 6,
+            "expected" : "Molino Mezclador"
+          },
+          {
+            "actual" : "Museo Horno 3",
+            "count" : 3,
+            "expected" : "Museo Horno 3"
+          },
+          {
+            "actual" : "Reloj Checador",
+            "count" : 5,
+            "expected" : "Reloj Checador"
+          },
+          {
+            "actual" : "Rueda Inglesa",
+            "count" : 5,
+            "expected" : "Rueda Inglesa"
+          },
+          {
+            "actual" : "Televisor Antiguo",
+            "count" : 4,
+            "expected" : "Televisor Antiguo"
+          },
+          {
+            "actual" : "Tenazas de Garra Industrial",
+            "count" : 4,
+            "expected" : "Tenazas de Garra Industrial"
+          },
+          {
+            "actual" : "Vagón Torpedo",
+            "count" : 4,
+            "expected" : "Vagón Torpedo"
+          }
+        ],
+        "statsByLabel" : {
+          "Acropora Pimienta" : {
+            "count" : 3,
+            "precisionRecall" : {
+              "success" : {
+                "precision" : 1,
+                "recall" : 1
+              }
+            }
+          },
+          "Carretilla de fundición " : {
+            "count" : 5,
+            "precisionRecall" : {
+              "success" : {
+                "precision" : 1,
+                "recall" : 1
+              }
+            }
+          },
+          "Chevrolet 3100" : {
+            "count" : 13,
+            "precisionRecall" : {
+              "success" : {
+                "precision" : 1,
+                "recall" : 1
+              }
+            }
+          },
+          "Coche de muchos acabados" : {
+            "count" : 5,
+            "precisionRecall" : {
+              "success" : {
+                "precision" : 1,
+                "recall" : 1
+              }
+            }
+          },
+          "Cuchara de Almeja" : {
+            "count" : 3,
+            "precisionRecall" : {
+              "success" : {
+                "precision" : 1,
+                "recall" : 1
+              }
+            }
+          },
+          "Cuchara de Volteo" : {
+            "count" : 5,
+            "precisionRecall" : {
+              "success" : {
+                "precision" : 1,
+                "recall" : 1
+              }
+            }
+          },
+          "Cuchara de fundición " : {
+            "count" : 10,
+            "precisionRecall" : {
+              "success" : {
+                "precision" : 1,
+                "recall" : 1
+              }
+            }
+          },
+          "Elevador de Carga" : {
+            "count" : 4,
+            "precisionRecall" : {
+              "success" : {
+                "precision" : 1,
+                "recall" : 1
+              }
+            }
+          },
+          "Estrella 04" : {
+            "count" : 3,
+            "precisionRecall" : {
+              "success" : {
+                "precision" : 1,
+                "recall" : 1
+              }
+            }
+          },
+          "Maqueta Modelo Horno 3" : {
+            "count" : 14,
+            "precisionRecall" : {
+              "success" : {
+                "precision" : 1,
+                "recall" : 1
+              }
+            }
+          },
+          "Molde de fundición " : {
+            "count" : 4,
+            "precisionRecall" : {
+              "success" : {
+                "precision" : 1,
+                "recall" : 1
+              }
+            }
+          },
+          "Molino Mezclador" : {
+            "count" : 6,
+            "precisionRecall" : {
+              "success" : {
+                "precision" : 1,
+                "recall" : 1
+              }
+            }
+          },
+          "Museo Horno 3" : {
+            "count" : 3,
+            "precisionRecall" : {
+              "success" : {
+                "precision" : 1,
+                "recall" : 1
+              }
+            }
+          },
+          "Reloj Checador" : {
+            "count" : 5,
+            "precisionRecall" : {
+              "success" : {
+                "precision" : 1,
+                "recall" : 1
+              }
+            }
+          },
+          "Rueda Inglesa" : {
+            "count" : 5,
+            "precisionRecall" : {
+              "success" : {
+                "precision" : 1,
+                "recall" : 1
+              }
+            }
+          },
+          "Televisor Antiguo" : {
+            "count" : 4,
+            "precisionRecall" : {
+              "success" : {
+                "precision" : 1,
+                "recall" : 1
+              }
+            }
+          },
+          "Tenazas de Garra Industrial" : {
+            "count" : 4,
+            "precisionRecall" : {
+              "success" : {
+                "precision" : 1,
+                "recall" : 1
+              }
+            }
+          },
+          "Vagón Torpedo" : {
+            "count" : 4,
+            "precisionRecall" : {
+              "success" : {
+                "precision" : 1,
+                "recall" : 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "validationAccuracy" : 1,
+    "validationResults" : {
+      "imageClassifier" : {
+        "accuracy" : 1,
+        "confusionMatrix" : [
+          {
+            "actual" : "Chevrolet 3100",
+            "count" : 2,
+            "expected" : "Chevrolet 3100"
+          },
+          {
+            "actual" : "Cuchara de fundición ",
+            "count" : 1,
+            "expected" : "Cuchara de fundición "
+          },
+          {
+            "actual" : "Maqueta Modelo Horno 3",
+            "count" : 2,
+            "expected" : "Maqueta Modelo Horno 3"
+          },
+          {
+            "actual" : "Molde de fundición ",
+            "count" : 1,
+            "expected" : "Molde de fundición "
+          },
+          {
+            "actual" : "Molino Mezclador",
+            "count" : 1,
+            "expected" : "Molino Mezclador"
+          },
+          {
+            "actual" : "Televisor Antiguo",
+            "count" : 1,
+            "expected" : "Televisor Antiguo"
+          },
+          {
+            "actual" : "Vagón Torpedo",
+            "count" : 1,
+            "expected" : "Vagón Torpedo"
+          }
+        ],
+        "statsByLabel" : {
+          "Chevrolet 3100" : {
+            "count" : 2,
+            "precisionRecall" : {
+              "success" : {
+                "precision" : 1,
+                "recall" : 1
+              }
+            }
+          },
+          "Cuchara de fundición " : {
+            "count" : 1,
+            "precisionRecall" : {
+              "success" : {
+                "precision" : 1,
+                "recall" : 1
+              }
+            }
+          },
+          "Maqueta Modelo Horno 3" : {
+            "count" : 2,
+            "precisionRecall" : {
+              "success" : {
+                "precision" : 1,
+                "recall" : 1
+              }
+            }
+          },
+          "Molde de fundición " : {
+            "count" : 1,
+            "precisionRecall" : {
+              "success" : {
+                "precision" : 1,
+                "recall" : 1
+              }
+            }
+          },
+          "Molino Mezclador" : {
+            "count" : 1,
+            "precisionRecall" : {
+              "success" : {
+                "precision" : 1,
+                "recall" : 1
+              }
+            }
+          },
+          "Televisor Antiguo" : {
+            "count" : 1,
+            "precisionRecall" : {
+              "success" : {
+                "precision" : 1,
+                "recall" : 1
+              }
+            }
+          },
+          "Vagón Torpedo" : {
+            "count" : 1,
+            "precisionRecall" : {
+              "success" : {
+                "precision" : 1,
+                "recall" : 1
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "validationEntity" : {
+    "analysedDataType" : "auto",
+    "dataResult" : {
+      "createdDate" : "2026-04-06T08:17:30Z"
+    },
+    "splitOptions" : {
+      "strategy" : {
+        "automatic" : {
+
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
