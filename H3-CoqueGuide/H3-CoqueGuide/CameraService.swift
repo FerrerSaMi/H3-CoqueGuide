@@ -50,6 +50,7 @@ final class CameraService: NSObject, ObservableObject {
     private let photoOutput  = AVCapturePhotoOutput()
     private var isConfigured = false
     private var photoContinuation: CheckedContinuation<UIImage, Error>?
+    private var visionModel: VNCoreMLModel?
 
     // MARK: - Public API
 
@@ -171,17 +172,19 @@ final class CameraService: NSObject, ObservableObject {
                 }
 
                 do {
-                    let modelURL = Bundle.main.url(forResource: "ClassificationObjectsH3", withExtension: "mlmodelc")
-                        ?? Bundle.main.url(forResource: "ClassificationObjectsH3", withExtension: "mlmodel")
+                    if self.visionModel == nil {
+                        let modelURL = Bundle.main.url(forResource: "ClassificationObjectsH3", withExtension: "mlmodelc")
+                            ?? Bundle.main.url(forResource: "ClassificationObjectsH3", withExtension: "mlmodel")
 
-                    guard let modelURL else {
-                        throw CameraError.classificationFailed("No se encontró el modelo ML.")
+                        guard let modelURL else {
+                            throw CameraError.classificationFailed("No se encontró el modelo ML.")
+                        }
+
+                        let mlModel = try MLModel(contentsOf: modelURL)
+                        self.visionModel = try VNCoreMLModel(for: mlModel)
                     }
 
-                    let mlModel = try MLModel(contentsOf: modelURL)
-                    let visionModel = try VNCoreMLModel(for: mlModel)
-
-                    let request = VNCoreMLRequest(model: visionModel) { request, error in
+                    let request = VNCoreMLRequest(model: self.visionModel!) { request, error in
                         if let error {
                             continuation.resume(throwing: CameraError.classificationFailed(error.localizedDescription))
                             return
@@ -195,12 +198,31 @@ final class CameraService: NSObject, ObservableObject {
                     }
                     request.imageCropAndScaleOption = .centerCrop
 
-                    let handler = VNImageRequestHandler(cgImage: cgImage, orientation: .up)
+                    let orientation = VNImageOrientation(uiImageOrientation: image.imageOrientation)
+                    let handler = VNImageRequestHandler(cgImage: cgImage, orientation: orientation)
                     try handler.perform([request])
                 } catch {
                     continuation.resume(throwing: error)
                 }
             }
+        }
+    }
+}
+
+// MARK: - VNImageOrientation Extension
+
+extension VNImageOrientation {
+    init(uiImageOrientation: UIImage.Orientation) {
+        switch uiImageOrientation {
+        case .up: self = .up
+        case .down: self = .down
+        case .left: self = .left
+        case .right: self = .right
+        case .upMirrored: self = .upMirrored
+        case .downMirrored: self = .downMirrored
+        case .leftMirrored: self = .leftMirrored
+        case .rightMirrored: self = .rightMirrored
+        @unknown default: self = .up
         }
     }
 }
