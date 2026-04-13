@@ -30,6 +30,9 @@ final class CGViewModel: ObservableObject {
     /// Número de sugerencias sin leer (mostrado como badge en el botón flotante).
     @Published private(set) var pendingSuggestionsCount: Int = 0
 
+    /// Mensaje pendiente que se enviará automáticamente al abrir el panel.
+    @Published var pendingMessage: String? = nil
+
     // MARK: - Dependencias
 
     private let aiService: CGAIServiceProtocol
@@ -65,6 +68,12 @@ final class CGViewModel: ObservableObject {
         if messages.isEmpty {
             showWelcomeMessage()
         }
+    }
+
+    /// Abre el panel y envía un mensaje automáticamente una vez que esté listo.
+    func openPanelWithMessage(_ message: String) {
+        pendingMessage = message
+        openPanel()
     }
 
     /// Envía un mensaje del usuario y solicita respuesta al servicio de IA.

@@ -428,7 +428,9 @@ struct LandingView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 14) {
                     ForEach(Attraction.museumAttractions) { attraction in
-                        AttractionCard(attraction: attraction)
+                        AttractionCard(attraction: attraction) {
+                            coqueGuideVM.openPanelWithMessage(attraction.message)
+                        }
                     }
                 }
                 .padding(.horizontal, 20)
@@ -444,43 +446,50 @@ struct Attraction: Identifiable {
     let subtitle: String
     let icon: String
     let color: Color
+    let message: String
 
     static let museumAttractions: [Attraction] = [
         Attraction(
             name: "Horno Alto",
             subtitle: "Paseo por el icono del museo",
             icon: "flame.fill",
-            color: Color(red: 0.93, green: 0.45, blue: 0.15)
+            color: Color(red: 0.93, green: 0.45, blue: 0.15),
+            message: "Cuéntame sobre el Horno Alto del museo"
         ),
         Attraction(
             name: "Galeria del Acero",
             subtitle: "Historia de la siderurgia",
             icon: "building.columns.fill",
-            color: Color(red: 0.30, green: 0.50, blue: 0.75)
+            color: Color(red: 0.30, green: 0.50, blue: 0.75),
+            message: "¿Qué puedo encontrar en la Galería del Acero?"
         ),
         Attraction(
             name: "Show del Acero",
             subtitle: "Espectaculo en vivo",
             icon: "sparkles",
-            color: Color(red: 0.85, green: 0.30, blue: 0.30)
+            color: Color(red: 0.85, green: 0.30, blue: 0.30),
+            message: "¿De qué trata el Show del Acero?"
         ),
         Attraction(
             name: "Laboratorio",
             subtitle: "Ciencia interactiva",
             icon: "flask.fill",
-            color: Color(red: 0.35, green: 0.70, blue: 0.50)
+            color: Color(red: 0.35, green: 0.70, blue: 0.50),
+            message: "¿Qué actividades hay en el Laboratorio?"
         ),
         Attraction(
             name: "Mirador",
             subtitle: "Vista panoramica",
             icon: "binoculars.fill",
-            color: Color(red: 0.55, green: 0.45, blue: 0.75)
+            color: Color(red: 0.55, green: 0.45, blue: 0.75),
+            message: "Cuéntame sobre el Mirador del museo"
         ),
         Attraction(
             name: "Aceria",
             subtitle: "Proceso del acero",
             icon: "gearshape.2.fill",
-            color: Color(red: 0.50, green: 0.55, blue: 0.60)
+            color: Color(red: 0.50, green: 0.55, blue: 0.60),
+            message: "¿Qué puedo aprender en la Acería?"
         ),
     ]
 }
@@ -488,37 +497,41 @@ struct Attraction: Identifiable {
 // MARK: - Tarjeta de Atraccion
 struct AttractionCard: View {
     let attraction: Attraction
+    let onTap: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            // Icono
-            ZStack {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(attraction.color.opacity(0.15))
-                    .frame(width: 44, height: 44)
+        Button(action: onTap) {
+            VStack(alignment: .leading, spacing: 10) {
+                // Icono
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(attraction.color.opacity(0.15))
+                        .frame(width: 44, height: 44)
 
-                Image(systemName: attraction.icon)
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundStyle(attraction.color)
+                    Image(systemName: attraction.icon)
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(attraction.color)
+                }
+
+                // Textos
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(attraction.name)
+                        .font(.subheadline)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.primary)
+
+                    Text(attraction.subtitle)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                }
             }
-
-            // Textos
-            VStack(alignment: .leading, spacing: 3) {
-                Text(attraction.name)
-                    .font(.subheadline)
-                    .fontWeight(.bold)
-                    .foregroundStyle(.primary)
-
-                Text(attraction.subtitle)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
-            }
+            .frame(width: 140)
+            .padding(14)
+            .background(Color(.secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
-        .frame(width: 140)
-        .padding(14)
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .buttonStyle(.plain)
     }
 }
 
