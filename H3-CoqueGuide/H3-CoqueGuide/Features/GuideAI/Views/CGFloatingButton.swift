@@ -151,7 +151,9 @@ struct CGOverlayModifier: ViewModifier {
                 .padding(.bottom, 88)
                 .animation(.spring(response: 0.45, dampingFraction: 0.75), value: viewModel.activeSuggestion?.id)
             }
-            .sheet(isPresented: $showPanel) {
+            .sheet(isPresented: $showPanel, onDismiss: {
+                viewModel.isPanelOpen = false
+            }) {
                 CGPanelView(viewModel: viewModel)
                     .environment(navigator)
                     .presentationDragIndicator(.visible)

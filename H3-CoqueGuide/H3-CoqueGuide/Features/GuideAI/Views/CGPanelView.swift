@@ -51,6 +51,14 @@ struct CGPanelView: View {
             }
             .navigationBarHidden(true)
             .background(Color(.systemGroupedBackground))
+            .onAppear {
+                if let pending = viewModel.pendingMessage {
+                    viewModel.pendingMessage = nil
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                        viewModel.sendMessage(pending)
+                    }
+                }
+            }
         }
     }
 
