@@ -42,16 +42,19 @@ struct SurveyAIService {
 
         let instructions = """
         You are an assistant that creates a visitor profile summary for a museum experience at Horno3.
-        Write exactly one paragraph.
+        Write exactly one complete paragraph of at least 100 words.
         Make it natural, attractive, and useful.
         Mention the type of experience they would probably enjoy, the pace of visit, and the kind of guidance style they prefer.
+        Use every item of visitor data to describe the user and their interests.
+        Prefer longer, complete content over short replies; do not shorten the response to save tokens.
+        End the paragraph with a complete sentence and a final period.
         \(languageInstruction)
         """
 
         let session = LanguageModelSession(instructions: instructions)
 
         let prompt = """
-        Create one paragraph describing this museum visitor.
+        Create one complete paragraph describing this museum visitor using all available data.
 
         Visitor data:
         - Gender: \(profile.gender)
@@ -64,6 +67,10 @@ struct SurveyAIService {
         - Preferred Coque personality: \(profile.coquePersonality)
 
         Rules:
+        - Use every visitor data field to build a complete personality and preference description.
+        - Do not stop mid-sentence or cut off any values.
+        - Write at least 100 words.
+        - Prefer longer, complete content over short replies; do not shorten the response to save tokens.
         - If the selected preference was "Recomendado", use the resolved attraction style naturally.
         - If the visitor selected "No" for a specific attraction, do not invent one.
         - Keep the result to one paragraph only.
@@ -90,7 +97,7 @@ struct SurveyAIService {
                     "role": "user",
                     "parts": [[
                         "text": """
-                        Create one paragraph describing this museum visitor.
+                        Create one complete paragraph describing this museum visitor using all available data.
 
                         Visitor data:
                         - Gender: \(profile.gender)
@@ -103,6 +110,10 @@ struct SurveyAIService {
                         - Preferred Coque personality: \(profile.coquePersonality)
 
                         Rules:
+                        - Use every visitor data field to build a complete personality and preference description.
+                        - Do not stop mid-sentence or cut off any values.
+                        - End the paragraph with a complete sentence and a final period.
+                        - Write a paragraph of at least 40 words.
                         - If the selected preference was "Recomendado", use the resolved attraction style naturally.
                         - If the visitor selected "No" for a specific attraction, do not invent one.
                         - Keep the result to one paragraph only.
@@ -113,8 +124,8 @@ struct SurveyAIService {
                 ]
             ],
             "generationConfig": [
-                "temperature": 0.7,
-                "maxOutputTokens": 220
+                "temperature": 0.2,
+                "maxOutputTokens": 700
             ]
         ]
 
