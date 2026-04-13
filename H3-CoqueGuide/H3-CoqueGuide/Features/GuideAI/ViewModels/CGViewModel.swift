@@ -67,8 +67,14 @@ final class CGViewModel: ObservableObject {
 
     /// Abre el panel y envía un mensaje automáticamente una vez que esté listo.
     func openPanelWithMessage(_ message: String) {
+        // Si el panel ya estaba cerrado, necesitamos reabrirlo
+        isPanelOpen = false
         pendingMessage = message
-        openPanel()
+
+        // Pequeño delay para que SwiftUI detecte el cambio false → true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+            self?.openPanel()
+        }
     }
 
     /// Envía un mensaje del usuario y solicita respuesta al servicio de IA.

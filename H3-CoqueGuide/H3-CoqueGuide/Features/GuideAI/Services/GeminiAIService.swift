@@ -74,7 +74,7 @@ final class GeminiAIService: CGAIServiceProtocol {
             ],
             "contents": conversationHistory,
             "generationConfig": [
-                "maxOutputTokens": 512,
+                "maxOutputTokens": 1024,
                 "temperature": 0.7
             ]
         ]
