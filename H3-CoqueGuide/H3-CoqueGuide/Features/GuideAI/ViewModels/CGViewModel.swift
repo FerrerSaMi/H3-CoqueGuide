@@ -55,10 +55,15 @@ final class CGViewModel: ObservableObject {
 
     /// Abre el panel de conversación.
     /// Muestra el mensaje de bienvenida si la conversación está vacía.
-    func openPanel() {
+    func openPanel(initialMessage: String? = nil) {
         isPanelOpen = true
         activeSuggestion = nil
         pendingSuggestionsCount = 0
+
+        if let initialMessage {
+            sendMessage(initialMessage)
+            return
+        }
 
         if messages.isEmpty {
             showWelcomeMessage()

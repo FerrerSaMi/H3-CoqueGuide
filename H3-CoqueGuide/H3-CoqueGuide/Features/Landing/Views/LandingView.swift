@@ -95,6 +95,7 @@ struct LandingView: View {
                 }
             }
         }
+        .environmentObject(coqueGuideVM)
         .preferredColorScheme(isDarkModeEnabled ? .dark : .light)
     }
     
