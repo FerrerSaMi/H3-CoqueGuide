@@ -10,6 +10,7 @@ import Combine
 import UIKit
 import Vision
 import CoreML
+import ImageIO
 
 // MARK: - Errors
 
@@ -198,7 +199,7 @@ final class CameraService: NSObject, ObservableObject {
                     }
                     request.imageCropAndScaleOption = .centerCrop
 
-                    let orientation = VNImageOrientation(uiImageOrientation: image.imageOrientation)
+                    let orientation = CGImagePropertyOrientation(uiImageOrientation: image.imageOrientation)
                     let handler = VNImageRequestHandler(cgImage: cgImage, orientation: orientation)
                     try handler.perform([request])
                 } catch {
@@ -209,9 +210,9 @@ final class CameraService: NSObject, ObservableObject {
     }
 }
 
-// MARK: - VNImageOrientation Extension
+// MARK: - CGImagePropertyOrientation Extension
 
-extension VNImageOrientation {
+extension CGImagePropertyOrientation {
     init(uiImageOrientation: UIImage.Orientation) {
         switch uiImageOrientation {
         case .up: self = .up
