@@ -125,7 +125,7 @@ struct SurveyAIService {
             ],
             "generationConfig": [
                 "temperature": 0.2,
-                "maxOutputTokens": 700
+                "maxOutputTokens": 2048
             ]
         ]
 
