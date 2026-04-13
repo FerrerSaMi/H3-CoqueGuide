@@ -9,7 +9,9 @@ import SwiftData
 
 struct SurveyView: View {
     @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject private var coqueGuideVM: CGViewModel
     @StateObject private var viewModel = SurveyViewModel()
+    @State private var showSurveyRequiredAlert = false
 
     private let optionColors: [Color] = [
         Color.orange.opacity(0.95),
@@ -41,6 +43,14 @@ struct SurveyView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task {
             viewModel.loadExistingProfile(from: modelContext)
+        }
+        .alert("Primero cuéntame de ti ✨", isPresented: $showSurveyRequiredAlert) {
+            Button("Hacer encuesta") {
+                viewModel.startSurvey()
+            }
+            Button("Después", role: .cancel) { }
+        } message: {
+            Text("Contesta la encuesta para que Coque pueda crear una ruta personalizada con tus gustos, tu tiempo y tu estilo de visita.")
         }
     }
 }
@@ -227,16 +237,24 @@ private extension SurveyView {
                 .padding(.horizontal, 20)
 
                 Button {
+                    handleSendToCoque()
                 } label: {
-                    Text("Mandársela a Coque")
-                        .fontWeight(.semibold)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(
-                            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                .fill(Color.orange)
-                        )
+                    VStack(spacing: 6) {
+                        Text("Mandársela a Coque")
+                            .fontWeight(.semibold)
+
+                        Text(viewModel.canSendToCoque ? "Abrirá el chat con tu ruta personalizada" : "Primero necesitas contestar la encuesta")
+                            .font(.footnote)
+                            .multilineTextAlignment(.center)
+                            .opacity(0.92)
+                    }
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .fill(viewModel.canSendToCoque ? Color.orange : Color.orange.opacity(0.65))
+                    )
                 }
                 .buttonStyle(.plain)
                 .padding(.horizontal, 20)
@@ -307,6 +325,17 @@ private extension SurveyView {
         .shadow(color: .orange.opacity(0.16), radius: 8, x: 0, y: 5)
         .scaleEffect(isSelected ? 0.98 : 1.0)
         .animation(.easeInOut(duration: 0.18), value: isSelected)
+        
+    }
+    
+    func handleSendToCoque() {
+        guard viewModel.canSendToCoque else {
+            showSurveyRequiredAlert = true
+            return
+        }
+
+        let prompt = viewModel.makeCoqueRoutePrompt()
+        coqueGuideVM.openPanel(initialMessage: prompt)
     }
 }
 

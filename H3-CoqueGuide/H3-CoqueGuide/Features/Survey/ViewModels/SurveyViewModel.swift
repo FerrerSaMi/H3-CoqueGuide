@@ -39,6 +39,21 @@ final class SurveyViewModel: ObservableObject {
     var progressText: String {
         "Pregunta \(currentStepIndex + 1) de \(steps.count)"
     }
+    
+    var hasCompletedSurvey: Bool {
+        !gender.isEmpty &&
+        !ageRange.isEmpty &&
+        !plannedTime.isEmpty &&
+        !attractionPreference.isEmpty &&
+        !specificAttraction.isEmpty &&
+        !preferredLanguage.isEmpty &&
+        !selectedCoquePersonality.isEmpty &&
+        !aiDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    var canSendToCoque: Bool {
+        hasCompletedSurvey && !isLoading
+    }
 
     func loadExistingProfile(from context: ModelContext) {
         let descriptor = FetchDescriptor<ExcursionUserProfile>(
@@ -188,6 +203,66 @@ final class SurveyViewModel: ObservableObject {
         }
     }
 
+    func makeCoqueRoutePrompt() -> String {
+        let cleanDescription = aiDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+        let specificGoal = specificAttraction == "No"
+            ? "No viene por una atracción específica; puedes priorizar lo más valioso según su perfil."
+            : "Quiere incluir especialmente: \(specificAttraction)."
+
+        return """
+        Quiero que actúes como Coque, el guía del museo Horno3, y me armes una ruta personalizada basada en la encuesta del visitante.
+
+        Debes responder únicamente en \(routeOutputLanguageInstruction()).
+
+        Quiero un guion narrado por ti, como si fueras acompañando al visitante durante el recorrido.
+
+        Usa este formato:
+
+        **PRIMERO: [nombre del lugar o experiencia]**
+        Explica qué verá o hará aquí, cuánto tiempo aproximado puede estar, y por qué este punto conecta con sus gustos.
+
+        **LUEGO: [nombre del lugar o experiencia]**
+        Continúa la ruta con el mismo estilo.
+
+        **DESPUÉS: [nombre del lugar o experiencia]**
+        Sigue la secuencia del recorrido como si fueras su guía.
+
+        Puedes agregar más paradas si el tiempo lo permite. Termina con una despedida breve.
+
+        Perfil del visitante:
+        - Género: \(gender)
+        - Edad: \(ageRange)
+        - Tiempo disponible: \(plannedTime)
+        - Preferencia principal: \(attractionPreference)
+        - Preferencia final: \(resolvedAttractionPreference)
+        - Idioma preferido: \(preferredLanguage)
+        - Personalidad de Coque: \(selectedCoquePersonality)
+        - Objetivo específico: \(specificGoal)
+
+        Descripción generada:
+        \(cleanDescription)
+        """
+    }
+
+    private func routeOutputLanguageInstruction() -> String {
+        switch preferredLanguage {
+        case "Español":
+            return "español"
+        case "English":
+            return "English"
+        case "Français":
+            return "français"
+        case "Português":
+            return "português"
+        case "Korean":
+            return "Korean"
+        case "Arabic":
+            return "Arabic"
+        default:
+            return "español"
+        }
+    }
+    
     private func validateAnswers() -> Bool {
         if gender.isEmpty {
             errorMessage = "Falta seleccionar el género."
