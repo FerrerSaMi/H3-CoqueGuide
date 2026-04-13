@@ -52,12 +52,7 @@ struct CGPanelView: View {
             .navigationBarHidden(true)
             .background(Color(.systemGroupedBackground))
             .onAppear {
-                if let pending = viewModel.pendingMessage {
-                    viewModel.pendingMessage = nil
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                        viewModel.sendMessage(pending)
-                    }
-                }
+                processPendingMessage()
             }
         }
     }
@@ -115,6 +110,19 @@ struct CGPanelView: View {
         guard !text.isEmpty else { return }
         inputText = ""
         viewModel.sendMessage(text)
+    }
+
+    /// Procesa el mensaje pendiente de las tarjetas de atracciones.
+    /// Usa un delay mayor si es la primera apertura (hay welcome message con 0.35s de delay).
+    private func processPendingMessage() {
+        guard let pending = viewModel.pendingMessage else { return }
+        viewModel.pendingMessage = nil
+
+        // Si hay pocos mensajes, es primera apertura → esperar más por el welcome
+        let delay: Double = viewModel.messages.count <= 1 ? 1.0 : 0.5
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+            viewModel.sendMessage(pending)
+        }
     }
 }
 
