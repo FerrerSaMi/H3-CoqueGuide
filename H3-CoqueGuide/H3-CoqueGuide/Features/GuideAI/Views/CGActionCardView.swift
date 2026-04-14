@@ -69,7 +69,7 @@ struct CGActionCardView: View {
             RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .stroke(Color.accentColor.opacity(0.3), lineWidth: 1)
         )
-        .frame(maxWidth: UIScreen.main.bounds.width * 0.70)
+        .frame(maxWidth: 280)
     }
 
     private func handleAction() {

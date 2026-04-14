@@ -1,6 +1,6 @@
 //
-//  CamScanner.swift
-//  
+//  CamScannerView.swift
+//  H3-CoqueGuide
 //
 //  Created by Angel De Jesus Sanchez Figueroa on 15/03/26.
 //
@@ -16,25 +16,19 @@ struct CamScannerView: View {
     // MARK: Environment
     @Environment(\.dismiss) private var dismiss
 
-    // MARK: Services
-    @StateObject private var camera = CameraService()
-    @StateObject private var speech = SpeechService()
-
-    // MARK: State
-    @State private var detectedObject: MuseumObject? = nil
-    @State private var isPanelExpanded = false
-    @State private var isScanning = false
+    // MARK: ViewModel
+    @StateObject private var viewModel = CamScannerViewModel()
 
     // MARK: - Body
 
     var body: some View {
         ZStack {
             // 1. Live camera feed
-            CameraPreview(session: camera.session)
+            CameraPreview(session: viewModel.camera.session)
                 .ignoresSafeArea()
 
             // 2. Scanner frame overlay
-            ScannerFrameOverlay(isScanning: isScanning)
+            ScannerFrameOverlay(isScanning: viewModel.isScanning)
                 .ignoresSafeArea()
                 .allowsHitTesting(false)
 
@@ -46,16 +40,15 @@ struct CamScannerView: View {
             }
 
             // 4. Permission denied
-            if camera.isPermissionDenied {
+            if viewModel.camera.isPermissionDenied {
                 permissionDeniedOverlay
             }
         }
         .onAppear {
-            camera.startSession()
+            viewModel.onAppear()
         }
         .onDisappear {
-            camera.stopSession()
-            speech.stop()           
+            viewModel.onDisappear()
         }
         .ignoresSafeArea(edges: .bottom)
         .preferredColorScheme(.dark)
@@ -73,6 +66,7 @@ struct CamScannerView: View {
                     .background(.black.opacity(0.45))
                     .clipShape(Circle())
             }
+            .accessibilityLabel("Cerrar escáner")
 
             Spacer()
 
@@ -88,15 +82,18 @@ struct CamScannerView: View {
 
             Spacer()
 
-            // Placeholder flash (Sprint 2)
-            Button { } label: {
-                Image(systemName: "bolt.slash.fill")
+            // Flash toggle
+            Button {
+                viewModel.toggleFlash()
+            } label: {
+                Image(systemName: viewModel.isFlashOn ? "bolt.fill" : "bolt.slash.fill")
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(viewModel.isFlashOn ? .yellow : .white)
                     .frame(width: 38, height: 38)
                     .background(.black.opacity(0.45))
                     .clipShape(Circle())
             }
+            .accessibilityLabel(viewModel.isFlashOn ? "Apagar flash" : "Encender flash")
         }
         .padding(.horizontal, 20)
         .padding(.top, 16)
@@ -107,7 +104,7 @@ struct CamScannerView: View {
 
     private var bottomArea: some View {
         VStack(spacing: 0) {
-            if let obj = detectedObject {
+            if let obj = viewModel.detectedObject {
                 infoPanel(obj)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                     .padding(.bottom, 4)
@@ -115,7 +112,7 @@ struct CamScannerView: View {
             shutterButton
                 .padding(.bottom, 16)
         }
-        .animation(.spring(response: 0.45, dampingFraction: 0.82), value: detectedObject != nil)
+        .animation(.spring(response: 0.45, dampingFraction: 0.82), value: viewModel.detectedObject != nil)
     }
 
     // MARK: - Info Panel
@@ -142,6 +139,7 @@ struct CamScannerView: View {
                     .padding(.vertical, 4)
                     .background(.orange)
                     .clipShape(Capsule())
+                    .accessibilityLabel("Confianza: \(Int(obj.confidence * 100)) por ciento")
             }
 
             // Descripción
@@ -149,25 +147,26 @@ struct CamScannerView: View {
                 .font(.system(size: 14))
                 .foregroundStyle(.white.opacity(0.88))
                 .lineSpacing(3)
-                .lineLimit(isPanelExpanded ? nil : 3)
+                .lineLimit(viewModel.isPanelExpanded ? nil : 3)
 
             // Barra de progreso de lectura (visible solo mientras habla)
-            if speech.isSpeaking {
-                SpeechProgressBar(progress: speech.progress)
+            if viewModel.speech.isSpeaking {
+                SpeechProgressBar(progress: viewModel.speech.progress)
                     .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                    .accessibilityLabel("Progreso de lectura")
+                    .accessibilityValue("\(Int(viewModel.speech.progress * 100)) por ciento")
             }
 
             // Acciones
             HStack(spacing: 12) {
                 Button {
-                    withAnimation(.easeInOut(duration: 0.25)) {
-                        isPanelExpanded.toggle()
-                    }
+                    viewModel.togglePanelExpanded()
                 } label: {
-                    Text(isPanelExpanded ? "Ver menos" : "Ver más")
+                    Text(viewModel.isPanelExpanded ? "Ver menos" : "Ver más")
                         .font(.system(size: 13, weight: .medium))
                         .foregroundStyle(.orange)
                 }
+                .accessibilityHint("Expande o contrae la descripción del objeto")
 
                 Spacer()
 
@@ -181,57 +180,60 @@ struct CamScannerView: View {
                 .strokeBorder(.white.opacity(0.12), lineWidth: 1)
         )
         .padding(.horizontal, 20)
-        .animation(.easeInOut(duration: 0.2), value: speech.isSpeaking)
+        .animation(.easeInOut(duration: 0.2), value: viewModel.speech.isSpeaking)
     }
 
     // MARK: - Speak Button
 
     private func speakButton(for obj: MuseumObject) -> some View {
         Button {
-            speech.toggle(obj.description)
+            viewModel.toggleSpeech(for: obj.description)
         } label: {
             HStack(spacing: 6) {
                 ZStack {
                     Image(systemName: "speaker.wave.2.fill")
-                        .opacity(speech.isSpeaking ? 0 : 1)
+                        .opacity(viewModel.speech.isSpeaking ? 0 : 1)
                     Image(systemName: "stop.fill")
-                        .opacity(speech.isSpeaking ? 1 : 0)
+                        .opacity(viewModel.speech.isSpeaking ? 1 : 0)
                 }
                 .font(.system(size: 13))
-                .animation(.easeInOut(duration: 0.18), value: speech.isSpeaking)
+                .animation(.easeInOut(duration: 0.18), value: viewModel.speech.isSpeaking)
 
-                Text(speech.isSpeaking ? "Detener" : "Escuchar")
+                Text(viewModel.speech.isSpeaking ? "Detener" : "Escuchar")
                     .font(.system(size: 13, weight: .semibold))
             }
             .foregroundStyle(.black)
             .padding(.horizontal, 14)
             .padding(.vertical, 8)
-            .background(speech.isSpeaking ? Color.white : Color.orange)
+            .background(viewModel.speech.isSpeaking ? Color.white : Color.orange)
             .clipShape(Capsule())
-            .animation(.easeInOut(duration: 0.2), value: speech.isSpeaking)
+            .animation(.easeInOut(duration: 0.2), value: viewModel.speech.isSpeaking)
         }
+        .accessibilityLabel(viewModel.speech.isSpeaking ? "Detener lectura" : "Escuchar descripción")
     }
 
     // MARK: - Shutter Button
 
     private var shutterButton: some View {
-        Button { triggerScan() } label: {
+        Button { viewModel.triggerScan() } label: {
             ZStack {
                 Circle()
                     .strokeBorder(.white.opacity(0.5), lineWidth: 3)
                     .frame(width: 72, height: 72)
                 Circle()
-                    .fill(isScanning ? Color.orange : Color.white)
+                    .fill(viewModel.isScanning ? Color.orange : Color.white)
                     .frame(width: 58, height: 58)
-                    .scaleEffect(isScanning ? 0.88 : 1.0)
-                    .animation(.easeInOut(duration: 0.35), value: isScanning)
+                    .scaleEffect(viewModel.isScanning ? 0.88 : 1.0)
+                    .animation(.easeInOut(duration: 0.35), value: viewModel.isScanning)
 
-                if isScanning {
+                if viewModel.isScanning {
                     ProgressView().tint(.black).scaleEffect(1.1)
                 }
             }
         }
-        .disabled(isScanning)
+        .disabled(viewModel.isScanning)
+        .accessibilityLabel("Escanear objeto")
+        .accessibilityHint("Toma una foto y clasifica el objeto detectado")
     }
 
     // MARK: - Permission Denied Overlay
@@ -264,6 +266,7 @@ struct CamScannerView: View {
                     .background(Color.orange)
                     .clipShape(Capsule())
             }
+            .accessibilityHint("Abre la configuración del sistema para activar el permiso de cámara")
         }
         .padding(28)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24))
@@ -272,43 +275,6 @@ struct CamScannerView: View {
                 .strokeBorder(.white.opacity(0.15), lineWidth: 1)
         )
         .padding(32)
-    }
-
-    // MARK: - Scan Logic
-
-    private func triggerScan() {
-        guard !isScanning else { return }
-        speech.stop()           // Cancela cualquier audio al re-escanear
-        detectedObject  = nil
-        isPanelExpanded = false
-        isScanning = true
-
-        Task {
-            do {
-                let result = try await camera.classifyCurrentFrame()
-                await MainActor.run {
-                    withAnimation {
-                        detectedObject = MuseumObject(
-                            title: result.label,
-                            era: "Etiquetado ML",
-                            description: "No hay información adicional disponible en la base de datos. Esta etiqueta proviene del modelo de clasificación.",
-                            confidence: result.confidence
-                        )
-                    }
-                    isScanning = false
-                }
-            } catch {
-                await MainActor.run {
-                    isScanning = false
-                    detectedObject = MuseumObject(
-                        title: "Desconocido",
-                        era: "Etiquetado ML",
-                        description: "No se pudo obtener una etiqueta del modelo. Intenta escanear nuevamente.",
-                        confidence: 0.0
-                    )
-                }
-            }
-        }
     }
 }
 
@@ -331,23 +297,6 @@ private struct SpeechProgressBar: View {
         }
         .frame(height: 3)
     }
-}
-
-// MARK: - Museum Object Model
-
-struct MuseumObject: Identifiable, Equatable {
-    let id          = UUID()
-    let title       : String
-    let era         : String
-    let description : String
-    let confidence  : Double
-
-    static let sampleHorno3 = MuseumObject(
-        title: "Horno 3",
-        era: "CA. 1950s",
-        description: "El Horno 3 fue uno de los altos hornos centrales de la Fundidora de Fierro y Acero de Monterrey. Operó durante décadas como corazón siderúrgico del noreste de México, transformando mineral de hierro en acero mediante temperaturas superiores a los 1 500 °C. Su cierre en 1986 marcó el fin de una era industrial y el inicio de su reconversión en parque cultural.",
-        confidence: 0.94
-    )
 }
 
 // MARK: - Preview

@@ -52,6 +52,8 @@ struct CGFloatingButton: View {
             }
         }
         .buttonStyle(CGPressableButtonStyle())
+        .accessibilityLabel("CoqueGuide")
+        .accessibilityHint("Abre el asistente del museo")
         // Rebota al aparecer una nueva sugerencia proactiva
         .onChange(of: viewModel.activeSuggestion?.id) { _, newID in
             guard newID != nil else { return }
@@ -121,7 +123,6 @@ struct CGOverlayModifier: ViewModifier {
     @ObservedObject var viewModel: CGViewModel
     let hideFloatingButton: Bool
     let navigator: CGNavigationCoordinator
-    @State private var showPanel: Bool = false
 
     func body(content: Content) -> some View {
         content
@@ -143,7 +144,6 @@ struct CGOverlayModifier: ViewModifier {
                     if !hideFloatingButton {
                         CGFloatingButton(viewModel: viewModel) {
                             viewModel.openPanel()
-                            showPanel = true
                         }
                     }
                 }
@@ -151,16 +151,14 @@ struct CGOverlayModifier: ViewModifier {
                 .padding(.bottom, 88)
                 .animation(.spring(response: 0.45, dampingFraction: 0.75), value: viewModel.activeSuggestion?.id)
             }
-            .sheet(isPresented: $showPanel, onDismiss: {
-                viewModel.isPanelOpen = false
-            }) {
+            .sheet(isPresented: Binding(
+                get: { viewModel.isPanelOpen },
+                set: { viewModel.isPanelOpen = $0 }
+            )) {
                 CGPanelView(viewModel: viewModel)
                     .environment(navigator)
                     .presentationDragIndicator(.visible)
                     .presentationDetents([.medium, .large])
-            }
-            .onChange(of: viewModel.isPanelOpen) { _, isOpen in
-                showPanel = isOpen
             }
     }
 }

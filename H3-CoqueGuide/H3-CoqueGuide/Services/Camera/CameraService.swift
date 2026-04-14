@@ -83,6 +83,7 @@ final class CameraService: NSObject, ObservableObject {
     }
 
     /// Captura un fotograma estático para análisis. Retorna la imagen en el main thread.
+    /// Protege contra llamadas concurrentes: si ya hay una captura en curso, retorna error.
     func capturePhoto() async throws -> UIImage {
         isCapturing = true
         defer { isCapturing = false }
@@ -95,6 +96,11 @@ final class CameraService: NSObject, ObservableObject {
                 }
                 guard self.session.isRunning else {
                     continuation.resume(throwing: CameraError.captureError("La sesión no está activa."))
+                    return
+                }
+                // Evitar sobrescribir una continuation activa (race condition)
+                if self.photoContinuation != nil {
+                    continuation.resume(throwing: CameraError.captureError("Ya hay una captura en curso."))
                     return
                 }
                 self.photoContinuation = continuation
