@@ -84,6 +84,20 @@ struct LandingView: View {
             }
             .tint(Color.accentColor)
             .environment(navigationCoordinator)
+            .navigationDestination(for: CGAppDestination.self) { destination in
+                switch destination {
+                case .map:
+                    MapaView()
+                case .events:
+                    PlaceholderView(title: "Atracciones")
+                case .scanning:
+                    CamScannerView()
+                case .survey:
+                    SurveyView()
+                case .chatbot:
+                    PlaceholderView(title: "Chatbot")
+                }
+            }
             .coqueGuideOverlay(viewModel: coqueGuideVM, hideFloatingButton: selectedTab == 0, navigator: navigationCoordinator)
             .onChange(of: navigationCoordinator.pendingDestination) { _, newValue in
                 if let destination = newValue {
@@ -101,8 +115,7 @@ struct LandingView: View {
     
     // MARK: - Tab Content: Atracciones
     private var atraccionesTab: some View {
-        NavigationStack(path: $navigationPath) {
-            GeometryReader { proxy in
+        GeometryReader { proxy in
                 let isLandscape = proxy.size.width > proxy.size.height
 
                 ScrollView {
@@ -206,21 +219,6 @@ struct LandingView: View {
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
-            .navigationDestination(for: CGAppDestination.self) { destination in
-                switch destination {
-                case .map:
-                    MapaView()
-                case .events:
-                    PlaceholderView(title: "Atracciones")
-                case .scanning:
-                    CamScannerView()
-                case .survey:
-                    SurveyView()
-                case .chatbot:
-                    PlaceholderView(title: "Chatbot")
-                }
-            }
-        }
     }
 
     private var coqueGuideInviteCard: some View {

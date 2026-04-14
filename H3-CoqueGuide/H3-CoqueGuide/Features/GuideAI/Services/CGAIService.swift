@@ -464,11 +464,3 @@ final class CGSimulatedAIService: CGAIServiceProtocol {
         ].randomElement()!
     }
 }
-
-// MARK: - Extensión auxiliar privada
-
-private extension String {
-    func containsAny(_ keywords: [String]) -> Bool {
-        keywords.contains { self.contains($0) }
-    }
-}

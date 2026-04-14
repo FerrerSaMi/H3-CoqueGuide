@@ -8,6 +8,6 @@ struct H3_CoqueGuideApp: App {
         WindowGroup {
             LandingView()
         }
-        .modelContainer(for: [CoqueGuide.self, ExcursionUserProfile.self])
+        .modelContainer(for: [ExcursionUserProfile.self])
     }
 }
