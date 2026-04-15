@@ -56,7 +56,7 @@ struct CGMessageBubble: View {
                             radius: 4, x: 0, y: 2
                         )
                         .frame(
-                            maxWidth: UIScreen.main.bounds.width * 0.70,
+                            maxWidth: 280,
                             alignment: isUser ? .trailing : .leading
                         )
                 }

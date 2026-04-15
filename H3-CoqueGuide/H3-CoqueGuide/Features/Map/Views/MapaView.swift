@@ -175,9 +175,9 @@ struct MapaView: View {
     }
 
     private var zoomGesture: some Gesture {
-        MagnificationGesture()
+        MagnifyGesture()
             .onChanged { value in
-                let nextScale = lastMapScale * value
+                let nextScale = lastMapScale * value.magnification
                 mapScale = min(max(nextScale, 1.0), 4.0)
             }
             .onEnded { _ in

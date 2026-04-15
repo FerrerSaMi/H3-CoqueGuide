@@ -3,33 +3,27 @@
 //  CoqueGuideAI
 //
 //  Integración con la API de Google Gemini 2.5 Flash para respuestas reales.
+//  Usa GeminiHTTPClient compartido para las llamadas HTTP.
 //
 
 import Foundation
 
 final class GeminiAIService: CGAIServiceProtocol {
 
-    private let apiKey: String
-    private let model = "gemini-2.5-flash"
+    private let client: GeminiHTTPClient
     private var conversationHistory: [[String: Any]] = []
     private let maxHistoryMessages = 20 // 10 pares user/assistant
 
     // MARK: - Inicialización
 
     init(apiKey: String) {
-        self.apiKey = apiKey
+        self.client = GeminiHTTPClient(apiKey: apiKey)
     }
 
     /// Intenta crear el servicio leyendo la API key desde Secrets.plist.
     /// Retorna `nil` si no se encuentra la key.
     static func fromSecretsPlist() -> GeminiAIService? {
-        guard let path = Bundle.main.path(forResource: "Secrets", ofType: "plist"),
-              let dict = NSDictionary(contentsOfFile: path),
-              let key = dict["GEMINI_API_KEY"] as? String,
-              !key.isEmpty,
-              key != "TU_API_KEY_AQUI"
-        else { return nil }
-
+        guard let key = GeminiHTTPClient.loadAPIKey() else { return nil }
         return GeminiAIService(apiKey: key)
     }
 
@@ -43,7 +37,12 @@ final class GeminiAIService: CGAIServiceProtocol {
         trimHistory()
 
         do {
-            let responseText = try await callGeminiAPI()
+            let responseText = try await client.generateContent(
+                contents: conversationHistory,
+                systemInstruction: Self.systemPrompt(),
+                maxOutputTokens: 1024,
+                temperature: 0.7
+            )
             conversationHistory.append([
                 "role": "model",
                 "parts": [["text": responseText]]
@@ -54,55 +53,6 @@ final class GeminiAIService: CGAIServiceProtocol {
             conversationHistory.removeLast() // Quita el mensaje del usuario si falló
             return .textOnly("Lo siento, no pude procesar tu pregunta en este momento. Intenta de nuevo o usa las acciones rápidas. 🔄")
         }
-    }
-
-    // MARK: - Llamada a la API
-
-    private func callGeminiAPI() async throws -> String {
-        let urlString = "https://generativelanguage.googleapis.com/v1beta/models/\(model):generateContent?key=\(apiKey)"
-        guard let url = URL(string: urlString) else {
-            throw GeminiAPIError.invalidURL
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        let body: [String: Any] = [
-            "system_instruction": [
-                "parts": [["text": Self.systemPrompt()]]
-            ],
-            "contents": conversationHistory,
-            "generationConfig": [
-                "maxOutputTokens": 1024,
-                "temperature": 0.7
-            ]
-        ]
-
-        request.httpBody = try JSONSerialization.data(withJSONObject: body)
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode) else {
-            let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
-            let body = String(data: data, encoding: .utf8) ?? "no body"
-            print("❌ Gemini HTTP \(statusCode): \(body)")
-            throw GeminiAPIError.badResponse
-        }
-
-        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let candidates = json["candidates"] as? [[String: Any]],
-              let firstCandidate = candidates.first,
-              let content = firstCandidate["content"] as? [String: Any],
-              let parts = content["parts"] as? [[String: Any]],
-              let firstPart = parts.first,
-              let text = firstPart["text"] as? String
-        else {
-            throw GeminiAPIError.invalidJSON
-        }
-
-        return text
     }
 
     // MARK: - Parsing de respuesta con marcadores de tarjetas
@@ -202,12 +152,4 @@ final class GeminiAIService: CGAIServiceProtocol {
         - No inventes información que no tengas.
         """
     }
-}
-
-// MARK: - Errores
-
-private enum GeminiAPIError: Error {
-    case invalidURL
-    case badResponse
-    case invalidJSON
 }
