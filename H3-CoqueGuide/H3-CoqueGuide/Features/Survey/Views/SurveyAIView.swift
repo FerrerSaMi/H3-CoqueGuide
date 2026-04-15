@@ -12,6 +12,7 @@ struct SurveyView: View {
     @EnvironmentObject private var coqueGuideVM: CGViewModel
     @StateObject private var viewModel = SurveyViewModel()
     @State private var showSurveyRequiredAlert = false
+    @State private var isDescriptionExpanded = false
 
     private let optionColors: [Color] = [
         Color.orange.opacity(0.95),
@@ -219,19 +220,46 @@ private extension SurveyView {
                             .foregroundStyle(.secondary)
                             .padding()
                     } else {
-                        Text(viewModel.aiDescription)
-                            .font(.body)
-                            .foregroundStyle(.primary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(20)
-                            .background(
-                                RoundedRectangle(cornerRadius: 24, style: .continuous)
-                                    .fill(Color.orange.opacity(0.12))
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 24, style: .continuous)
-                                    .stroke(Color.orange.opacity(0.28), lineWidth: 1)
-                            )
+                        VStack(spacing: 0) {
+                            Button {
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    isDescriptionExpanded.toggle()
+                                }
+                            } label: {
+                                HStack {
+                                    Image(systemName: "doc.text.magnifyingglass")
+                                        .font(.system(size: 16, weight: .semibold))
+                                    Text(isDescriptionExpanded ? "Ocultar descripción" : "Ver descripción generada")
+                                        .font(.subheadline)
+                                        .fontWeight(.semibold)
+                                    Spacer()
+                                    Image(systemName: isDescriptionExpanded ? "chevron.up" : "chevron.down")
+                                        .font(.system(size: 13, weight: .semibold))
+                                }
+                                .foregroundStyle(.orange)
+                                .padding(16)
+                                .background(
+                                    RoundedRectangle(cornerRadius: isDescriptionExpanded ? 0 : 18, style: .continuous)
+                                        .fill(Color.orange.opacity(0.12))
+                                )
+                            }
+                            .buttonStyle(.plain)
+
+                            if isDescriptionExpanded {
+                                Text(viewModel.aiDescription)
+                                    .font(.body)
+                                    .foregroundStyle(.primary)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(20)
+                                    .background(Color.orange.opacity(0.06))
+                                    .transition(.opacity.combined(with: .move(edge: .top)))
+                            }
+                        }
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                .stroke(Color.orange.opacity(0.28), lineWidth: 1)
+                        )
                     }
                 }
                 .padding(.horizontal, 20)

@@ -8,6 +8,7 @@
 //
 
 import SwiftUI
+import SwiftData
 import Combine
 
 @MainActor
@@ -35,7 +36,7 @@ final class CGViewModel: ObservableObject {
 
     // MARK: - Dependencias
 
-    private let aiService: CGAIServiceProtocol
+    private var aiService: CGAIServiceProtocol
     private var suggestionTimer: Timer?
 
     // MARK: - Inicialización
@@ -45,6 +46,23 @@ final class CGViewModel: ObservableObject {
     init(aiService: CGAIServiceProtocol = CGSimulatedAIService()) {
         self.aiService = aiService
         startProactiveSuggestions()
+    }
+
+    // MARK: - Perfil del visitante
+
+    /// Carga el perfil más reciente de SwiftData y lo pasa al servicio de IA.
+    func loadVisitorProfile(from context: ModelContext) {
+        do {
+            let descriptor = FetchDescriptor<ExcursionUserProfile>(
+                sortBy: [SortDescriptor(\.updatedAt, order: .reverse)]
+            )
+            if let profile = try context.fetch(descriptor).first,
+               !profile.gender.isEmpty {
+                aiService.visitorProfile = CGVisitorProfile(from: profile)
+            }
+        } catch {
+            print("⚠️ No se pudo cargar el perfil del visitante: \(error)")
+        }
     }
 
     deinit {

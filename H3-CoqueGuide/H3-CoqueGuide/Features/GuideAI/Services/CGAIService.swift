@@ -33,9 +33,34 @@ struct CGAIResponse {
 
 // MARK: - Protocolo del servicio de IA
 
+/// Datos relevantes del perfil del visitante para personalizar respuestas.
+struct CGVisitorProfile {
+    let gender: String
+    let ageRange: String
+    let plannedTime: String
+    let attractionPreference: String
+    let specificAttraction: String
+    let preferredLanguage: String
+    let coquePersonality: String
+
+    /// Crea un perfil desde un ExcursionUserProfile de SwiftData.
+    init(from profile: ExcursionUserProfile) {
+        self.gender = profile.gender
+        self.ageRange = profile.ageRange
+        self.plannedTime = profile.plannedTime
+        self.attractionPreference = profile.resolvedAttractionPreference
+        self.specificAttraction = profile.specificAttraction
+        self.preferredLanguage = profile.preferredLanguage
+        self.coquePersonality = profile.coquePersonality
+    }
+}
+
 /// Contrato que debe cumplir cualquier implementación del servicio de IA.
 /// Permite intercambiar fácilmente la implementación simulada por una real.
 protocol CGAIServiceProtocol {
+    /// Perfil del visitante actual. Se usa para personalizar respuestas.
+    var visitorProfile: CGVisitorProfile? { get set }
+
     /// Recibe el texto del usuario y devuelve una respuesta estructurada.
     func processMessage(_ text: String) async -> CGAIResponse
 }
@@ -46,6 +71,9 @@ protocol CGAIServiceProtocol {
 /// Incluye: puntaje por coincidencias, memoria de conversación, detección de idioma,
 /// tolerancia a typos, saludos por hora y default inteligente.
 final class CGSimulatedAIService: CGAIServiceProtocol {
+
+    // MARK: - Perfil del visitante
+    var visitorProfile: CGVisitorProfile?
 
     // MARK: - Estado de conversación (memoria)
 
