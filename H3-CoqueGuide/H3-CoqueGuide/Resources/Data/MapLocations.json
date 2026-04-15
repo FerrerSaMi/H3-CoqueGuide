@@ -16,7 +16,8 @@
         {"id": 10, "name": "Andador a El Lingote", "x": 812, "y": 805},
         {"id": 11, "name": "Salón Ciencia en Vivo", "x": 922, "y": 915},
         {"id": 12, "name": "Salón Diseño y Simulación", "x": 822, "y": 915},
-        {"id": 13, "name": "Salón Manufactura Inteligente", "x": 715, "y": 915}
+        {"id": 13, "name": "Salón Manufactura Inteligente", "x": 715, "y": 915},
+        {"id": 14, "name": "Baños Piso 1", "x": 475, "y": 700}
       ]
     },
     {

@@ -9,7 +9,7 @@ import SwiftUI
 import UIKit
 
 struct MapaView: View {
-    private let pinButtonSize: CGFloat = 27
+    private let pinButtonSize: CGFloat = 30
     @State private var showingFirstMap: Bool = true
     @State private var selectedLocationNumber: Int? = nil
     @State private var selectedLocationInfo: SelectedLocationInfo? = nil
@@ -17,6 +17,7 @@ struct MapaView: View {
     @State private var lastMapScale: CGFloat = 1.0
     @State private var mapOffset: CGSize = .zero
     @State private var lastMapOffset: CGSize = .zero
+    @State private var mapTransitionID = UUID()
     private let mapConfig = MapLocationsConfig.load()
 
     private var locations: [Int: String] {
@@ -40,70 +41,89 @@ struct MapaView: View {
     }
 
     var body: some View {
-        ZStack {
-            ScrollView {
-                VStack(spacing: 16) {
-                    HStack {
-                        Button {
-                            showingFirstMap.toggle()
-                            resetMapTransform()
-                        } label: {
-                            Text(showingFirstMap ? "Cambiar a Nivel 2" : "Cambiar a Nivel 1")
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
-                        }
-                        .buttonStyle(.borderedProminent)
+        VStack(spacing: 0) {
+            // MARK: - Header con selector de nivel
+            levelSelector
+                .padding(.horizontal, 20)
+                .padding(.top, 12)
+                .padding(.bottom, 8)
 
-                        Button {
-                            resetMapTransform()
-                        } label: {
-                            Label("Reset Zoom", systemImage: "arrow.counterclockwise")
-                                .font(.subheadline)
-                        }
-                        .buttonStyle(.bordered)
+            // MARK: - Mapa
+            mapCanvas
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(Color.secondary.opacity(0.15), lineWidth: 1)
+                )
+                .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
+                .padding(.horizontal, 16)
 
-                        Spacer()
-                    }
-
-                    mapCanvas
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
-                        )
-                }
-                .padding()
+            // MARK: - Info del punto seleccionado
+            if let info = selectedLocationInfo {
+                locationInfoCard(info)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .padding(.horizontal, 20)
+                    .padding(.top, 12)
             }
 
-            if let selectedLocationInfo {
-                Color.black.opacity(0.28)
-                    .ignoresSafeArea()
-                    .onTapGesture {
-                        self.selectedLocationInfo = nil
-                    }
+            Spacer()
 
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Punto \(selectedLocationInfo.id)")
-                        .font(.headline)
-                    Text(selectedLocationInfo.name)
-                        .font(.body)
-                }
-                .frame(maxWidth: 320, alignment: .leading)
-                .padding(16)
-                .background(.regularMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
-                )
+            // MARK: - Instrucciones / Reset
+            bottomBar
                 .padding(.horizontal, 20)
-                .transition(.opacity.combined(with: .scale(scale: 0.96)))
+                .padding(.bottom, 8)
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle("Mapa del Museo")
+        .navigationBarTitleDisplayMode(.inline)
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: selectedLocationInfo != nil)
+    }
+
+    // MARK: - Level Selector
+
+    private var levelSelector: some View {
+        HStack(spacing: 0) {
+            levelTab(title: "Nivel 1", isSelected: showingFirstMap) {
+                switchLevel(toFirst: true)
+            }
+            levelTab(title: "Nivel 2", isSelected: !showingFirstMap) {
+                switchLevel(toFirst: false)
             }
         }
-        .navigationTitle("Mapa")
-        .navigationBarTitleDisplayMode(.inline)
-        .animation(.easeInOut(duration: 0.2), value: selectedLocationInfo != nil)
+        .background(Color(.tertiarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
+
+    private func levelTab(title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .foregroundStyle(isSelected ? .white : .secondary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(isSelected ? Color.orange : Color.clear)
+                )
+                .padding(2)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(title)
+    }
+
+    private func switchLevel(toFirst: Bool) {
+        guard showingFirstMap != toFirst else { return }
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+            showingFirstMap = toFirst
+            selectedLocationNumber = nil
+            selectedLocationInfo = nil
+            resetMapTransform()
+            mapTransitionID = UUID()
+        }
+    }
+
+    // MARK: - Map Canvas
 
     private var mapCanvas: some View {
         GeometryReader { proxy in
@@ -118,29 +138,24 @@ struct MapaView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size.width, height: size.height)
+                    .id(mapTransitionID)
+                    .transition(.opacity)
 
                 ForEach(currentPins) { pin in
                     Button {
-                        selectedLocationNumber = pin.number
-                        if let name = locations[pin.number] {
-                            selectedLocationInfo = SelectedLocationInfo(id: pin.number, name: name)
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                            if selectedLocationNumber == pin.number {
+                                selectedLocationNumber = nil
+                                selectedLocationInfo = nil
+                            } else {
+                                selectedLocationNumber = pin.number
+                                if let name = locations[pin.number] {
+                                    selectedLocationInfo = SelectedLocationInfo(id: pin.number, name: name)
+                                }
+                            }
                         }
                     } label: {
-                        ZStack {
-                            Circle()
-                                .fill(selectedLocationNumber == pin.number ? Color.accentColor : Color.white)
-                                .frame(width: pinButtonSize, height: pinButtonSize)
-
-                            Circle()
-                                .stroke(Color.accentColor, lineWidth: 2)
-                                .frame(width: pinButtonSize, height: pinButtonSize)
-
-                            Text("\(pin.number)")
-                                .font(.caption)
-                                .fontWeight(.bold)
-                                .foregroundStyle(selectedLocationNumber == pin.number ? Color.white : Color.accentColor)
-                        }
-                        .shadow(color: .black.opacity(0.18), radius: 2, x: 0, y: 1)
+                        pinView(pin: pin)
                     }
                     .buttonStyle(.plain)
                     .position(
@@ -160,6 +175,122 @@ struct MapaView: View {
         }
         .frame(height: 420)
     }
+
+    // MARK: - Pin View
+
+    private func pinView(pin: MapPin) -> some View {
+        let isSelected = selectedLocationNumber == pin.number
+        return ZStack {
+            // Pulso exterior animado
+            if isSelected {
+                Circle()
+                    .fill(Color.orange.opacity(0.2))
+                    .frame(width: pinButtonSize + 14, height: pinButtonSize + 14)
+                    .scaleEffect(isSelected ? 1.3 : 1.0)
+                    .opacity(isSelected ? 0.0 : 0.5)
+                    .animation(
+                        .easeOut(duration: 1.2).repeatForever(autoreverses: false),
+                        value: isSelected
+                    )
+            }
+
+            Circle()
+                .fill(isSelected ? Color.orange : Color.white)
+                .frame(width: pinButtonSize, height: pinButtonSize)
+
+            Circle()
+                .stroke(isSelected ? Color.orange : Color.accentColor, lineWidth: 2.5)
+                .frame(width: pinButtonSize, height: pinButtonSize)
+
+            Text("\(pin.number)")
+                .font(.system(size: 12, weight: .bold, design: .rounded))
+                .foregroundStyle(isSelected ? .white : Color.accentColor)
+        }
+        .shadow(color: isSelected ? Color.orange.opacity(0.4) : .black.opacity(0.18), radius: isSelected ? 6 : 2, x: 0, y: isSelected ? 3 : 1)
+        .scaleEffect(isSelected ? 1.2 : 1.0)
+        .animation(.spring(response: 0.35, dampingFraction: 0.6), value: isSelected)
+    }
+
+    // MARK: - Location Info Card
+
+    private func locationInfoCard(_ info: SelectedLocationInfo) -> some View {
+        HStack(spacing: 14) {
+            ZStack {
+                Circle()
+                    .fill(Color.orange)
+                    .frame(width: 40, height: 40)
+
+                Text("\(info.id)")
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
+            }
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Punto \(info.id)")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.secondary)
+
+                Text(info.name)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.primary)
+            }
+
+            Spacer()
+
+            Button {
+                withAnimation {
+                    selectedLocationNumber = nil
+                    selectedLocationInfo = nil
+                }
+            } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.system(size: 22))
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Cerrar información")
+        }
+        .padding(14)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .shadow(color: .black.opacity(0.08), radius: 6, x: 0, y: 3)
+    }
+
+    // MARK: - Bottom Bar
+
+    private var bottomBar: some View {
+        HStack {
+            Label("Pellizca para hacer zoom", systemImage: "hand.pinch")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            Spacer()
+
+            Button {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                    resetMapTransform()
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: "arrow.counterclockwise")
+                        .font(.system(size: 12, weight: .semibold))
+                    Text("Reset")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                }
+                .foregroundStyle(.orange)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color.orange.opacity(0.12))
+                .clipShape(Capsule())
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    // MARK: - Gestures
 
     private var dragGesture: some Gesture {
         DragGesture()
@@ -192,13 +323,13 @@ struct MapaView: View {
     }
 
     private func resetMapTransform() {
-        withAnimation(.easeInOut(duration: 0.2)) {
-            mapScale = 1.0
-            lastMapScale = 1.0
-            mapOffset = .zero
-            lastMapOffset = .zero
-        }
+        mapScale = 1.0
+        lastMapScale = 1.0
+        mapOffset = .zero
+        lastMapOffset = .zero
     }
+
+    // MARK: - Helpers
 
     private func imageAspectRatio(for imageName: String) -> CGFloat {
         guard let image = UIImage(named: imageName), image.size.height > 0 else {
@@ -226,6 +357,8 @@ struct MapaView: View {
         }
     }
 }
+
+// MARK: - Models
 
 struct MapPin: Identifiable {
     let number: Int
