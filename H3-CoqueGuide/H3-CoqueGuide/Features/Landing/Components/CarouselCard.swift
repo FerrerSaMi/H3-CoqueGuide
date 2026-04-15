@@ -44,6 +44,7 @@ struct CarouselCard: View {
             }
             .padding(20)
         }
+        .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
         .accessibilityLabel("\(title). \(subtitle)")
     }
 }
