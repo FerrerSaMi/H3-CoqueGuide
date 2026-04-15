@@ -128,6 +128,9 @@ struct LandingView: View {
         .preferredColorScheme(isDarkModeEnabled ? .dark : .light)
     }
 
+    // MARK: - Animación de aparición
+    @State private var sectionsAppeared = false
+
     // MARK: - Tab Content: Atracciones
 
     private var atraccionesTab: some View {
@@ -138,27 +141,49 @@ struct LandingView: View {
                     VStack(alignment: .leading, spacing: 24) {
                         // MARK: - Header
                         headerSection
+                            .opacity(sectionsAppeared ? 1 : 0)
+                            .offset(y: sectionsAppeared ? 0 : -20)
 
                         // MARK: - Carrusel de Galerías
                         carouselSection(isLandscape: isLandscape, proxyHeight: proxy.size.height)
+                            .opacity(sectionsAppeared ? 1 : 0)
+                            .scaleEffect(sectionsAppeared ? 1 : 0.95)
 
                         coqueGuideInviteCard
                             .padding(.horizontal, 20)
                             .padding(.top, 14)
+                            .opacity(sectionsAppeared ? 1 : 0)
+                            .offset(y: sectionsAppeared ? 0 : 30)
 
                         // MARK: - Cómo usar la app
                         howToUseSection
                             .padding(.horizontal, 20)
                             .padding(.top, 10)
+                            .opacity(sectionsAppeared ? 1 : 0)
+                            .offset(y: sectionsAppeared ? 0 : 30)
 
                         // MARK: - Atracciones del museo
                         attractionsSection
                             .padding(.top, 10)
+                            .opacity(sectionsAppeared ? 1 : 0)
+                            .offset(y: sectionsAppeared ? 0 : 30)
+
+                        // MARK: - Ubicación del museo
+                        MuseumLocationCard()
+                            .padding(.horizontal, 20)
+                            .padding(.top, 10)
+                            .opacity(sectionsAppeared ? 1 : 0)
+                            .offset(y: sectionsAppeared ? 0 : 30)
 
                         Spacer(minLength: 20)
                     }
                     .frame(maxWidth: .infinity)
                     .background(Color(.systemGroupedBackground))
+                }
+                .onAppear {
+                    withAnimation(.easeOut(duration: 0.8).delay(0.1)) {
+                        sectionsAppeared = true
+                    }
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
@@ -186,7 +211,9 @@ struct LandingView: View {
                 Spacer()
 
                 Button {
-                    isDarkModeEnabled.toggle()
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                        isDarkModeEnabled.toggle()
+                    }
                 } label: {
                     Image(systemName: isDarkModeEnabled ? "sun.max.fill" : "moon.fill")
                         .font(.system(size: 16, weight: .medium))
@@ -194,6 +221,8 @@ struct LandingView: View {
                         .frame(width: 36, height: 36)
                         .background(Color(.secondarySystemGroupedBackground))
                         .clipShape(Circle())
+                        .rotationEffect(.degrees(isDarkModeEnabled ? 360 : 0))
+                        .animation(.spring(response: 0.5, dampingFraction: 0.6), value: isDarkModeEnabled)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(isDarkModeEnabled ? "Cambiar a modo claro" : "Cambiar a modo oscuro")

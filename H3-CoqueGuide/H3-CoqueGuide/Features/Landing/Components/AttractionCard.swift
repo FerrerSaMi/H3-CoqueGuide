@@ -42,9 +42,21 @@ struct AttractionCard: View {
             .padding(14)
             .background(Color(.secondarySystemGroupedBackground))
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .shadow(color: attraction.color.opacity(0.15), radius: 6, x: 0, y: 3)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(SpringPressStyle())
         .accessibilityLabel(attraction.name)
         .accessibilityHint("Abre CoqueGuide con información sobre \(attraction.name)")
+    }
+}
+
+// MARK: - Estilo de botón con spring press
+
+struct SpringPressStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.93 : 1.0)
+            .opacity(configuration.isPressed ? 0.85 : 1.0)
+            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
     }
 }
