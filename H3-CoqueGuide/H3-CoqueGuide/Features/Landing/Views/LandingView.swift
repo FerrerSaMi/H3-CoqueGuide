@@ -6,9 +6,13 @@
 //
 
 import SwiftUI
+import SwiftData
 import Combine
 
 struct LandingView: View {
+
+    // MARK: - SwiftData
+    @Environment(\.modelContext) private var modelContext
 
     // MARK: - CoqueGuide ViewModel
     // Usa Gemini API si hay key en Secrets.plist, sino usa servicio simulado
@@ -108,6 +112,15 @@ struct LandingView: View {
                         navigationPath.append(destination)
                         navigationCoordinator.pendingDestination = nil
                     }
+                }
+            }
+            .onAppear {
+                coqueGuideVM.loadVisitorProfile(from: modelContext)
+            }
+            .onChange(of: selectedTab) { oldTab, newTab in
+                // Recargar perfil al volver del tab de Encuesta
+                if oldTab == 3 && newTab != 3 {
+                    coqueGuideVM.loadVisitorProfile(from: modelContext)
                 }
             }
         }

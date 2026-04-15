@@ -14,6 +14,9 @@ final class GeminiAIService: CGAIServiceProtocol {
     private var conversationHistory: [[String: Any]] = []
     private let maxHistoryMessages = 20 // 10 pares user/assistant
 
+    // MARK: - Perfil del visitante
+    var visitorProfile: CGVisitorProfile?
+
     // MARK: - Inicialización
 
     init(apiKey: String) {
@@ -39,8 +42,8 @@ final class GeminiAIService: CGAIServiceProtocol {
         do {
             let responseText = try await client.generateContent(
                 contents: conversationHistory,
-                systemInstruction: Self.systemPrompt(),
-                maxOutputTokens: 1024,
+                systemInstruction: Self.systemPrompt(visitor: visitorProfile),
+                maxOutputTokens: 2048,
                 temperature: 0.7
             )
             conversationHistory.append([
@@ -116,19 +119,75 @@ final class GeminiAIService: CGAIServiceProtocol {
 
     // MARK: - System Prompt
 
-    private static func systemPrompt() -> String {
+    private static func systemPrompt(visitor: CGVisitorProfile? = nil) -> String {
         let events = CGEventService.shared.todaysEvents()
         let eventsList = events.map { "- \($0.name) (\($0.location))" }.joined(separator: "\n")
 
-        return """
-        Eres "Coque", el asistente inteligente del Museo del Acero Horno3 en Monterrey, México. \
-        Tu nombre viene del "coque", el combustible que se usaba en los Altos Hornos.
-
+        var personalityBlock = """
         PERSONALIDAD:
         - Amable, entusiasta y conocedor de la historia industrial
         - Respuestas concisas pero informativas (máximo 3-4 párrafos cortos)
         - Usa español mexicano natural
         - Puedes usar emojis con moderación
+        """
+
+        var visitorBlock = ""
+
+        if let visitor {
+            // Adaptar personalidad según preferencia del visitante
+            let personalityStyle: String
+            switch visitor.coquePersonality {
+            case "Divertido":
+                personalityStyle = "Sé muy amigable, casual y usa emojis frecuentemente. Haz comentarios graciosos y ligeros."
+            case "Formal":
+                personalityStyle = "Sé profesional y estructurado. Usa un tono respetuoso y evita emojis."
+            case "Técnico":
+                personalityStyle = "Da datos técnicos, cifras y detalles históricos precisos. Sé informativo y detallado."
+            case "Infantil":
+                personalityStyle = "Usa un lenguaje sencillo y divertido, como si hablaras con un niño. Usa muchos emojis y analogías simples."
+            default:
+                personalityStyle = "Sé amable y natural."
+            }
+
+            personalityBlock += "\n- Estilo de comunicación: \(personalityStyle)"
+
+            // Idioma preferido
+            let languageInstruction: String
+            switch visitor.preferredLanguage {
+            case "English":
+                languageInstruction = "You MUST respond ONLY in English. Do not use Spanish at all."
+            case "Français":
+                languageInstruction = "Tu DOIS répondre UNIQUEMENT en français. N'utilise pas l'espagnol."
+            case "Português":
+                languageInstruction = "Você DEVE responder APENAS em português. Não use espanhol."
+            case "Korean":
+                languageInstruction = "반드시 한국어로만 답변하세요. 스페인어를 사용하지 마세요."
+            case "Arabic":
+                languageInstruction = "يجب أن تجيب باللغة العربية فقط. لا تستخدم الإسبانية."
+            default:
+                languageInstruction = "Responde siempre en español mexicano."
+            }
+
+            visitorBlock = """
+
+            IDIOMA DE RESPUESTA:
+            \(languageInstruction)
+
+            PERFIL DEL VISITANTE:
+            - Género: \(visitor.gender)
+            - Rango de edad: \(visitor.ageRange)
+            - Tiempo de visita: \(visitor.plannedTime)
+            - Preferencia de experiencia: \(visitor.attractionPreference)
+            - Atracción específica: \(visitor.specificAttraction)
+            Adapta tus respuestas al perfil del visitante. Recomienda experiencias afines a sus intereses y tiempo disponible.
+            """
+        }
+
+        return """
+        Eres "Coque", el asistente inteligente del Museo del Acero Horno3 en Monterrey, México. \
+        Tu nombre viene del "coque", el combustible que se usaba en los Altos Hornos.
+
+        \(personalityBlock)
 
         INFORMACIÓN DEL MUSEO:
         - Niveles: Nivel 1 (exhibiciones históricas, Horno Alto original), Nivel 2 (galería industrial, mirador).
@@ -138,6 +197,7 @@ final class GeminiAIService: CGAIServiceProtocol {
 
         EVENTOS DE HOY:
         \(eventsList)
+        \(visitorBlock)
 
         TARJETAS DE ACCIÓN:
         Cuando tu respuesta se beneficie de una acción interactiva, incluye UN marcador al final del texto:
