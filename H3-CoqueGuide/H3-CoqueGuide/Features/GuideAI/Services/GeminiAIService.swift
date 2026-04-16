@@ -109,6 +109,32 @@ final class GeminiAIService: CGAIServiceProtocol {
         return .withCards(cleanText.isEmpty ? nil : cleanText, cards: cards)
     }
 
+    // MARK: - Generación de descripción de objeto
+
+    func generateObjectDescription(for objectName: String, objectEra: String? = nil) async throws -> String {
+        let eraText = objectEra.map { "Está enmarcado en la era de \($0)." } ?? ""
+        let message = """
+        Genera una descripción breve y accesible para un visitante del museo.
+        - Incluye qué es el objeto, qué puede esperar el visitante y por qué vale la pena.
+        - Mantén el tono en función de la personalidad de Coque y el idioma preferido del visitante.
+        - Usa máximo 3-4 párrafos cortos y evita listas largas.
+        - No incluyas etiquetas, solo texto limpio.
+        Objeto: \(objectName).
+        \(eraText)
+        """
+
+        let contents: [[String: Any]] = [
+            ["role": "user", "parts": [["text": message]]]
+        ]
+
+        return try await client.generateContent(
+            contents: contents,
+            systemInstruction: Self.systemPrompt(visitor: visitorProfile),
+            maxOutputTokens: 280,
+            temperature: 0.75
+        ).trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     // MARK: - Historial
 
     private func trimHistory() {

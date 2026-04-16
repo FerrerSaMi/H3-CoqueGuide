@@ -7,6 +7,7 @@
 
 import SwiftUI
 import AVFoundation
+import SwiftData
 
 // MARK: - CamScannerView
 
@@ -14,6 +15,7 @@ struct CamScannerView: View {
 
     // MARK: ViewModel
     @StateObject private var viewModel = CamScannerViewModel()
+    @Environment(\.modelContext) private var modelContext
     @State private var bottomSafeArea: CGFloat = 0
     @State private var isIntroVisible = true
 
@@ -64,6 +66,9 @@ struct CamScannerView: View {
                 )
                 .onPreferenceChange(BottomSafeAreaKey.self) { bottomSafeArea = $0 }
             }
+        }
+        .onAppear {
+            viewModel.loadVisitorProfile(from: modelContext)
         }
         .onDisappear { viewModel.onDisappear() }
         .preferredColorScheme(.dark)
