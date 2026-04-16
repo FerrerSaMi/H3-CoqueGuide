@@ -29,16 +29,7 @@ struct SimpleCardView: View {
                     .lineSpacing(6)
                     .fixedSize(horizontal: false, vertical: true)
 
-                Button {
-                    // Garantiza ejecución en el hilo principal y con animación si hay transiciones
-                    if Thread.isMainThread {
-                        withAnimation(.snappy) { action() }
-                    } else {
-                        DispatchQueue.main.async {
-                            withAnimation(.snappy) { action() }
-                        }
-                    }
-                } label: {
+                Button(action: action) {
                     Text(actionTitle)
                         .font(.subheadline)
                         .fontWeight(.semibold)
@@ -47,22 +38,12 @@ struct SimpleCardView: View {
                         .padding(.vertical, 14)
                         .background(Color.accentColor)
                         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                        .contentShape(Rectangle())
-                        .allowsHitTesting(true)
-                        .accessibilityLabel(Text(actionTitle))
-                        .accessibilityAddTraits(.isButton)
                 }
             }
             .padding(26)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .contentShape(Rectangle())
-            .simultaneousGesture(TapGesture().onEnded {
-                // Si deseas que toda la tarjeta sea tapable para iniciar el escaneo, descomenta la línea siguiente
-                // action()
-            })
         }
-        .frame(maxHeight: .infinity, alignment: .center)
-        .frame(maxWidth: 360, maxHeight: UIScreen.main.bounds.height * 0.75, alignment: .center)
+        .frame(maxWidth: 360, maxHeight: UIScreen.main.bounds.height * 0.65)
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .shadow(color: Color.black.opacity(0.12), radius: 12, x: 0, y: 6)
