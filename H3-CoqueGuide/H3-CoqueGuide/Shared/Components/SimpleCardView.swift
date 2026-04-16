@@ -54,7 +54,7 @@ struct SimpleCardView: View {
             .padding(26)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .frame(maxWidth: 360, maxHeight: UIScreen.main.bounds.height * 0.75)
+        .frame(maxWidth: 360, maxHeight: UIScreen.main.bounds.height * 0.65)
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .shadow(color: Color.black.opacity(0.12), radius: 12, x: 0, y: 6)
@@ -79,15 +79,17 @@ struct SimpleCardView: View {
 
 #Preview {
     SimpleCardView(
-        title: "Descubre el Museo con CoqueGuide",
+        title: "Bienvenido a CoqueGuide",
         description: """
-        ¡Bienvenido al escáner inteligente del museo!
-        Escaneo de Objetos:
-        Apunta tu cámara a cualquier objeto del museo y presiona el botón circular. CoqueGuide analizará la imagen y te dirá qué objeto es, con qué confianza lo identificó y te dará una descripción detallada generada por IA.
-        Traducción de Texto
-        Si ves texto en los objetos del museo, presiona "Extraer Texto" para que CoqueGuide lo lea automáticamente. Luego podrás traducirlo a tu idioma preferido entre Español, Inglés, Francés, Portugués, Coreano y Árabe.
+        Explora el museo de forma inteligente con nuestro escáner.
+
+        Para escanear objetos: Apunta la cámara y presiona el botón circular. El sistema identificará el objeto y te dará una descripción detallada.
+
+        Para traducir texto: Presiona "Extraer Texto" para leer automáticamente el texto visible, luego tradúcelo a tu idioma preferido.
+
+        Los modelos de traducción se descargan automáticamente cuando los necesites por primera vez.
         """,
-        actionTitle: "Comenzar Exploración",
+        actionTitle: "Comenzar",
         action: {}
     )
     .padding()

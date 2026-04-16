@@ -42,19 +42,17 @@ struct CamScannerView: View {
                     Spacer()
 
                     SimpleCardView(
-                        title: "Descubre el Museo con CoqueGuide",
+                        title: "Bienvenido a CoqueGuide",
                         description: """
-                        ¡Bienvenido al escáner inteligente del museo!
+                        Explora el museo de forma inteligente con nuestro escáner.
 
-                        🎯 **Escaneo de Objetos:**
-                        Apunta tu cámara a cualquier objeto del museo y presiona el botón circular. CoqueGuide analizará la imagen y te dirá qué objeto es, con qué confianza lo identificó y te dará una descripción detallada generada por IA.
+                        Para escanear objetos: Apunta la cámara y presiona el botón circular. El sistema identificará el objeto y te dará una descripción detallada.
 
-                        📝 **Traducción de Texto:**
-                        Si ves texto en los objetos del museo, presiona "Extraer Texto" para que CoqueGuide lo lea automáticamente. Luego podrás traducirlo a tu idioma preferido entre Español, Inglés, Francés, Portugués, Coreano y Árabe.
+                        Para traducir texto: Presiona "Extraer Texto" para leer automáticamente el texto visible, luego tradúcelo a tu idioma preferido.
 
-                        💡 **Consejo:** Los modelos de traducción se descargan automáticamente la primera vez que los uses, asegurando traducciones rápidas y offline después.
+                        Los modelos de traducción se descargan automáticamente cuando los necesites por primera vez.
                         """,
-                        actionTitle: "Comenzar Exploración"
+                        actionTitle: "Comenzar"
                     ) {
                         // Animar la salida de la intro y entrada de la cámara
                         withAnimation(.easeIn(duration: 0.4)) {
