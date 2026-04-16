@@ -61,48 +61,73 @@ struct CamScannerView: View {
 
                     VStack(spacing: 16) {
                         if let text = viewModel.extractedText {
-                            Text("Texto detectado: \(text)")
-                                .foregroundColor(.white)
-                                .padding()
-                                .background(Color.black.opacity(0.7))
-                                .cornerRadius(8)
-
-                            // Language Picker
-                            HStack {
-                                Text("Traducir a:")
-                                    .foregroundColor(.white)
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("Texto detectado")
                                     .font(.subheadline)
-                                
-                                Spacer()
-                                
-                                Button(action: {
-                                    showLanguagePicker = true
-                                }) {
-                                    Text(viewModel.selectedTranslationLanguage)
-                                        .foregroundColor(.white)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 6)
-                                        .background(Color.blue.opacity(0.3))
-                                        .cornerRadius(6)
-                                }
-                            }
-                            .padding(.horizontal)
-
-                            if let translated = viewModel.translatedText {
-                                Text("Traducido: \(translated)")
+                                    .fontWeight(.semibold)
                                     .foregroundColor(.white)
-                                    .padding()
-                                    .background(Color.blue.opacity(0.7))
-                                    .cornerRadius(8)
-                            } else {
-                                Button("Traducir") {
-                                    Task { await viewModel.translateExtractedText() }
+
+                                Text(text)
+                                    .font(.body)
+                                    .foregroundColor(.white)
+                                    .lineLimit(nil)
+                                    .fixedSize(horizontal: false, vertical: true)
+
+                                HStack {
+                                    Text("Traducir a:")
+                                        .font(.caption)
+                                        .foregroundColor(.white.opacity(0.8))
+
+                                    Spacer()
+
+                                    Button(action: {
+                                        showLanguagePicker = true
+                                    }) {
+                                        Text(viewModel.selectedTranslationLanguage)
+                                            .font(.caption)
+                                            .foregroundColor(.white)
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 8)
+                                            .background(Color.blue.opacity(0.25))
+                                            .clipShape(Capsule())
+                                    }
                                 }
-                                .foregroundColor(.white)
-                                .padding()
-                                .background(Color.blue.opacity(0.7))
-                                .cornerRadius(8)
+
+                                if let translated = viewModel.translatedText {
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        Text("Traducido")
+                                            .font(.subheadline)
+                                            .fontWeight(.semibold)
+                                            .foregroundColor(.white)
+
+                                        Text(translated)
+                                            .font(.body)
+                                            .foregroundColor(.white)
+                                            .lineLimit(nil)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
+                                } else {
+                                    Button("Traducir") {
+                                        Task { await viewModel.translateExtractedText() }
+                                    }
+                                    .foregroundColor(.white)
+                                    .padding(.vertical, 12)
+                                    .frame(maxWidth: .infinity)
+                                    .background(Color.blue.opacity(0.8))
+                                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                                }
                             }
+                            .padding(18)
+                            .background(.ultraThinMaterial)
+                            .background(
+                                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                                    .fill(Color.white.opacity(0.10))
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                                    .stroke(Color.white.opacity(0.12), lineWidth: 1)
+                            )
+                            .shadow(color: Color.black.opacity(0.25), radius: 18, x: 0, y: 8)
                         }
 
                         HStack(spacing: 16) {
