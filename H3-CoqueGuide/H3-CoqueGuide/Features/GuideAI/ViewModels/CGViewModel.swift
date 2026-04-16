@@ -100,6 +100,26 @@ final class CGViewModel: ObservableObject {
         }
     }
 
+    /// Abre el panel y envía un prompt silencioso al servicio de IA:
+    /// solicita respuesta pero **no** muestra el prompt como mensaje del usuario.
+    /// Útil para contextos largos (p. ej. el prompt de ruta generado tras la encuesta).
+    func openPanelWithSilentPrompt(_ prompt: String) {
+        let trimmed = prompt.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+
+        isPanelOpen = true
+        activeSuggestion = nil
+        pendingSuggestionsCount = 0
+
+        // Evita colisionar con otro mensaje pendiente que abriría el chat duplicado.
+        pendingMessage = nil
+
+        // Si ya está pensando (otra petición en vuelo), dejamos pasar la actual.
+        guard !isThinking else { return }
+
+        fetchResponse(for: trimmed)
+    }
+
     /// Envía un mensaje del usuario y solicita respuesta al servicio de IA.
     func sendMessage(_ text: String) {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
