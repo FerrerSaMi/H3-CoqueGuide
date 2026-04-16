@@ -15,6 +15,7 @@ struct CamScannerView: View {
     // MARK: ViewModel
     @StateObject private var viewModel = CamScannerViewModel()
     @State private var bottomSafeArea: CGFloat = 0
+    @State private var isIntroVisible = true
 
     // MARK: - Body
 
@@ -23,21 +24,47 @@ struct CamScannerView: View {
             CameraPreview(session: viewModel.camera.session)
                 .ignoresSafeArea()
 
-            VStack {
-                Spacer()
+            if isIntroVisible {
+                Color.black.opacity(0.42)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
 
-                shutterButton
-                    .padding(.bottom, max(24, bottomSafeArea + 18))
-            }
-            .frame(maxWidth: .infinity)
-            .background(
-                GeometryReader { proxy in
-                    Color.clear.preference(key: BottomSafeAreaKey.self, value: proxy.safeAreaInsets.bottom)
+                VStack {
+                    Spacer()
+
+                    SimpleCardView(
+                        title: "Cómo usar el escáner",
+                        description: "Apunta al objeto del museo con la cámara y pulsa Continuar. El escáner te mostrará la etiqueta del objeto y la confianza del modelo en el resultado.",
+                        actionTitle: "Continuar"
+                    ) {
+                        withAnimation(.easeOut(duration: 0.3)) {
+                            isIntroVisible = false
+                        }
+                        viewModel.onAppear()
+                    }
+                    .frame(maxWidth: 360)
+                    .padding(.horizontal, 24)
+
+                    Spacer()
                 }
-            )
-            .onPreferenceChange(BottomSafeAreaKey.self) { bottomSafeArea = $0 }
+            }
+
+            if !isIntroVisible {
+                VStack {
+                    Spacer()
+
+                    shutterButton
+                        .padding(.bottom, max(24, bottomSafeArea + 18))
+                }
+                .frame(maxWidth: .infinity)
+                .background(
+                    GeometryReader { proxy in
+                        Color.clear.preference(key: BottomSafeAreaKey.self, value: proxy.safeAreaInsets.bottom)
+                    }
+                )
+                .onPreferenceChange(BottomSafeAreaKey.self) { bottomSafeArea = $0 }
+            }
         }
-        .onAppear { viewModel.onAppear() }
         .onDisappear { viewModel.onDisappear() }
         .preferredColorScheme(.dark)
     }
