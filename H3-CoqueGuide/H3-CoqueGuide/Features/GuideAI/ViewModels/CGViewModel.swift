@@ -72,7 +72,7 @@ final class CGViewModel: ObservableObject {
     // MARK: - API pública
 
     /// Abre el panel de conversación.
-    /// Muestra el mensaje de bienvenida si la conversación está vacía.
+    /// Muestra el mensaje de bienvenida si la conversación está vacía y no hay mensaje pendiente.
     func openPanel(initialMessage: String? = nil) {
         isPanelOpen = true
         activeSuggestion = nil
@@ -83,7 +83,8 @@ final class CGViewModel: ObservableObject {
             return
         }
 
-        if messages.isEmpty {
+        // Si hay un mensaje pendiente, no mostramos welcome para evitar ruido visual
+        if messages.isEmpty && pendingMessage == nil {
             showWelcomeMessage()
         }
     }
@@ -94,7 +95,8 @@ final class CGViewModel: ObservableObject {
             // El panel ya está abierto, enviar directamente
             sendMessage(message)
         } else {
-            // Guardar mensaje pendiente y abrir el panel
+            // Primero marcamos el mensaje pendiente, luego abrimos el panel
+            // (el orden importa: openPanel chequea pendingMessage para decidir el welcome).
             pendingMessage = message
             openPanel()
         }

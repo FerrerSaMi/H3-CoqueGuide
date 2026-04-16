@@ -112,15 +112,14 @@ struct CGPanelView: View {
         viewModel.sendMessage(text)
     }
 
-    /// Procesa el mensaje pendiente de las tarjetas de atracciones.
-    /// Usa un delay mayor si es la primera apertura (hay welcome message con 0.35s de delay).
+    /// Procesa el mensaje pendiente que se dejó al abrir el panel desde otra vista.
+    /// Cuando hay mensaje pendiente, se omite el welcome para evitar overlap, así que
+    /// basta con un pequeño delay para que termine la animación del sheet.
     private func processPendingMessage() {
         guard let pending = viewModel.pendingMessage else { return }
         viewModel.pendingMessage = nil
 
-        // Si hay pocos mensajes, es primera apertura → esperar más por el welcome
-        let delay: Double = viewModel.messages.count <= 1 ? 1.0 : 0.5
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
             viewModel.sendMessage(pending)
         }
     }
