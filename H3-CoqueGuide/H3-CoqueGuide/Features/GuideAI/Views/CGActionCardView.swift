@@ -18,7 +18,7 @@ struct CGActionCardView: View {
             HStack(spacing: 10) {
                 Image(systemName: card.icon)
                     .font(.title3)
-                    .foregroundStyle(.accent)
+                    .foregroundColor(.accentColor)
                     .frame(width: 32, height: 32)
 
                 VStack(alignment: .leading, spacing: 2) {

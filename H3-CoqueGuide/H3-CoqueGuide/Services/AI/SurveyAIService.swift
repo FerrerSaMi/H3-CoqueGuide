@@ -10,21 +10,28 @@ import Foundation
 import FoundationModels
 
 struct SurveyAIService {
-    private let appleModel = SystemLanguageModel.default
-
     func generateDescription(for profile: ExcursionUserProfile) async throws -> String {
-        do {
-            return try await generateDescriptionWithAppleModel(for: profile)
-        } catch {
+        if #available(iOS 26.0, *) {
+            do {
+                return try await generateDescriptionWithAppleModel(for: profile)
+            } catch {
+                if let apiKey = GeminiHTTPClient.loadAPIKey() {
+                    return try await generateDescriptionWithGemini(for: profile, apiKey: apiKey)
+                } else {
+                    throw error
+                }
+            }
+        } else {
             if let apiKey = GeminiHTTPClient.loadAPIKey() {
                 return try await generateDescriptionWithGemini(for: profile, apiKey: apiKey)
-            } else {
-                throw error
             }
+            throw SurveyAIError.unavailable
         }
     }
 
+    @available(iOS 26.0, *)
     private func generateDescriptionWithAppleModel(for profile: ExcursionUserProfile) async throws -> String {
+        let appleModel = SystemLanguageModel.default
         switch appleModel.availability {
         case .available:
             break
