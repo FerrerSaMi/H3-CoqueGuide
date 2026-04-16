@@ -286,21 +286,14 @@ struct LandingView: View {
         VStack(alignment: .leading, spacing: 16) {
             // Header con avatar y título
             HStack(spacing: 12) {
-                ZStack {
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [Color.white.opacity(0.4), Color.white.opacity(0.15)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(width: 44, height: 44)
-
-                    Image(systemName: "sparkles")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundStyle(.white)
-                }
+                Image("Coque")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 48, height: 48)
+                    .clipShape(Circle())
+                    .overlay(
+                        Circle().stroke(Color.white.opacity(0.6), lineWidth: 2)
+                    )
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(homeInviteContent.title)
@@ -310,7 +303,7 @@ struct LandingView: View {
 
                     Text("Tu asistente inteligente")
                         .font(.caption)
-                        .foregroundStyle(.white.opacity(0.8))
+                        .foregroundStyle(.white.opacity(0.85))
                 }
 
                 Spacer()
@@ -336,28 +329,46 @@ struct LandingView: View {
                 .font(.subheadline)
                 .fontWeight(.medium)
                 .foregroundStyle(.white.opacity(0.95))
+                .fixedSize(horizontal: false, vertical: true)
 
-            // Divider sutil
-            Rectangle()
-                .fill(Color.white.opacity(0.2))
-                .frame(height: 0.5)
+            // CTA primario — claramente tappable
+            Button {
+                coqueGuideVM.openPanel()
+            } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "message.fill")
+                        .font(.system(size: 15, weight: .bold))
+                    Text("Abrir chat con Coque")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                    Spacer()
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 13, weight: .bold))
+                }
+                .foregroundStyle(Color(red: 0.85, green: 0.35, blue: 0.10))
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .frame(maxWidth: .infinity)
+                .background(Color.white)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint("Abre el chat con el asistente del museo")
 
-            // Quick actions
-            LazyVGrid(
-                columns: [GridItem(.adaptive(minimum: 130), spacing: 10, alignment: .leading)],
-                alignment: .leading,
-                spacing: 10
-            ) {
+            // Separador sutil
+            Text("Preguntas rápidas")
+                .font(.caption2)
+                .fontWeight(.semibold)
+                .tracking(0.5)
+                .foregroundStyle(.white.opacity(0.7))
+                .padding(.top, 2)
+
+            // Quick actions en columnas iguales
+            HStack(spacing: 8) {
                 ForEach(homeInviteContent.quickActions) { action in
                     quickActionChip(action) {
-                        if action.icon == "map" {
-                            navigationPath.append(CGAppDestination.map)
-                        } else if action.icon == "message.fill" {
-                            coqueGuideVM.openPanel()
-                        } else {
-                            coqueGuideVM.openPanel()
-                            coqueGuideVM.handleQuickAction(action)
-                        }
+                        coqueGuideVM.openPanelWithMessage(action.message)
                     }
                 }
             }
@@ -379,23 +390,27 @@ struct LandingView: View {
 
     private func quickActionChip(_ action: CGQuickAction, perform: @escaping () -> Void) -> some View {
         Button(action: perform) {
-            HStack(spacing: 6) {
+            VStack(spacing: 6) {
                 Image(systemName: action.icon)
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(Color.accentColor)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.white)
 
                 Text(action.title)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundStyle(.primary)
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.85)
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 9)
-            .background(.ultraThinMaterial)
-            .clipShape(Capsule())
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 10)
+            .padding(.horizontal, 6)
+            .background(Color.white.opacity(0.15))
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             .overlay(
-                Capsule()
-                    .stroke(Color.white.opacity(0.3), lineWidth: 0.5)
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .stroke(Color.white.opacity(0.25), lineWidth: 0.5)
             )
         }
         .buttonStyle(.plain)

@@ -16,6 +16,9 @@ final class CamScannerViewModel: ObservableObject {
     let camera = CameraService()
     let speech = SpeechService()
 
+    // MARK: - Catalog
+    private let catalog = MuseumObjectsCatalog.load()
+
     // MARK: - Published State
     @Published var detectedObject: MuseumObject? = nil
     @Published var isPanelExpanded = false
@@ -66,22 +69,22 @@ final class CamScannerViewModel: ObservableObject {
             do {
                 let result = try await camera.classifyCurrentFrame()
                 withAnimation {
-                    detectedObject = MuseumObject(
-                        title: result.label,
-                        era: "Etiquetado ML",
-                        description: "No hay información adicional disponible en la base de datos. Esta etiqueta proviene del modelo de clasificación.",
+                    detectedObject = catalog.museumObject(
+                        forLabel: result.label,
                         confidence: result.confidence
                     )
                 }
                 isScanning = false
             } catch {
                 isScanning = false
-                detectedObject = MuseumObject(
-                    title: "Desconocido",
-                    era: "Etiquetado ML",
-                    description: "No se pudo obtener una etiqueta del modelo. Intenta escanear nuevamente.",
-                    confidence: 0.0
-                )
+                withAnimation {
+                    detectedObject = MuseumObject(
+                        title: catalog.unknown.title,
+                        era: catalog.unknown.era,
+                        description: "No se pudo completar el escaneo. Intenta acercarte al objeto, mejorar la iluminación o encuadrarlo dentro del marco del escáner.",
+                        confidence: 0.0
+                    )
+                }
             }
         }
     }
@@ -95,6 +98,15 @@ final class CamScannerViewModel: ObservableObject {
     func togglePanelExpanded() {
         withAnimation(.easeInOut(duration: 0.25)) {
             isPanelExpanded.toggle()
+        }
+    }
+
+    /// Cierra el panel de información y detiene cualquier lectura activa.
+    func dismissInfoPanel() {
+        speech.stop()
+        withAnimation(.easeInOut(duration: 0.25)) {
+            detectedObject = nil
+            isPanelExpanded = false
         }
     }
 }

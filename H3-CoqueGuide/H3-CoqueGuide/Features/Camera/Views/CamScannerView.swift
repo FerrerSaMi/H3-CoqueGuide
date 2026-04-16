@@ -14,7 +14,7 @@ import UIKit
 struct CamScannerView: View {
 
     // MARK: Environment
-    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var coqueGuideVM: CGViewModel
 
     // MARK: ViewModel
     @StateObject private var viewModel = CamScannerViewModel()
@@ -50,26 +50,13 @@ struct CamScannerView: View {
         .onDisappear {
             viewModel.onDisappear()
         }
-        .ignoresSafeArea(edges: .bottom)
-        .preferredColorScheme(.dark)
     }
 
     // MARK: - Top Bar
 
     private var topBar: some View {
-        HStack {
-            Button { dismiss() } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .frame(width: 38, height: 38)
-                    .background(.black.opacity(0.45))
-                    .clipShape(Circle())
-            }
-            .accessibilityLabel("Cerrar escáner")
-
-            Spacer()
-
+        ZStack {
+            // Título centrado
             VStack(spacing: 2) {
                 Text("ESCÁNER")
                     .font(.system(size: 11, weight: .semibold, design: .monospaced))
@@ -80,20 +67,21 @@ struct CamScannerView: View {
                     .foregroundStyle(.white)
             }
 
-            Spacer()
-
-            // Flash toggle
-            Button {
-                viewModel.toggleFlash()
-            } label: {
-                Image(systemName: viewModel.isFlashOn ? "bolt.fill" : "bolt.slash.fill")
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundStyle(viewModel.isFlashOn ? .yellow : .white)
-                    .frame(width: 38, height: 38)
-                    .background(.black.opacity(0.45))
-                    .clipShape(Circle())
+            // Flash a la derecha
+            HStack {
+                Spacer()
+                Button {
+                    viewModel.toggleFlash()
+                } label: {
+                    Image(systemName: viewModel.isFlashOn ? "bolt.fill" : "bolt.slash.fill")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(viewModel.isFlashOn ? .yellow : .white)
+                        .frame(width: 38, height: 38)
+                        .background(.black.opacity(0.45))
+                        .clipShape(Circle())
+                }
+                .accessibilityLabel(viewModel.isFlashOn ? "Apagar flash" : "Encender flash")
             }
-            .accessibilityLabel(viewModel.isFlashOn ? "Apagar flash" : "Encender flash")
         }
         .padding(.horizontal, 20)
         .padding(.top, 16)
@@ -121,7 +109,7 @@ struct CamScannerView: View {
         VStack(alignment: .leading, spacing: 14) {
 
             // Header
-            HStack(alignment: .top) {
+            HStack(alignment: .top, spacing: 10) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(obj.title)
                         .font(.system(size: 17, weight: .bold))
@@ -140,6 +128,19 @@ struct CamScannerView: View {
                     .background(.orange)
                     .clipShape(Capsule())
                     .accessibilityLabel("Confianza: \(Int(obj.confidence * 100)) por ciento")
+
+                Button {
+                    viewModel.dismissInfoPanel()
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 24, height: 24)
+                        .background(.white.opacity(0.15))
+                        .clipShape(Circle())
+                }
+                .accessibilityLabel("Cerrar información")
+                .accessibilityHint("Oculta la descripción del objeto escaneado")
             }
 
             // Descripción
@@ -172,6 +173,11 @@ struct CamScannerView: View {
 
                 speakButton(for: obj)
             }
+
+            // CTA a Coque (solo cuando la pieza fue reconocida)
+            if !obj.isUnknown {
+                askCoqueButton(for: obj)
+            }
         }
         .padding(18)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
@@ -181,6 +187,36 @@ struct CamScannerView: View {
         )
         .padding(.horizontal, 20)
         .animation(.easeInOut(duration: 0.2), value: viewModel.speech.isSpeaking)
+    }
+
+    // MARK: - Ask Coque Button
+
+    private func askCoqueButton(for obj: MuseumObject) -> some View {
+        Button {
+            let prompt = "Cuéntame más sobre \(obj.title)."
+            viewModel.dismissInfoPanel()
+            coqueGuideVM.openPanelWithMessage(prompt)
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "sparkles")
+                    .font(.system(size: 13, weight: .bold))
+                Text("Pregúntale a Coque")
+                    .font(.system(size: 14, weight: .semibold))
+            }
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(
+                LinearGradient(
+                    colors: [Color.orange, Color.orange.opacity(0.78)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+        }
+        .accessibilityLabel("Pregúntale a Coque sobre \(obj.title)")
+        .accessibilityHint("Cierra el escáner y abre el asistente con el contexto de la pieza")
     }
 
     // MARK: - Speak Button
@@ -303,4 +339,5 @@ private struct SpeechProgressBar: View {
 
 #Preview {
     CamScannerView()
+        .environmentObject(CGViewModel())
 }

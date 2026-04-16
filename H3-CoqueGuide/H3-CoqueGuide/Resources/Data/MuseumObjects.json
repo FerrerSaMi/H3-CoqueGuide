@@ -1,0 +1,99 @@
+{
+  "objects": {
+    "Acropora Pimienta": {
+      "title": "Acrópora Pimienta",
+      "era": "PLANETA TIERRA · Biodiversidad marina",
+      "description": "Especie de coral pétreo característica de los arrecifes del Caribe mexicano. Su presencia en Horno3 forma parte de la exhibición Planeta Tierra, que vincula la actividad industrial humana con los ecosistemas globales y las consecuencias del cambio climático sobre la vida marina."
+    },
+    "Carretilla de fundición": {
+      "title": "Carretilla de Fundición",
+      "era": "GALERÍA DEL ACERO · Principios del siglo XX",
+      "description": "Herramienta robusta usada por los trabajadores de la Fundidora de Monterrey para transportar arena de moldeo, chatarra y otros materiales dentro de las áreas de fundición. Fabricada en acero resistente al calor y al desgaste, representa el trabajo manual que sostenía la cadena productiva del horno alto."
+    },
+    "Chevrolet 3100": {
+      "title": "Chevrolet 3100",
+      "era": "1947 — 1955 · Pickup clásica",
+      "description": "Camioneta pickup producida por General Motors durante la posguerra. Su carrocería de acero estampado ejemplifica cómo la industria siderúrgica del noreste de México contribuyó a la expansión automotriz norteamericana. Es un ícono del diseño industrial de mediados del siglo XX."
+    },
+    "Coche de muchos acabados": {
+      "title": "Coche de Muchos Acabados",
+      "era": "GALERÍA DEL ACERO · Muestra técnica",
+      "description": "Automóvil de exhibición que muestra distintos tratamientos superficiales del acero: pintura, cromado, galvanizado y acabado mate. Permite al visitante comprender cómo una sola aleación puede transformarse en múltiples apariencias según el proceso de acabado industrial."
+    },
+    "Cuchara de Almeja": {
+      "title": "Cuchara de Almeja",
+      "era": "GALERÍA DEL ACERO · Herramienta de carga",
+      "description": "Pinza mecánica de grandes mordazas utilizada en plantas siderúrgicas para recoger chatarra, mineral o carga a granel. Su diseño articulado le permite abrirse y cerrarse como una almeja, facilitando el traslado de materiales pesados hacia los hornos."
+    },
+    "Cuchara de Volteo": {
+      "title": "Cuchara de Volteo",
+      "era": "GALERÍA DEL ACERO · Transporte de metal líquido",
+      "description": "Recipiente industrial revestido de material refractario utilizado para transportar y vaciar acero fundido a más de 1500 °C. Su mecanismo de volteo controlado permitía verter con precisión el metal líquido en los moldes durante la colada."
+    },
+    "Cuchara de fundición": {
+      "title": "Cuchara de Fundición",
+      "era": "GALERÍA DEL ACERO · Proceso siderúrgico",
+      "description": "Gran receptáculo metálico usado para recibir el acero líquido directamente del horno alto y trasladarlo a los procesos de colada continua o a los moldes de lingotera. Una pieza clave en el ciclo de producción del acero."
+    },
+    "Elevador de Carga": {
+      "title": "Elevador de Carga",
+      "era": "HORNO ALTO No. 3 · Infraestructura",
+      "description": "Sistema diagonal de elevación que llevaba la carga de mineral de hierro, coque y caliza hasta la boca del horno alto. Operaba continuamente durante los 76 años de actividad del Horno 3, alimentando la bestia industrial que definió a Monterrey."
+    },
+    "Estrella 04": {
+      "title": "Estrella 04",
+      "era": "EXHIBICIÓN PERMANENTE · Pieza emblemática",
+      "description": "Componente metálico forjado que formó parte del sistema estructural del Horno Alto No. 3. Su nomenclatura alfanumérica conserva el código de identificación original con el que era referenciada durante las operaciones de mantenimiento de la Fundidora."
+    },
+    "Maqueta Modelo Horno 3": {
+      "title": "Maqueta del Horno 3",
+      "era": "GALERÍA DE HISTORIA · Modelo a escala",
+      "description": "Representación tridimensional reducida del Alto Horno No. 3 que permite apreciar en conjunto la estructura completa del coloso industrial de 70 metros. La maqueta muestra los niveles, pasillos, elevadores y la chimenea que hoy puedes recorrer."
+    },
+    "Molde de fundición": {
+      "title": "Molde de Fundición",
+      "era": "GALERÍA DEL ACERO · Herramienta de forma",
+      "description": "Pieza de arena aglomerada o metal que da forma al acero líquido durante la colada. Los moldes permitían producir lingotes, rieles, piezas automotrices y miles de componentes industriales que impulsaron la modernización de México."
+    },
+    "Molino Mezclador": {
+      "title": "Molino Mezclador",
+      "era": "GALERÍA DEL ACERO · Preparación de materias primas",
+      "description": "Equipo industrial utilizado para homogeneizar la arena de moldeo con aglomerantes y aditivos antes de la fundición. Su mezcla uniforme era esencial para garantizar piezas de acero sin defectos estructurales ni porosidades."
+    },
+    "Museo Horno 3": {
+      "title": "Museo del Acero Horno³",
+      "era": "MONUMENTO INDUSTRIAL · Inaugurado en 2007",
+      "description": "La estructura que habitas hoy como museo fue, entre 1968 y 1986, el corazón siderúrgico del noreste de México. El Alto Horno No. 3 de la Fundidora de Monterrey produjo acero durante 76 años. Hoy es Patrimonio Industrial de la Humanidad y un centro cultural de talla internacional."
+    },
+    "Reloj Checador": {
+      "title": "Reloj Checador",
+      "era": "GALERÍA DE HISTORIA · Vida obrera",
+      "description": "Mecanismo utilizado por los obreros de la Fundidora para registrar sus horarios de entrada y salida mediante tarjetas perforadas. Este dispositivo simboliza la organización del trabajo industrial y la vida cotidiana de miles de familias regiomontanas durante el siglo XX."
+    },
+    "Rueda Inglesa": {
+      "title": "Rueda Inglesa",
+      "era": "GALERÍA DEL ACERO · Conformado de metal",
+      "description": "Herramienta artesanal usada para dar forma curva a láminas de acero, especialmente en la fabricación de carrocerías de automóvil y aeronaves. Permite transformar una superficie plana en una pieza tridimensional mediante la presión entre dos ruedas contrapuestas."
+    },
+    "Televisor Antiguo": {
+      "title": "Televisor Antiguo",
+      "era": "GALERÍA DE HISTORIA · Vida cotidiana",
+      "description": "Aparato electrónico doméstico con gabinete de madera y chasis metálico fabricado en la segunda mitad del siglo XX. Forma parte de la exhibición que muestra cómo el acero llegó a los hogares mexicanos no solo como infraestructura, sino como parte de la vida cotidiana."
+    },
+    "Tenazas de Garra Industrial": {
+      "title": "Tenazas de Garra Industrial",
+      "era": "GALERÍA DEL ACERO · Herramienta de sujeción",
+      "description": "Pinzas de gran tamaño diseñadas para manipular piezas de acero al rojo vivo dentro de los hornos y líneas de laminación. Su garra metálica soportaba temperaturas extremas, permitiendo al operario trabajar con seguridad cerca del metal fundido."
+    },
+    "Vagón Torpedo": {
+      "title": "Vagón Torpedo",
+      "era": "GALERÍA DEL ACERO · Transporte ferroviario",
+      "description": "Carro ferroviario de forma cilíndrica revestido con ladrillo refractario, diseñado para transportar arrabio (hierro líquido) desde el horno alto hasta la acería. Cada vagón podía mover hasta 300 toneladas de metal fundido a más de 1400 °C, siendo una pieza clave de la logística siderúrgica."
+    }
+  },
+  "unknown": {
+    "title": "Pieza no identificada",
+    "era": "SIN RECONOCER",
+    "description": "No logré reconocer esta pieza con suficiente certeza. Prueba acercarte más al objeto, mejorar la iluminación o encuadrarlo dentro del marco del escáner. También puedes preguntarle directamente a Coque sobre lo que estás viendo."
+  }
+}

@@ -72,7 +72,7 @@ final class CGViewModel: ObservableObject {
     // MARK: - API pública
 
     /// Abre el panel de conversación.
-    /// Muestra el mensaje de bienvenida si la conversación está vacía.
+    /// Muestra el mensaje de bienvenida si la conversación está vacía y no hay mensaje pendiente.
     func openPanel(initialMessage: String? = nil) {
         isPanelOpen = true
         activeSuggestion = nil
@@ -83,7 +83,8 @@ final class CGViewModel: ObservableObject {
             return
         }
 
-        if messages.isEmpty {
+        // Si hay un mensaje pendiente, no mostramos welcome para evitar ruido visual
+        if messages.isEmpty && pendingMessage == nil {
             showWelcomeMessage()
         }
     }
@@ -94,10 +95,31 @@ final class CGViewModel: ObservableObject {
             // El panel ya está abierto, enviar directamente
             sendMessage(message)
         } else {
-            // Guardar mensaje pendiente y abrir el panel
+            // Primero marcamos el mensaje pendiente, luego abrimos el panel
+            // (el orden importa: openPanel chequea pendingMessage para decidir el welcome).
             pendingMessage = message
             openPanel()
         }
+    }
+
+    /// Abre el panel y envía un prompt silencioso al servicio de IA:
+    /// solicita respuesta pero **no** muestra el prompt como mensaje del usuario.
+    /// Útil para contextos largos (p. ej. el prompt de ruta generado tras la encuesta).
+    func openPanelWithSilentPrompt(_ prompt: String) {
+        let trimmed = prompt.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+
+        isPanelOpen = true
+        activeSuggestion = nil
+        pendingSuggestionsCount = 0
+
+        // Evita colisionar con otro mensaje pendiente que abriría el chat duplicado.
+        pendingMessage = nil
+
+        // Si ya está pensando (otra petición en vuelo), dejamos pasar la actual.
+        guard !isThinking else { return }
+
+        fetchResponse(for: trimmed)
     }
 
     /// Envía un mensaje del usuario y solicita respuesta al servicio de IA.

@@ -119,27 +119,22 @@ struct CGHomeInviteContent {
 
     static let `default` = CGHomeInviteContent(
         title: "CoqueGuide",
-        message: "!Bienvenido! ¿Como puedo ayudarte en tu visita?",
+        message: "¡Bienvenido! ¿Cómo puedo ayudarte en tu visita?",
         quickActions: [
             CGQuickAction(
-                title: "Asistente",
-                icon: "message.fill",
-                message: ""
-            ),
-            CGQuickAction(
-                title: "¿Donde estoy?",
-                icon: "location",
-                message: "¿Donde estoy en el museo?"
+                title: "¿Dónde estoy?",
+                icon: "location.fill",
+                message: "¿Dónde estoy en el museo?"
             ),
             CGQuickAction(
                 title: "Ver mapa",
-                icon: "map",
+                icon: "map.fill",
                 message: "¿Puedes mostrarme el mapa del museo?"
             ),
             CGQuickAction(
-                title: "Proximo evento",
+                title: "Próximo evento",
                 icon: "calendar",
-                message: "¿Cual es el proximo evento?"
+                message: "¿Cuál es el próximo evento?"
             )
         ]
     )

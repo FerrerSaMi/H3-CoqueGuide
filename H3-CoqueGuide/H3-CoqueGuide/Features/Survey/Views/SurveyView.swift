@@ -363,7 +363,9 @@ private extension SurveyView {
         }
 
         let prompt = viewModel.makeCoqueRoutePrompt()
-        coqueGuideVM.openPanel(initialMessage: prompt)
+        // Envía el prompt como contexto silencioso: no aparecerá como burbuja
+        // del usuario en el chat, solo se mostrará la respuesta de Coque.
+        coqueGuideVM.openPanelWithSilentPrompt(prompt)
     }
 }
 

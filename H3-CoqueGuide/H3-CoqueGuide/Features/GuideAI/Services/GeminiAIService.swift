@@ -43,7 +43,7 @@ final class GeminiAIService: CGAIServiceProtocol {
             let responseText = try await client.generateContent(
                 contents: conversationHistory,
                 systemInstruction: Self.systemPrompt(visitor: visitorProfile),
-                maxOutputTokens: 2048,
+                maxOutputTokens: 4096,
                 temperature: 0.7
             )
             conversationHistory.append([
