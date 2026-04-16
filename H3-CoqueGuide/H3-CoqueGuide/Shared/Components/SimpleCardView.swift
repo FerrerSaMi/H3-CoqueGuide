@@ -16,30 +16,33 @@ struct SimpleCardView: View {
     @State private var isVisible = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text(title)
-                .font(.headline)
-                .fontWeight(.semibold)
-                .foregroundStyle(.primary)
-
-            Text(description)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .lineLimit(3)
-                .fixedSize(horizontal: false, vertical: true)
-
-            Button(action: action) {
-                Text(actionTitle)
-                    .font(.subheadline)
+        ScrollView(.vertical, showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 16) {
+                Text(title)
+                    .font(.headline)
                     .fontWeight(.semibold)
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(Color.accentColor)
-                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .foregroundStyle(.primary)
+
+                Text(description)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Button(action: action) {
+                    Text(actionTitle)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Color.accentColor)
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                }
             }
+            .padding(24)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(20)
+        .frame(maxWidth: 360, maxHeight: UIScreen.main.bounds.height * 0.68)
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .shadow(color: Color.black.opacity(0.12), radius: 12, x: 0, y: 6)
