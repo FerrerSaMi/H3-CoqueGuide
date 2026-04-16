@@ -44,6 +44,8 @@ final class CameraService: NSObject, ObservableObject {
     @Published var cameraError: CameraError?
     @Published var capturedImage: UIImage?
     @Published var isCapturing = false
+    @Published var isRunning = false
+    @Published var isConfigured = false
 
     // MARK: Session
     let session = AVCaptureSession()
@@ -51,27 +53,40 @@ final class CameraService: NSObject, ObservableObject {
     // MARK: Private
     private let sessionQueue = DispatchQueue(label: "com.h3.camera.session", qos: .userInitiated)
     private let photoOutput  = AVCapturePhotoOutput()
-    private var isConfigured = false
     private var photoContinuation: CheckedContinuation<UIImage, Error>?
     private var visionModel: VNCoreMLModel?
+    private var isConfiguring = false
 
     // MARK: - Public API
 
     func startSession() {
         sessionQueue.async { [weak self] in
             guard let self else { return }
+
+            // Evitar inicializaciones duplicadas
+            guard !self.isConfiguring else { return }
+
+            self.isConfiguring = true
+
             switch AVCaptureDevice.authorizationStatus(for: .video) {
             case .authorized:
                 self.configureAndStart()
+                DispatchQueue.main.async {
+                    self.isConfiguring = false
+                }
             case .notDetermined:
                 AVCaptureDevice.requestAccess(for: .video) { granted in
-                    if granted {
-                        self.configureAndStart()
-                    } else {
-                        self.publishError(.permissionDenied)
+                    self.sessionQueue.async {
+                        self.isConfiguring = false
+                        if granted {
+                            self.configureAndStart()
+                        } else {
+                            self.publishError(.permissionDenied)
+                        }
                     }
                 }
             default:
+                self.isConfiguring = false
                 self.publishError(.permissionDenied)
             }
         }
@@ -82,6 +97,9 @@ final class CameraService: NSObject, ObservableObject {
             guard let self else { return }
             if self.session.isRunning {
                 self.session.stopRunning()
+                DispatchQueue.main.async {
+                    self.isRunning = false
+                }
             }
         }
     }
@@ -99,7 +117,11 @@ final class CameraService: NSObject, ObservableObject {
             self.session.outputs.forEach { self.session.removeOutput($0) }
             self.session.commitConfiguration()
 
-            self.isConfigured = false
+            DispatchQueue.main.async {
+                self.isConfigured = false
+                self.isRunning = false
+            }
+
             self.photoContinuation?.resume(throwing: CameraError.captureError("La sesión de cámara se ha detenido."))
             self.photoContinuation = nil
             self.visionModel = nil
