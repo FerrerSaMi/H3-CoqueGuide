@@ -17,15 +17,18 @@ struct SimpleCardView: View {
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 20) {
                 Text(title)
-                    .font(.headline)
-                    .fontWeight(.semibold)
+                    .font(.title2)
+                    .fontWeight(.bold)
                     .foregroundStyle(.primary)
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 Text(description)
-                    .font(.subheadline)
+                    .font(.body)
                     .foregroundStyle(.secondary)
+                    .lineSpacing(6)
                     .fixedSize(horizontal: false, vertical: true)
 
                 Button(action: action) {
@@ -39,7 +42,7 @@ struct SimpleCardView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 }
             }
-            .padding(24)
+            .padding(26)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .frame(maxWidth: 360, maxHeight: UIScreen.main.bounds.height * 0.68)
