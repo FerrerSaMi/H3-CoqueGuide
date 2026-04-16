@@ -41,6 +41,7 @@ struct CGVisitorProfile {
     let attractionPreference: String
     let specificAttraction: String
     let preferredLanguage: String
+    let translationLanguage: String
     let coquePersonality: String
 
     /// Crea un perfil desde un ExcursionUserProfile de SwiftData.
@@ -51,6 +52,7 @@ struct CGVisitorProfile {
         self.attractionPreference = profile.resolvedAttractionPreference
         self.specificAttraction = profile.specificAttraction
         self.preferredLanguage = profile.preferredLanguage
+        self.translationLanguage = profile.translationLanguage
         self.coquePersonality = profile.coquePersonality
     }
 }

@@ -18,6 +18,10 @@ struct CamScannerView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var bottomSafeArea: CGFloat = 0
     @State private var isIntroVisible = true
+    @State private var showLanguagePicker = false
+
+    // MARK: - Available Languages
+    private let availableLanguages = ["Español", "English", "Français", "Português", "Korean", "Arabic"]
 
     // MARK: - Body
 
@@ -63,6 +67,27 @@ struct CamScannerView: View {
                                 .background(Color.black.opacity(0.7))
                                 .cornerRadius(8)
 
+                            // Language Picker
+                            HStack {
+                                Text("Traducir a:")
+                                    .foregroundColor(.white)
+                                    .font(.subheadline)
+                                
+                                Spacer()
+                                
+                                Button(action: {
+                                    showLanguagePicker = true
+                                }) {
+                                    Text(viewModel.selectedTranslationLanguage)
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(Color.blue.opacity(0.3))
+                                        .cornerRadius(6)
+                                }
+                            }
+                            .padding(.horizontal)
+
                             if let translated = viewModel.translatedText {
                                 Text("Traducido: \(translated)")
                                     .foregroundColor(.white)
@@ -107,6 +132,30 @@ struct CamScannerView: View {
             viewModel.loadVisitorProfile(from: modelContext)
         }
         .onDisappear { viewModel.onDisappear() }
+        .sheet(isPresented: $showLanguagePicker) {
+            NavigationView {
+                List(availableLanguages, id: \.self) { language in
+                    Button(action: {
+                        viewModel.selectedTranslationLanguage = language
+                        viewModel.saveTranslationLanguagePreference(to: modelContext)
+                        showLanguagePicker = false
+                    }) {
+                        HStack {
+                            Text(language)
+                            Spacer()
+                            if viewModel.selectedTranslationLanguage == language {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                    }
+                }
+                .navigationTitle("Seleccionar idioma")
+                .navigationBarItems(trailing: Button("Cancelar") {
+                    showLanguagePicker = false
+                })
+            }
+        }
         .preferredColorScheme(.dark)
     }
 

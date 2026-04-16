@@ -27,6 +27,7 @@ final class CamScannerViewModel: ObservableObject {
     @Published var descriptionGenerationError: String? = nil
     @Published var extractedText: String? = nil
     @Published var translatedText: String? = nil
+    @Published var selectedTranslationLanguage: String = "Español"
 
     // MARK: - Initialization
 
@@ -50,6 +51,7 @@ final class CamScannerViewModel: ObservableObject {
                 let cgProfile = CGVisitorProfile(from: profile)
                 geminiService?.visitorProfile = cgProfile
                 visitorProfile = cgProfile
+                selectedTranslationLanguage = profile.translationLanguage
             }
         } catch {
             print("⚠️ No se pudo cargar el perfil de visitante: \(error)")
@@ -161,13 +163,27 @@ final class CamScannerViewModel: ObservableObject {
         guard let text = extractedText, let service = geminiService else { return }
 
         do {
-            let targetLanguage = visitorProfile?.preferredLanguage ?? "Español"
-            let languageName = languageName(for: targetLanguage)
+            let languageName = languageName(for: selectedTranslationLanguage)
             let translated = try await service.translateText(text, to: languageName)
             translatedText = translated
         } catch {
             translatedText = nil
             print("❌ Translation error: \(error)")
+        }
+    }
+
+    func saveTranslationLanguagePreference(to context: ModelContext) {
+        do {
+            let descriptor = FetchDescriptor<ExcursionUserProfile>(
+                sortBy: [SortDescriptor(\.updatedAt, order: .reverse)]
+            )
+            if let profile = try context.fetch(descriptor).first {
+                profile.translationLanguage = selectedTranslationLanguage
+                profile.updatedAt = .now
+                try context.save()
+            }
+        } catch {
+            print("❌ Error saving translation language preference: \(error)")
         }
     }
 

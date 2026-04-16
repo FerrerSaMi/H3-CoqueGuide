@@ -18,6 +18,7 @@ final class ExcursionUserProfile {
     var resolvedAttractionPreference: String
     var specificAttraction: String
     var preferredLanguage: String
+    var translationLanguage: String
     var coquePersonality: String
     var aiDescriptionText: String
     var updatedAt: Date
@@ -31,6 +32,7 @@ final class ExcursionUserProfile {
         resolvedAttractionPreference: String = "",
         specificAttraction: String = "",
         preferredLanguage: String = "",
+        translationLanguage: String = "Español",
         coquePersonality: String = "",
         aiDescriptionText: String = "",
         updatedAt: Date = .now
@@ -43,6 +45,7 @@ final class ExcursionUserProfile {
         self.resolvedAttractionPreference = resolvedAttractionPreference
         self.specificAttraction = specificAttraction
         self.preferredLanguage = preferredLanguage
+        self.translationLanguage = translationLanguage
         self.coquePersonality = coquePersonality
         self.aiDescriptionText = aiDescriptionText
         self.updatedAt = updatedAt
