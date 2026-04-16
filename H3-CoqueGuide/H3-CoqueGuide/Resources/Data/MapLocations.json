@@ -28,7 +28,8 @@
       "locations": [
         {"id": 15, "name": "Terraza verde", "x": 162, "y": 442},
         {"id": 16, "name": "Salón Show del horno", "x": 388, "y": 355},
-        {"id": 17, "name": "Planeta Tierra", "x": 600, "y": 480}
+        {"id": 17, "name": "Planeta Tierra", "x": 600, "y": 480},
+        {"id": 20, "name": "Baños · Nivel 2", "type": "service", "x": 300, "y": 600}
       ]
     }
   ]
