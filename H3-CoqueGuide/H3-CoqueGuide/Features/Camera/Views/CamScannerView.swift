@@ -61,21 +61,23 @@ struct CamScannerView: View {
 
                     VStack(spacing: 16) {
                         if let text = viewModel.extractedText {
-                            VStack(alignment: .leading, spacing: 12) {
+                            VStack(alignment: .leading, spacing: 14) {
                                 Text("Texto detectado")
-                                    .font(.subheadline)
-                                    .fontWeight(.semibold)
+                                    .font(.system(.headline, design: .default))
+                                    .fontWeight(.bold)
                                     .foregroundColor(.white)
+                                    .lineSpacing(4)
 
                                 Text(text)
-                                    .font(.body)
+                                    .font(.system(.body, design: .default))
                                     .foregroundColor(.white)
-                                    .lineLimit(nil)
+                                    .lineSpacing(6)
+                                    .multilineTextAlignment(.leading)
                                     .fixedSize(horizontal: false, vertical: true)
 
                                 HStack {
                                     Text("Traducir a:")
-                                        .font(.caption)
+                                        .font(.system(.caption, design: .default))
                                         .foregroundColor(.white.opacity(0.8))
 
                                     Spacer()
@@ -94,16 +96,18 @@ struct CamScannerView: View {
                                 }
 
                                 if let translated = viewModel.translatedText {
-                                    VStack(alignment: .leading, spacing: 8) {
+                                    VStack(alignment: .leading, spacing: 10) {
                                         Text("Traducido")
-                                            .font(.subheadline)
-                                            .fontWeight(.semibold)
+                                            .font(.system(.headline, design: .default))
+                                            .fontWeight(.bold)
                                             .foregroundColor(.white)
+                                            .lineSpacing(4)
 
                                         Text(translated)
-                                            .font(.body)
+                                            .font(.system(.body, design: .default))
                                             .foregroundColor(.white)
-                                            .lineLimit(nil)
+                                            .lineSpacing(6)
+                                            .multilineTextAlignment(.leading)
                                             .fixedSize(horizontal: false, vertical: true)
                                     }
                                 } else {
@@ -117,7 +121,7 @@ struct CamScannerView: View {
                                     .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                                 }
                             }
-                            .padding(18)
+                            .padding(22)
                             .background(.ultraThinMaterial)
                             .background(
                                 RoundedRectangle(cornerRadius: 22, style: .continuous)
