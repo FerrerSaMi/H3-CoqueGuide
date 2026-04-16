@@ -165,6 +165,15 @@ struct CamScannerView: View {
                 .onPreferenceChange(BottomSafeAreaKey.self) { bottomSafeArea = $0 }
             }
         }
+        .overlay {
+            if viewModel.showFallbackUI {
+                CameraErrorFallbackView(
+                    errorMessage: viewModel.cameraError ?? "Error desconocido de cámara",
+                    onRetry: viewModel.retryCameraSetup
+                )
+                .transition(.opacity)
+            }
+        }
         .onAppear {
             viewModel.loadVisitorProfile(from: modelContext)
         }
@@ -243,6 +252,49 @@ private struct BottomSafeAreaKey: PreferenceKey {
 
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
         value = max(value, nextValue())
+    }
+}
+
+// MARK: - Camera Error Fallback View
+
+struct CameraErrorFallbackView: View {
+    let errorMessage: String
+    let onRetry: () -> Void
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.8)
+                .ignoresSafeArea()
+
+            VStack(spacing: 24) {
+                Image(systemName: "camera.fill")
+                    .font(.system(size: 64))
+                    .foregroundColor(.white.opacity(0.6))
+
+                Text("Error de Cámara")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+
+                Text(errorMessage)
+                    .font(.body)
+                    .foregroundColor(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+
+                Button(action: onRetry) {
+                    Text("Reintentar")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 32)
+                        .padding(.vertical, 16)
+                        .background(Color.blue)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                .padding(.top, 8)
+            }
+            .padding()
+        }
     }
 }
 

@@ -28,6 +28,11 @@ final class CamScannerViewModel: ObservableObject {
     @Published var extractedText: String? = nil
     @Published var translatedText: String? = nil
     @Published var selectedTranslationLanguage: String = "Español"
+    @Published var cameraError: String? = nil
+    @Published var showFallbackUI = false
+
+    // MARK: Private
+    private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Initialization
 
@@ -37,6 +42,24 @@ final class CamScannerViewModel: ObservableObject {
         } else {
             geminiService = nil
         }
+
+        setupCameraErrorObserver()
+    }
+
+    private func setupCameraErrorObserver() {
+        camera.$cameraError
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] error in
+                if let error = error {
+                    self?.cameraError = error.localizedDescription
+                    self?.showFallbackUI = true
+                    print("📷 Camera error: \(error.localizedDescription)")
+                } else {
+                    self?.cameraError = nil
+                    self?.showFallbackUI = false
+                }
+            }
+            .store(in: &cancellables)
     }
 
     // MARK: - Lifecycle
@@ -59,6 +82,7 @@ final class CamScannerViewModel: ObservableObject {
     }
 
     func onAppear() {
+        camera.clearError()
         camera.startSession()
     }
 
@@ -66,6 +90,18 @@ final class CamScannerViewModel: ObservableObject {
         camera.resetSession()
         speech.stop()
         setFlash(false)
+    }
+
+    /// Intenta recuperar de un error de cámara reiniciando la sesión
+    func retryCameraSetup() {
+        print("🔄 Retrying camera setup")
+        camera.clearError()
+        camera.resetSession()
+
+        // Pequeño delay antes de reiniciar
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            self?.camera.startSession()
+        }
     }
 
     // MARK: - Flash
