@@ -61,24 +61,29 @@ struct CamScannerView: View {
 
                     VStack(spacing: 16) {
                         if let text = viewModel.extractedText {
-                            VStack(alignment: .leading, spacing: 14) {
-                                Text("Texto detectado")
-                                    .font(.system(.headline, design: .default))
-                                    .fontWeight(.bold)
-                                    .foregroundColor(.white)
-                                    .lineSpacing(4)
+                            VStack(alignment: .leading, spacing: 18) {
+                                VStack(alignment: .leading, spacing: 10) {
+                                    Text("Texto detectado")
+                                        .font(.system(.headline, design: .default))
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.white)
+                                        .lineSpacing(4)
 
-                                Text(text)
-                                    .font(.system(.body, design: .default))
-                                    .foregroundColor(.white)
-                                    .lineSpacing(6)
-                                    .multilineTextAlignment(.leading)
-                                    .fixedSize(horizontal: false, vertical: true)
+                                    Text(text)
+                                        .font(.system(.body, design: .default))
+                                        .foregroundColor(.white)
+                                        .lineSpacing(6)
+                                        .multilineTextAlignment(.leading)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
+                                .padding(16)
+                                .background(Color.white.opacity(0.08))
+                                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
 
                                 HStack {
                                     Text("Traducir a:")
                                         .font(.system(.caption, design: .default))
-                                        .foregroundColor(.white.opacity(0.8))
+                                        .foregroundColor(.white.opacity(0.75))
 
                                     Spacer()
 
@@ -86,7 +91,7 @@ struct CamScannerView: View {
                                         showLanguagePicker = true
                                     }) {
                                         Text(viewModel.selectedTranslationLanguage)
-                                            .font(.caption)
+                                            .font(.system(.caption, design: .default))
                                             .foregroundColor(.white)
                                             .padding(.horizontal, 12)
                                             .padding(.vertical, 8)
@@ -97,7 +102,7 @@ struct CamScannerView: View {
 
                                 if let translated = viewModel.translatedText {
                                     VStack(alignment: .leading, spacing: 10) {
-                                        Text("Traducido")
+                                        Text("Traducción")
                                             .font(.system(.headline, design: .default))
                                             .fontWeight(.bold)
                                             .foregroundColor(.white)
@@ -105,11 +110,14 @@ struct CamScannerView: View {
 
                                         Text(translated)
                                             .font(.system(.body, design: .default))
-                                            .foregroundColor(.white)
+                                            .foregroundColor(.white.opacity(0.95))
                                             .lineSpacing(6)
                                             .multilineTextAlignment(.leading)
                                             .fixedSize(horizontal: false, vertical: true)
                                     }
+                                    .padding(16)
+                                    .background(Color.blue.opacity(0.14))
+                                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                                 } else {
                                     Button("Traducir") {
                                         Task { await viewModel.translateExtractedText() }
