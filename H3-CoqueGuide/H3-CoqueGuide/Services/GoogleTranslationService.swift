@@ -7,9 +7,67 @@
 //
 
 import Foundation
-import MLKitTranslate
 import Combine
 import OSLog
+
+#if canImport(MLKitTranslate)
+import MLKitTranslate
+#endif
+
+#if !canImport(MLKitTranslate)
+// Fallback stubs to allow compilation when MLKitTranslate is not available.
+// These mirror the minimal API surface we use in this file.
+fileprivate enum TranslateLanguage: String {
+    case spanish
+    case english
+    case french
+    case portuguese
+    case korean
+    case arabic
+
+    var displayName: String {
+        switch self {
+        case .spanish: return "Español"
+        case .english: return "English"
+        case .french: return "Français"
+        case .portuguese: return "Português"
+        case .korean: return "Korean"
+        case .arabic: return "Arabic"
+        }
+    }
+}
+
+fileprivate struct ModelDownloadConditions {
+    var requiresWifi: Bool
+    var requiresCharging: Bool
+}
+
+fileprivate struct TranslateRemoteModel {
+    static func translateRemoteModel(_ language: TranslateLanguage) -> TranslateRemoteModel { TranslateRemoteModel() }
+    var isModelOnDevice: Bool { false }
+    func download(_ conditions: ModelDownloadConditions, completion: @escaping (Error?) -> Void) {
+        // Immediately fail to indicate unavailable feature in fallback build.
+        completion(NSError(domain: "MLKitUnavailable", code: -1, userInfo: [NSLocalizedDescriptionKey: "ML Kit Translate not available in this build"]))
+    }
+}
+
+fileprivate final class TranslatorOptions {
+    let sourceLanguage: TranslateLanguage
+    let targetLanguage: TranslateLanguage
+    init(sourceLanguage: TranslateLanguage, targetLanguage: TranslateLanguage) {
+        self.sourceLanguage = sourceLanguage
+        self.targetLanguage = targetLanguage
+    }
+}
+
+fileprivate final class Translator {
+    static func translator(options: TranslatorOptions) -> Translator { Translator() }
+    func translate(_ text: String, completion: @escaping (String?, Error?) -> Void) {
+        // Fallback just returns the original text.
+        completion(text, nil)
+    }
+}
+#endif
 
 @MainActor
 final class GoogleTranslationService: ObservableObject {
@@ -86,12 +144,6 @@ final class GoogleTranslationService: ObservableObject {
     /// Verifica si un modelo de idioma está descargado
     func isModelDownloaded(for languageName: String) -> Bool {
         guard let language = supportedLanguages[languageName] else { return false }
-
-        let conditions = ModelDownloadConditions(
-            requiresWifi: false,
-            requiresCharging: false
-        )
-
         return TranslateRemoteModel.translateRemoteModel(language).isModelOnDevice
     }
 
@@ -136,13 +188,12 @@ final class GoogleTranslationService: ObservableObject {
                 continuation.resume(returning: ())
             }
 
-            // Monitorear progreso (ML Kit no proporciona progreso directo)
-            // Simulamos progreso básico
+            // Simulated progress when actual progress not available
             Task {
                 for progress in stride(from: 0.0, to: 1.0, by: 0.1) {
                     try? await Task.sleep(nanoseconds: 500_000_000) // 0.5s
                     await MainActor.run {
-                        self.downloadProgress = progress
+                        self.downloadProgress = Float(progress)
                     }
                 }
                 await MainActor.run {
@@ -204,8 +255,7 @@ enum TranslationError: LocalizedError {
     }
 }
 
-// MARK: - TranslateLanguage Extension
-
+#if canImport(MLKitTranslate)
 extension TranslateLanguage {
     var displayName: String {
         switch self {
@@ -215,7 +265,8 @@ extension TranslateLanguage {
         case .portuguese: return "Português"
         case .korean: return "Korean"
         case .arabic: return "Arabic"
-        default: return rawValue
+        @unknown default: return rawValue
         }
     }
 }
+#endif

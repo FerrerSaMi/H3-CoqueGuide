@@ -136,6 +136,7 @@ final class GeminiAIService: CGAIServiceProtocol {
     }
 
     // MARK: - Historial
+    private func trimHistory() {
         if conversationHistory.count > maxHistoryMessages {
             conversationHistory = Array(conversationHistory.suffix(maxHistoryMessages))
         }
@@ -236,4 +237,6 @@ final class GeminiAIService: CGAIServiceProtocol {
         - No inventes información que no tengas.
         """
     }
+
 }
+

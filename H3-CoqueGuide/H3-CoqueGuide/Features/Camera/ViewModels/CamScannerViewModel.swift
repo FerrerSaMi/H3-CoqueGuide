@@ -39,13 +39,8 @@ final class CamScannerViewModel: ObservableObject {
     // MARK: Private
     private var cancellables = Set<AnyCancellable>()
 
-    // MARK: - Public Accessors
+    // MARK: - Accessors
     var googleTranslationService: GoogleTranslationService {
-        return translationService
-    }
-
-    // MARK: - Public Accessors
-    var translationService: GoogleTranslationService {
         return translationService
     }
 

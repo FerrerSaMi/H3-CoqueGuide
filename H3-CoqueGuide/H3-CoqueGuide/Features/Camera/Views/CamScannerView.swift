@@ -479,7 +479,7 @@ struct AnimatedActionButton: View {
             .padding()
         }
     }
-}
+
 
 // MARK: - Scan Success Indicator
 
