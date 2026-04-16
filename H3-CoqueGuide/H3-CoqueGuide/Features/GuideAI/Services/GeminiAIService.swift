@@ -135,36 +135,7 @@ final class GeminiAIService: CGAIServiceProtocol {
         ).trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    // MARK: - Traducción de texto
-
-    func translateText(_ text: String, to targetLanguage: String) async throws -> String {
-        guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            return text // Retornar texto original si está vacío
-        }
-
-        let message = """
-        Traduce el siguiente texto al \(targetLanguage). Mantén el significado exacto y el tono original.
-        Si el texto ya está en \(targetLanguage), simplemente retorna el texto original sin cambios.
-        Solo retorna la traducción, sin explicaciones adicionales.
-
-        Texto a traducir: "\(text)"
-        """
-
-        let contents: [[String: Any]] = [
-            ["role": "user", "parts": [["text": message]]]
-        ]
-
-        return try await client.generateContent(
-            contents: contents,
-            systemInstruction: "Eres un traductor profesional. Traduce de manera precisa y natural.",
-            maxOutputTokens: 1024,
-            temperature: 0.3
-        ).trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
     // MARK: - Historial
-
-    private func trimHistory() {
         if conversationHistory.count > maxHistoryMessages {
             conversationHistory = Array(conversationHistory.suffix(maxHistoryMessages))
         }

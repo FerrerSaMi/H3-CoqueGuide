@@ -17,6 +17,7 @@ final class CamScannerViewModel: ObservableObject {
     let camera = CameraService()
     let speech = SpeechService()
     private let geminiService: GeminiAIService?
+    private let translationService = GoogleTranslationService()
     private var visitorProfile: CGVisitorProfile?
 
     // MARK: - Published State
@@ -30,9 +31,22 @@ final class CamScannerViewModel: ObservableObject {
     @Published var selectedTranslationLanguage: String = "Español"
     @Published var cameraError: String? = nil
     @Published var showFallbackUI = false
+    @Published var isDownloadingTranslationModel = false
+    @Published var translationDownloadProgress: Float = 0.0
+    @Published var translationError: String? = nil
 
     // MARK: Private
     private var cancellables = Set<AnyCancellable>()
+
+    // MARK: - Public Accessors
+    var googleTranslationService: GoogleTranslationService {
+        return translationService
+    }
+
+    // MARK: - Public Accessors
+    var translationService: GoogleTranslationService {
+        return translationService
+    }
 
     // MARK: - Initialization
 
@@ -44,6 +58,30 @@ final class CamScannerViewModel: ObservableObject {
         }
 
         setupCameraErrorObserver()
+        setupTranslationObservers()
+    }
+
+    private func setupTranslationObservers() {
+        translationService.$isDownloadingModel
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isDownloading in
+                self?.isDownloadingTranslationModel = isDownloading
+            }
+            .store(in: &cancellables)
+
+        translationService.$downloadProgress
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] progress in
+                self?.translationDownloadProgress = progress
+            }
+            .store(in: &cancellables)
+
+        translationService.$lastError
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] error in
+                self?.translationError = error
+            }
+            .store(in: &cancellables)
     }
 
     private func setupCameraErrorObserver() {
@@ -196,15 +234,27 @@ final class CamScannerViewModel: ObservableObject {
     }
 
     func translateExtractedText() async {
-        guard let text = extractedText, let service = geminiService else { return }
+        guard let text = extractedText else { return }
+
+        // Limpiar errores previos
+        translationError = nil
 
         do {
-            let languageName = languageName(for: selectedTranslationLanguage)
-            let translated = try await service.translateText(text, to: languageName)
+            // Verificar si el modelo está descargado
+            if !translationService.isModelDownloaded(for: selectedTranslationLanguage) {
+                print("📥 Model not downloaded for \(selectedTranslationLanguage), downloading...")
+                try await translationService.downloadModel(for: selectedTranslationLanguage)
+            }
+
+            // Realizar traducción
+            let translated = try await translationService.translateText(text, to: selectedTranslationLanguage)
             translatedText = translated
+            print("✅ Translation completed successfully")
+
         } catch {
             translatedText = nil
-            print("❌ Translation error: \(error)")
+            translationError = error.localizedDescription
+            print("❌ Translation error: \(error.localizedDescription)")
         }
     }
 
@@ -220,17 +270,6 @@ final class CamScannerViewModel: ObservableObject {
             }
         } catch {
             print("❌ Error saving translation language preference: \(error)")
-        }
-    }
-
-    private func languageName(for code: String) -> String {
-        switch code {
-        case "English": return "inglés"
-        case "Français": return "francés"
-        case "Português": return "portugués"
-        case "Korean": return "coreano"
-        case "Arabic": return "árabe"
-        default: return "español"
         }
     }
 

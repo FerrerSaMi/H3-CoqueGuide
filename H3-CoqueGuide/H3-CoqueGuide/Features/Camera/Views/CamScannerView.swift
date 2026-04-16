@@ -21,7 +21,9 @@ struct CamScannerView: View {
     @State private var showLanguagePicker = false
 
     // MARK: - Available Languages
-    private let availableLanguages = ["Español", "English", "Français", "Português", "Korean", "Arabic"]
+    private var availableLanguages: [String] {
+        viewModel.googleTranslationService.getSupportedLanguages()
+    }
 
     // MARK: - Body
 
@@ -118,6 +120,41 @@ struct CamScannerView: View {
                                     .padding(16)
                                     .background(Color.blue.opacity(0.14))
                                     .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                                } else if viewModel.isDownloadingTranslationModel {
+                                    VStack(spacing: 12) {
+                                        ProgressView(value: viewModel.translationDownloadProgress)
+                                            .progressViewStyle(.linear)
+                                            .tint(.white)
+                                            .frame(height: 4)
+
+                                        Text("Descargando modelo de traducción...")
+                                            .font(.system(.caption, design: .default))
+                                            .foregroundColor(.white.opacity(0.8))
+                                    }
+                                    .padding(.vertical, 12)
+                                } else if let error = viewModel.translationError {
+                                    VStack(spacing: 8) {
+                                        Text("Error de traducción")
+                                            .font(.system(.caption, design: .default))
+                                            .foregroundColor(.red.opacity(0.8))
+
+                                        Text(error)
+                                            .font(.system(.caption2, design: .default))
+                                            .foregroundColor(.white.opacity(0.6))
+                                            .multilineTextAlignment(.center)
+                                            .lineLimit(2)
+
+                                        Button("Reintentar") {
+                                            Task { await viewModel.translateExtractedText() }
+                                        }
+                                        .font(.system(.caption, design: .default))
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 16)
+                                        .padding(.vertical, 8)
+                                        .background(Color.blue.opacity(0.6))
+                                        .clipShape(Capsule())
+                                    }
+                                    .padding(.vertical, 8)
                                 } else {
                                     Button("Traducir") {
                                         Task { await viewModel.translateExtractedText() }
