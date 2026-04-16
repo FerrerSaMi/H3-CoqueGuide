@@ -112,30 +112,34 @@ extension CGQuickAction {
 // MARK: - Contenido de tarjeta invitadora Home
 
 /// Contenido reutilizable para la tarjeta de invitacion de CoqueGuide en la pantalla de inicio.
+/// Se construye dinámicamente para que los textos sigan el idioma del iPhone.
 struct CGHomeInviteContent {
     let title: String
     let message: String
     let quickActions: [CGQuickAction]
 
-    static let `default` = CGHomeInviteContent(
-        title: "CoqueGuide",
-        message: "¡Bienvenido! ¿Cómo puedo ayudarte en tu visita?",
-        quickActions: [
-            CGQuickAction(
-                title: "¿Dónde estoy?",
-                icon: "location.fill",
-                message: "¿Dónde estoy en el museo?"
-            ),
-            CGQuickAction(
-                title: "Ver mapa",
-                icon: "map.fill",
-                message: "¿Puedes mostrarme el mapa del museo?"
-            ),
-            CGQuickAction(
-                title: "Próximo evento",
-                icon: "calendar",
-                message: "¿Cuál es el próximo evento?"
-            )
-        ]
-    )
+    /// Versión localizada (se recalcula en cada acceso para reflejar el idioma actual).
+    static var `default`: CGHomeInviteContent {
+        CGHomeInviteContent(
+            title: L10n.cgHomeTitle,
+            message: L10n.cgHomeMessage,
+            quickActions: [
+                CGQuickAction(
+                    title: L10n.qaWhereTitle,
+                    icon: "location.fill",
+                    message: L10n.qaWhereMessage
+                ),
+                CGQuickAction(
+                    title: L10n.qaMapTitle,
+                    icon: "map.fill",
+                    message: L10n.qaMapMessage
+                ),
+                CGQuickAction(
+                    title: L10n.qaNextEventTitle,
+                    icon: "calendar",
+                    message: L10n.qaNextEventMessage
+                )
+            ]
+        )
+    }
 }

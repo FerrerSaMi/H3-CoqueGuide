@@ -18,42 +18,66 @@ struct CGPanelView: View {
     @State private var inputText: String = ""
     @FocusState private var isInputFocused: Bool
 
+    /// Controla el swap skeleton → contenido real.
+    /// Mientras el sheet está animando, mostramos un skeleton ligero para
+    /// que la animación sea fluida. Tras ~200 ms instanciamos el árbol real.
+    @State private var contentReady: Bool = false
+
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
+        VStack(spacing: 0) {
 
-                // MARK: Encabezado del asistente
-                CGPanelHeader()
+            // MARK: Encabezado del asistente (ligero — se muestra siempre)
+            CGPanelHeader()
 
-                Divider()
+            Divider()
 
-                // MARK: Historial de mensajes
-                messagesScrollView
-
-                Divider()
-
-                // MARK: Acciones rápidas
-                CGQuickActionsView(actions: CGQuickAction.defaults) { action in
-                    viewModel.handleQuickAction(action)
-                    isInputFocused = false
-                }
-                .padding(.vertical, 10)
-
-                Divider()
-
-                // MARK: Campo de entrada
-                CGInputBar(
-                    text: $inputText,
-                    isFocused: $isInputFocused,
-                    isThinking: viewModel.isThinking,
-                    onSend: submitMessage
-                )
+            // MARK: Contenido (skeleton o real según esté listo)
+            if contentReady {
+                realContent
+                    .transition(.opacity)
+            } else {
+                CGPanelSkeleton()
+                    .transition(.opacity)
             }
-            .navigationBarHidden(true)
-            .background(Color(.systemGroupedBackground))
-            .onAppear {
+        }
+        .background(Color(.systemGroupedBackground))
+        .animation(.easeInOut(duration: 0.2), value: contentReady)
+        .onAppear {
+            // Espera a que la animación del sheet haya avanzado antes de
+            // instanciar el árbol pesado. 0.22 s ≈ mitad de la curva del sheet.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) {
+                contentReady = true
+                // processPendingMessage corre después de que el contenido ya
+                // está montado, evitando el flash de "typing" sobre skeleton.
                 processPendingMessage()
             }
+        }
+    }
+
+    /// Árbol real del panel. Se monta solo cuando `contentReady == true`.
+    private var realContent: some View {
+        VStack(spacing: 0) {
+            // Historial de mensajes
+            messagesScrollView
+
+            Divider()
+
+            // Acciones rápidas
+            CGQuickActionsView(actions: CGQuickAction.defaults) { action in
+                viewModel.handleQuickAction(action)
+                isInputFocused = false
+            }
+            .padding(.vertical, 10)
+
+            Divider()
+
+            // Campo de entrada
+            CGInputBar(
+                text: $inputText,
+                isFocused: $isInputFocused,
+                isThinking: viewModel.isThinking,
+                onSend: submitMessage
+            )
         }
     }
 
@@ -62,7 +86,11 @@ struct CGPanelView: View {
     private var messagesScrollView: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(spacing: 14) {
+                // VStack (en vez de LazyVStack) porque para conversaciones típicas
+                // (< 50 mensajes) es más barato en el primer render — LazyVStack
+                // agrega overhead de cálculo de visibilidad que no se amortiza
+                // con tan pocos elementos y genera jank al abrir el chat.
+                VStack(spacing: 14) {
                     ForEach(viewModel.messages) { message in
                         CGMessageBubble(message: message)
                             .id(message.id)
@@ -155,7 +183,7 @@ private struct CGPanelHeader: View {
                     Circle()
                         .fill(Color.green)
                         .frame(width: 7, height: 7)
-                    Text("Asistente activo")
+                    Text(L10n.cgHeaderStatus)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -165,7 +193,7 @@ private struct CGPanelHeader: View {
 
             // Ícono decorativo
             Image(systemName: "sparkles")
-                .font(.system(size: 18))
+                .scalingFont(size: 18)
                 .foregroundStyle(Color.accentColor)
                 .padding(.trailing, 4)
 
@@ -174,7 +202,7 @@ private struct CGPanelHeader: View {
                 dismiss()
             } label: {
                 Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 26))
+                    .scalingFont(size: 26)
                     .foregroundStyle(Color(.systemGray3))
             }
         }
@@ -200,7 +228,7 @@ private struct CGInputBar: View {
     var body: some View {
         HStack(alignment: .bottom, spacing: 10) {
 
-            TextField("Escribe tu pregunta…", text: $text, axis: .vertical)
+            TextField(L10n.cgInputPlaceholder, text: $text, axis: .vertical)
                 .lineLimit(1...4)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
@@ -217,7 +245,7 @@ private struct CGInputBar: View {
             // Botón de enviar
             Button(action: onSend) {
                 Image(systemName: "arrow.up.circle.fill")
-                    .font(.system(size: 36))
+                    .scalingFont(size: 36)
                     .foregroundStyle(canSend ? Color.accentColor : Color(.systemGray4))
                     .animation(.easeInOut(duration: 0.2), value: canSend)
             }
