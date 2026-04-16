@@ -15,6 +15,7 @@ struct CamScannerView: View {
 
     // MARK: Environment
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var coqueGuideVM: CGViewModel
 
     // MARK: ViewModel
     @StateObject private var viewModel = CamScannerViewModel()
@@ -172,6 +173,11 @@ struct CamScannerView: View {
 
                 speakButton(for: obj)
             }
+
+            // CTA a Coque (solo cuando la pieza fue reconocida)
+            if !obj.isUnknown {
+                askCoqueButton(for: obj)
+            }
         }
         .padding(18)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
@@ -181,6 +187,37 @@ struct CamScannerView: View {
         )
         .padding(.horizontal, 20)
         .animation(.easeInOut(duration: 0.2), value: viewModel.speech.isSpeaking)
+    }
+
+    // MARK: - Ask Coque Button
+
+    private func askCoqueButton(for obj: MuseumObject) -> some View {
+        Button {
+            viewModel.speech.stop()
+            let prompt = "Cuéntame más sobre \(obj.title)."
+            coqueGuideVM.openPanelWithMessage(prompt)
+            dismiss()
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "sparkles")
+                    .font(.system(size: 13, weight: .bold))
+                Text("Pregúntale a Coque")
+                    .font(.system(size: 14, weight: .semibold))
+            }
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(
+                LinearGradient(
+                    colors: [Color.orange, Color.orange.opacity(0.78)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+        }
+        .accessibilityLabel("Pregúntale a Coque sobre \(obj.title)")
+        .accessibilityHint("Cierra el escáner y abre el asistente con el contexto de la pieza")
     }
 
     // MARK: - Speak Button
@@ -303,4 +340,5 @@ private struct SpeechProgressBar: View {
 
 #Preview {
     CamScannerView()
+        .environmentObject(CGViewModel())
 }
