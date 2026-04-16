@@ -18,9 +18,10 @@ struct MapaView: View {
     @State private var mapOffset: CGSize = .zero
     @State private var lastMapOffset: CGSize = .zero
     @State private var mapTransitionID = UUID()
+    @State private var showServices: Bool = true
     private let mapConfig = MapLocationsConfig.load()
 
-    private var locations: [Int: String] {
+    private var locations: [Int: MapLocation] {
         mapConfig.allLocations
     }
 
@@ -37,7 +38,8 @@ struct MapaView: View {
     }
 
     private var currentPins: [MapPin] {
-        currentLevel?.normalizedPins ?? []
+        let allPins = currentLevel?.normalizedPins ?? []
+        return showServices ? allPins : allPins.filter { $0.type != .service }
     }
 
     var body: some View {
@@ -68,7 +70,7 @@ struct MapaView: View {
 
             Spacer()
 
-            // MARK: - Instrucciones / Reset
+            // MARK: - Instrucciones / Reset / Toggle servicios
             bottomBar
                 .padding(.horizontal, 20)
                 .padding(.bottom, 8)
@@ -149,8 +151,12 @@ struct MapaView: View {
                                 selectedLocationInfo = nil
                             } else {
                                 selectedLocationNumber = pin.number
-                                if let name = locations[pin.number] {
-                                    selectedLocationInfo = SelectedLocationInfo(id: pin.number, name: name)
+                                if let location = locations[pin.number] {
+                                    selectedLocationInfo = SelectedLocationInfo(
+                                        id: pin.number,
+                                        name: location.name,
+                                        type: location.locationType
+                                    )
                                 }
                             }
                         }
@@ -158,6 +164,7 @@ struct MapaView: View {
                         pinView(pin: pin)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel(pin.type == .service ? "Servicio: \(locations[pin.number]?.name ?? "")" : "Punto \(pin.number)")
                     .position(
                         x: imageRect.minX + (pin.x * imageRect.width),
                         y: imageRect.minY + (pin.y * imageRect.height)
@@ -180,11 +187,12 @@ struct MapaView: View {
 
     private func pinView(pin: MapPin) -> some View {
         let isSelected = selectedLocationNumber == pin.number
+        let accentColor = pin.type.accentColor
         return ZStack {
             // Pulso exterior animado
             if isSelected {
                 Circle()
-                    .fill(Color.orange.opacity(0.2))
+                    .fill(accentColor.opacity(0.2))
                     .frame(width: pinButtonSize + 14, height: pinButtonSize + 14)
                     .scaleEffect(isSelected ? 1.3 : 1.0)
                     .opacity(isSelected ? 0.0 : 0.5)
@@ -195,18 +203,24 @@ struct MapaView: View {
             }
 
             Circle()
-                .fill(isSelected ? Color.orange : Color.white)
+                .fill(isSelected ? accentColor : Color.white)
                 .frame(width: pinButtonSize, height: pinButtonSize)
 
             Circle()
-                .stroke(isSelected ? Color.orange : Color.accentColor, lineWidth: 2.5)
+                .stroke(accentColor, lineWidth: 2.5)
                 .frame(width: pinButtonSize, height: pinButtonSize)
 
-            Text("\(pin.number)")
-                .font(.system(size: 12, weight: .bold, design: .rounded))
-                .foregroundStyle(isSelected ? .white : Color.accentColor)
+            if let symbol = pin.type.symbolName {
+                Image(systemName: symbol)
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(isSelected ? .white : accentColor)
+            } else {
+                Text("\(pin.number)")
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .foregroundStyle(isSelected ? .white : accentColor)
+            }
         }
-        .shadow(color: isSelected ? Color.orange.opacity(0.4) : .black.opacity(0.18), radius: isSelected ? 6 : 2, x: 0, y: isSelected ? 3 : 1)
+        .shadow(color: isSelected ? accentColor.opacity(0.4) : .black.opacity(0.18), radius: isSelected ? 6 : 2, x: 0, y: isSelected ? 3 : 1)
         .scaleEffect(isSelected ? 1.2 : 1.0)
         .animation(.spring(response: 0.35, dampingFraction: 0.6), value: isSelected)
     }
@@ -217,16 +231,22 @@ struct MapaView: View {
         HStack(spacing: 14) {
             ZStack {
                 Circle()
-                    .fill(Color.orange)
+                    .fill(info.type.accentColor)
                     .frame(width: 40, height: 40)
 
-                Text("\(info.id)")
-                    .font(.system(size: 16, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
+                if let symbol = info.type.symbolName {
+                    Image(systemName: symbol)
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundStyle(.white)
+                } else {
+                    Text("\(info.id)")
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                }
             }
 
             VStack(alignment: .leading, spacing: 3) {
-                Text("Punto \(info.id)")
+                Text(info.type == .service ? "Servicio" : "Punto \(info.id)")
                     .font(.caption)
                     .fontWeight(.medium)
                     .foregroundStyle(.secondary)
@@ -261,8 +281,32 @@ struct MapaView: View {
     // MARK: - Bottom Bar
 
     private var bottomBar: some View {
-        HStack {
-            Label("Pellizca para hacer zoom", systemImage: "hand.pinch")
+        HStack(spacing: 10) {
+            // Toggle de servicios
+            Button {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                    showServices.toggle()
+                }
+            } label: {
+                HStack(spacing: 5) {
+                    Image(systemName: "figure.dress.line.vertical.figure")
+                        .font(.system(size: 12, weight: .semibold))
+                    Text("Servicios")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                }
+                .foregroundStyle(showServices ? .white : .blue)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(showServices ? Color.blue : Color.blue.opacity(0.12))
+                .clipShape(Capsule())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(showServices ? "Ocultar servicios" : "Mostrar servicios")
+
+            Spacer()
+
+            Label("Pellizca para zoom", systemImage: "hand.pinch")
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
@@ -360,27 +404,50 @@ struct MapaView: View {
 
 // MARK: - Models
 
+/// Tipo de ubicación del mapa. Determina el estilo visual del pin.
+enum LocationType: String, Decodable {
+    case attraction
+    case service
+
+    var accentColor: Color {
+        switch self {
+        case .attraction: return .orange
+        case .service:    return .blue
+        }
+    }
+
+    /// SF Symbol mostrado dentro del pin. `nil` significa que se muestra el número.
+    var symbolName: String? {
+        switch self {
+        case .attraction: return nil
+        case .service:    return "figure.dress.line.vertical.figure"
+        }
+    }
+}
+
 struct MapPin: Identifiable {
     let number: Int
     let x: CGFloat
     let y: CGFloat
+    let type: LocationType
 
     var id: Int { number }
 }
 
-private struct SelectedLocationInfo: Identifiable {
+private struct SelectedLocationInfo: Identifiable, Equatable {
     let id: Int
     let name: String
+    let type: LocationType
 }
 
 struct MapLocationsConfig: Decodable {
     let levels: [MapLevel]
 
-    var allLocations: [Int: String] {
-        var dictionary: [Int: String] = [:]
+    var allLocations: [Int: MapLocation] {
+        var dictionary: [Int: MapLocation] = [:]
         for level in levels {
             for location in level.locations {
-                dictionary[location.id] = location.name
+                dictionary[location.id] = location
             }
         }
         return dictionary
@@ -404,27 +471,28 @@ struct MapLocationsConfig: Decodable {
             id: 1,
             imageName: "MapaN1",
             locations: [
-                MapLocation(id: 1, name: "Laboratorio de Innovación", x: 348, y: 810),
-                MapLocation(id: 2, name: "Laboratorio Una Ventana a la Ciencia", x: 475, y: 810),
-                MapLocation(id: 3, name: "Lobby", x: 595, y: 785),
-                MapLocation(id: 4, name: "Vestíbulo de la Galería de la Historia", x: 555, y: 465),
-                MapLocation(id: 5, name: "Vestíbulo de la Galería del Acero", x: 425, y: 535),
-                MapLocation(id: 6, name: "Núcleo Científico", x: 372, y: 415),
-                MapLocation(id: 7, name: "Salones (Newton, Galilei, Curie)", x: 278, y: 205),
-                MapLocation(id: 8, name: "Explanada Estufas", x: 692, y: 305),
-                MapLocation(id: 9, name: "Patio de Demostraciones", x: 692, y: 485),
-                MapLocation(id: 10, name: "Andador a El Lingote", x: 812, y: 805),
-                MapLocation(id: 11, name: "Salón Ciencia en Vivo", x: 922, y: 915),
-                MapLocation(id: 12, name: "Salón Diseño y Simulación", x: 822, y: 915),
-                MapLocation(id: 13, name: "Salón Manufactura Inteligente", x: 715, y: 915)
+                MapLocation(id: 1, name: "Laboratorio de Innovación", type: nil, x: 348, y: 810),
+                MapLocation(id: 2, name: "Laboratorio Una Ventana a la Ciencia", type: nil, x: 475, y: 810),
+                MapLocation(id: 3, name: "Lobby", type: nil, x: 595, y: 785),
+                MapLocation(id: 4, name: "Vestíbulo de la Galería de la Historia", type: nil, x: 555, y: 465),
+                MapLocation(id: 5, name: "Vestíbulo de la Galería del Acero", type: nil, x: 425, y: 535),
+                MapLocation(id: 6, name: "Núcleo Científico", type: nil, x: 372, y: 415),
+                MapLocation(id: 7, name: "Salones (Newton, Galilei, Curie)", type: nil, x: 278, y: 205),
+                MapLocation(id: 8, name: "Explanada Estufas", type: nil, x: 692, y: 305),
+                MapLocation(id: 9, name: "Patio de Demostraciones", type: nil, x: 692, y: 485),
+                MapLocation(id: 10, name: "Andador a El Lingote", type: nil, x: 812, y: 805),
+                MapLocation(id: 11, name: "Salón Ciencia en Vivo", type: nil, x: 922, y: 915),
+                MapLocation(id: 12, name: "Salón Diseño y Simulación", type: nil, x: 822, y: 915),
+                MapLocation(id: 13, name: "Salón Manufactura Inteligente", type: nil, x: 715, y: 915),
+                MapLocation(id: 14, name: "Baños Nivel 1", type: "service", x: 475, y: 700)
             ]
         ),
         MapLevel(
             id: 2,
             imageName: "MapaN2",
             locations: [
-                MapLocation(id: 14, name: "Terraza verde", x: 162, y: 442),
-                MapLocation(id: 15, name: "Salón Show del horno", x: 388, y: 355)
+                MapLocation(id: 15, name: "Terraza verde", type: nil, x: 162, y: 442),
+                MapLocation(id: 16, name: "Salón Show del horno", type: nil, x: 388, y: 355)
             ]
         )
     ])
@@ -456,7 +524,8 @@ struct MapLevel: Decodable {
             MapPin(
                 number: location.id,
                 x: min(max((location.x * xAxisScaleFactor) / imageSize.width, 0), 1),
-                y: min(max(location.y / imageSize.height, 0), 1)
+                y: min(max(location.y / imageSize.height, 0), 1),
+                type: location.locationType
             )
         }
     }
@@ -465,8 +534,18 @@ struct MapLevel: Decodable {
 struct MapLocation: Decodable {
     let id: Int
     let name: String
+    /// Tipo (raw string). Ver `locationType` para el enum resuelto.
+    let type: String?
     let x: CGFloat
     let y: CGFloat
+
+    /// Tipo resuelto con fallback a `.attraction` si falta o no es reconocido.
+    var locationType: LocationType {
+        guard let type, let parsed = LocationType(rawValue: type) else {
+            return .attraction
+        }
+        return parsed
+    }
 }
 
 #Preview {
