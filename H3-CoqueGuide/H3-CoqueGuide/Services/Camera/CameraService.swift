@@ -124,6 +124,13 @@ final class CameraService: NSObject, ObservableObject {
         return try await extractText(from: image)
     }
 
+    /// Extrae y traduce texto de la imagen actual.
+    func extractAndTranslateTextFromCurrentFrame(to targetLanguage: String, using translator: (String, String) async throws -> String) async throws -> String {
+        let extractedText = try await extractTextFromCurrentFrame()
+        guard !extractedText.isEmpty else { return "" }
+        return try await translator(extractedText, targetLanguage)
+    }
+
 
     // MARK: - Private helpers
 

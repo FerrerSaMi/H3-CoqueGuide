@@ -55,8 +55,44 @@ struct CamScannerView: View {
                 VStack {
                     Spacer()
 
-                    shutterButton
-                        .padding(.bottom, max(24, bottomSafeArea + 18))
+                    VStack(spacing: 16) {
+                        if let text = viewModel.extractedText {
+                            Text("Texto detectado: \(text)")
+                                .foregroundColor(.white)
+                                .padding()
+                                .background(Color.black.opacity(0.7))
+                                .cornerRadius(8)
+
+                            if let translated = viewModel.translatedText {
+                                Text("Traducido: \(translated)")
+                                    .foregroundColor(.white)
+                                    .padding()
+                                    .background(Color.blue.opacity(0.7))
+                                    .cornerRadius(8)
+                            } else {
+                                Button("Traducir") {
+                                    Task { await viewModel.translateExtractedText() }
+                                }
+                                .foregroundColor(.white)
+                                .padding()
+                                .background(Color.blue.opacity(0.7))
+                                .cornerRadius(8)
+                            }
+                        }
+
+                        HStack(spacing: 16) {
+                            Button("Extraer Texto") {
+                                Task { await viewModel.extractText() }
+                            }
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Color.green.opacity(0.7))
+                            .cornerRadius(8)
+
+                            shutterButton
+                        }
+                    }
+                    .padding(.bottom, max(24, bottomSafeArea + 18))
                 }
                 .frame(maxWidth: .infinity)
                 .background(

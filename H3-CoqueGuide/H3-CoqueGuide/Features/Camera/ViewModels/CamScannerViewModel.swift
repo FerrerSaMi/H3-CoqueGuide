@@ -13,10 +13,11 @@ import SwiftData
 @MainActor
 final class CamScannerViewModel: ObservableObject {
 
-    // MARK: - Services
+    // MARK: Services
     let camera = CameraService()
     let speech = SpeechService()
     private let geminiService: GeminiAIService?
+    private var visitorProfile: CGVisitorProfile?
 
     // MARK: - Published State
     @Published var detectedObject: MuseumObject? = nil
@@ -24,6 +25,8 @@ final class CamScannerViewModel: ObservableObject {
     @Published var isScanning = false
     @Published var isFlashOn = false
     @Published var descriptionGenerationError: String? = nil
+    @Published var extractedText: String? = nil
+    @Published var translatedText: String? = nil
 
     // MARK: - Initialization
 
@@ -44,7 +47,9 @@ final class CamScannerViewModel: ObservableObject {
             )
             if let profile = try context.fetch(descriptor).first,
                !profile.gender.isEmpty {
-                geminiService?.visitorProfile = CGVisitorProfile(from: profile)
+                let cgProfile = CGVisitorProfile(from: profile)
+                geminiService?.visitorProfile = cgProfile
+                visitorProfile = cgProfile
             }
         } catch {
             print("⚠️ No se pudo cargar el perfil de visitante: \(error)")
@@ -138,6 +143,42 @@ final class CamScannerViewModel: ObservableObject {
             descriptionGenerationError = "Error generando descripción: \(error.localizedDescription)"
             print("❌ Description generation error: \(error)")
             return nil
+        }
+    }
+
+    func extractText() async {
+        do {
+            let text = try await camera.extractTextFromCurrentFrame()
+            extractedText = text.isEmpty ? nil : text
+            translatedText = nil // Reset translation when new text is extracted
+        } catch {
+            extractedText = nil
+            print("❌ Text extraction error: \(error)")
+        }
+    }
+
+    func translateExtractedText() async {
+        guard let text = extractedText, let service = geminiService else { return }
+
+        do {
+            let targetLanguage = visitorProfile?.preferredLanguage ?? "Español"
+            let languageName = languageName(for: targetLanguage)
+            let translated = try await service.translateText(text, to: languageName)
+            translatedText = translated
+        } catch {
+            translatedText = nil
+            print("❌ Translation error: \(error)")
+        }
+    }
+
+    private func languageName(for code: String) -> String {
+        switch code {
+        case "English": return "inglés"
+        case "Français": return "francés"
+        case "Português": return "portugués"
+        case "Korean": return "coreano"
+        case "Arabic": return "árabe"
+        default: return "español"
         }
     }
 
