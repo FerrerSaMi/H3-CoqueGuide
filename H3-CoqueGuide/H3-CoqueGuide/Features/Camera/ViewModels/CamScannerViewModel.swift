@@ -63,7 +63,7 @@ final class CamScannerViewModel: ObservableObject {
     }
 
     func onDisappear() {
-        camera.stopSession()
+        camera.resetSession()
         speech.stop()
         setFlash(false)
     }

@@ -79,8 +79,30 @@ final class CameraService: NSObject, ObservableObject {
 
     func stopSession() {
         sessionQueue.async { [weak self] in
-            guard let self, self.session.isRunning else { return }
-            self.session.stopRunning()
+            guard let self else { return }
+            if self.session.isRunning {
+                self.session.stopRunning()
+            }
+        }
+    }
+
+    func resetSession() {
+        sessionQueue.async { [weak self] in
+            guard let self else { return }
+
+            if self.session.isRunning {
+                self.session.stopRunning()
+            }
+
+            self.session.beginConfiguration()
+            self.session.inputs.forEach { self.session.removeInput($0) }
+            self.session.outputs.forEach { self.session.removeOutput($0) }
+            self.session.commitConfiguration()
+
+            self.isConfigured = false
+            self.photoContinuation?.resume(throwing: CameraError.captureError("La sesión de cámara se ha detenido."))
+            self.photoContinuation = nil
+            self.visionModel = nil
         }
     }
 
