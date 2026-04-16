@@ -18,45 +18,14 @@ struct CGPanelView: View {
     @State private var inputText: String = ""
     @FocusState private var isInputFocused: Bool
 
-    /// Controla el swap skeleton → contenido real.
-    /// Mientras el sheet está animando, mostramos un skeleton ligero para
-    /// que la animación sea fluida. Tras ~200 ms instanciamos el árbol real.
-    @State private var contentReady: Bool = false
-
     var body: some View {
         VStack(spacing: 0) {
 
-            // MARK: Encabezado del asistente (ligero — se muestra siempre)
+            // MARK: Encabezado del asistente
             CGPanelHeader()
 
             Divider()
 
-            // MARK: Contenido (skeleton o real según esté listo)
-            if contentReady {
-                realContent
-                    .transition(.opacity)
-            } else {
-                CGPanelSkeleton()
-                    .transition(.opacity)
-            }
-        }
-        .background(Color(.systemGroupedBackground))
-        .animation(.easeInOut(duration: 0.2), value: contentReady)
-        .onAppear {
-            // Espera a que la animación del sheet haya avanzado antes de
-            // instanciar el árbol pesado. 0.22 s ≈ mitad de la curva del sheet.
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) {
-                contentReady = true
-                // processPendingMessage corre después de que el contenido ya
-                // está montado, evitando el flash de "typing" sobre skeleton.
-                processPendingMessage()
-            }
-        }
-    }
-
-    /// Árbol real del panel. Se monta solo cuando `contentReady == true`.
-    private var realContent: some View {
-        VStack(spacing: 0) {
             // Historial de mensajes
             messagesScrollView
 
@@ -78,6 +47,10 @@ struct CGPanelView: View {
                 isThinking: viewModel.isThinking,
                 onSend: submitMessage
             )
+        }
+        .background(Color(.systemGroupedBackground))
+        .onAppear {
+            processPendingMessage()
         }
     }
 
