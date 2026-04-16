@@ -59,16 +59,6 @@ struct CamScannerView: View {
 
     private var topBar: some View {
         HStack {
-            Button { dismiss() } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .frame(width: 38, height: 38)
-                    .background(.black.opacity(0.45))
-                    .clipShape(Circle())
-            }
-            .accessibilityLabel("Cerrar escáner")
-
             Spacer()
 
             VStack(spacing: 2) {
@@ -82,19 +72,6 @@ struct CamScannerView: View {
             }
 
             Spacer()
-
-            // Flash toggle
-            Button {
-                viewModel.toggleFlash()
-            } label: {
-                Image(systemName: viewModel.isFlashOn ? "bolt.fill" : "bolt.slash.fill")
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundStyle(viewModel.isFlashOn ? .yellow : .white)
-                    .frame(width: 38, height: 38)
-                    .background(.black.opacity(0.45))
-                    .clipShape(Circle())
-            }
-            .accessibilityLabel(viewModel.isFlashOn ? "Apagar flash" : "Encender flash")
         }
         .padding(.horizontal, 20)
         .padding(.top, 16)
