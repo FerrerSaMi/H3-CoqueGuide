@@ -17,7 +17,9 @@
         {"id": 11, "name": "Salón Ciencia en Vivo", "x": 922, "y": 915},
         {"id": 12, "name": "Salón Diseño y Simulación", "x": 822, "y": 915},
         {"id": 13, "name": "Salón Manufactura Inteligente", "x": 715, "y": 915},
-        {"id": 14, "name": "Baños Nivel 1", "type": "service", "x": 475, "y": 700}
+        {"id": 14, "name": "Baños · Norte", "type": "service", "x": 400, "y": 160},
+        {"id": 18, "name": "Baños · Centro", "type": "service", "x": 745, "y": 440},
+        {"id": 19, "name": "Baños · Sur", "type": "service", "x": 430, "y": 900}
       ]
     },
     {
