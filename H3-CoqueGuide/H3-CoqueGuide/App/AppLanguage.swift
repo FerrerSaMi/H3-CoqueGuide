@@ -24,12 +24,20 @@ enum AppLanguage: String, CaseIterable {
 
     /// Idioma detectado a partir de la configuración del iPhone.
     /// Cae a español si el código no corresponde a ningún idioma soportado.
-    static var device: AppLanguage {
+    ///
+    /// Se resuelve **una sola vez** en el primer acceso y se cachea durante
+    /// toda la sesión. Esto es seguro porque iOS reinicia la app cuando el
+    /// usuario cambia el idioma del sistema en Ajustes, así que el valor
+    /// nunca cambia mientras la app está viva.
+    ///
+    /// Evita pagar `Locale.current.language.languageCode` en cada render
+    /// de cada `Text` de la UI (L10n se consulta cientos de veces).
+    static let device: AppLanguage = {
         let code = Locale.current.language.languageCode?.identifier
             ?? Locale.current.identifier.components(separatedBy: "_").first
             ?? "es"
         return AppLanguage(rawValue: code) ?? .spanish
-    }
+    }()
 
     // MARK: - Mapeo desde el perfil del visitante
 
