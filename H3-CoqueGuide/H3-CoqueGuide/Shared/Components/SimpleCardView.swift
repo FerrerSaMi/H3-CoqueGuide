@@ -61,7 +61,8 @@ struct SimpleCardView: View {
                 // action()
             })
         }
-        .frame(maxWidth: 360, maxHeight: UIScreen.main.bounds.height * 0.65)
+        .frame(maxHeight: .infinity, alignment: .center)
+        .frame(maxWidth: 360, maxHeight: UIScreen.main.bounds.height * 0.75, alignment: .center)
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .shadow(color: Color.black.opacity(0.12), radius: 12, x: 0, y: 6)
