@@ -13,10 +13,6 @@ struct SimpleCardView: View {
     let actionTitle: String
     let action: () -> Void
 
-    @State private var isVisible = false
-    @State private var contentOffset: CGFloat = 30
-    @State private var contentOpacity: Double = 0
-
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 20) {
@@ -26,16 +22,12 @@ struct SimpleCardView: View {
                     .foregroundStyle(.primary)
                     .lineLimit(nil)
                     .fixedSize(horizontal: false, vertical: true)
-                    .opacity(contentOpacity)
-                    .offset(y: contentOffset)
 
                 Text(description)
                     .font(.body)
                     .foregroundStyle(.secondary)
                     .lineSpacing(6)
                     .fixedSize(horizontal: false, vertical: true)
-                    .opacity(contentOpacity * 0.8)
-                    .offset(y: contentOffset * 0.8)
 
                 Button(action: action) {
                     Text(actionTitle)
@@ -47,9 +39,6 @@ struct SimpleCardView: View {
                         .background(Color.accentColor)
                         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 }
-                .opacity(1)
-                .offset(y: 0)
-                .scaleEffect(1)
             }
             .padding(26)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -58,22 +47,6 @@ struct SimpleCardView: View {
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .shadow(color: Color.black.opacity(0.12), radius: 12, x: 0, y: 6)
-        .opacity(isVisible ? 1 : 0)
-        .scaleEffect(isVisible ? 1 : 0.9)
-        .offset(y: isVisible ? 0 : 40)
-        .onAppear {
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.8, blendDuration: 0)) {
-                isVisible = true
-            }
-
-            // Animar contenido con delay escalonado
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                withAnimation(.easeOut(duration: 0.8)) {
-                    contentOpacity = 1
-                    contentOffset = 0
-                }
-            }
-        }
     }
 }
 

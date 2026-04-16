@@ -64,7 +64,6 @@ struct CamScannerView: View {
                         }
                     }
                     .frame(maxWidth: 360)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
                     .zIndex(2)
 
                     Spacer()
@@ -95,9 +94,6 @@ struct CamScannerView: View {
                         }
                     }
                     .padding(.bottom, max(24, bottomSafeArea + 18))
-                    .opacity(isIntroVisible ? 0 : 1)
-                    .offset(y: isIntroVisible ? 50 : 0)
-                    .animation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.3), value: isIntroVisible)
                 }
                 .frame(maxWidth: .infinity)
                 .background(
@@ -254,9 +250,6 @@ struct AnimatedTextResultCard: View {
     let translation: String?
     let viewModel: CamScannerViewModel
 
-    @State private var isVisible = false
-    @State private var showTranslation = false
-
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             // Texto detectado
@@ -277,9 +270,6 @@ struct AnimatedTextResultCard: View {
             .padding(16)
             .background(Color.white.opacity(0.08))
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .opacity(isVisible ? 1 : 0)
-            .offset(y: isVisible ? 0 : 20)
-            .animation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.1), value: isVisible)
 
             // Selector de idioma
             HStack {
@@ -301,9 +291,6 @@ struct AnimatedTextResultCard: View {
                         .clipShape(Capsule())
                 }
             }
-            .opacity(isVisible ? 1 : 0)
-            .offset(y: isVisible ? 0 : 15)
-            .animation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.2), value: isVisible)
 
             // Traducción o estados de carga/error
             Group {
@@ -325,7 +312,6 @@ struct AnimatedTextResultCard: View {
                     .padding(16)
                     .background(Color.blue.opacity(0.14))
                     .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                    .transition(.slide.combined(with: .opacity))
                 } else if viewModel.isDownloadingTranslationModel {
                     VStack(spacing: 12) {
                         ProgressView(value: viewModel.translationDownloadProgress)
@@ -338,7 +324,6 @@ struct AnimatedTextResultCard: View {
                             .foregroundColor(.white.opacity(0.8))
                     }
                     .padding(.vertical, 12)
-                    .transition(.slide.combined(with: .opacity))
                 } else if let error = viewModel.translationError {
                     VStack(spacing: 8) {
                         Text("Error de traducción")
@@ -362,7 +347,6 @@ struct AnimatedTextResultCard: View {
                         .clipShape(Capsule())
                     }
                     .padding(.vertical, 8)
-                    .transition(.slide.combined(with: .opacity))
                 } else {
                     Button("Traducir") {
                         Task { await viewModel.translateExtractedText() }
@@ -372,12 +356,8 @@ struct AnimatedTextResultCard: View {
                     .frame(maxWidth: .infinity)
                     .background(Color.blue.opacity(0.8))
                     .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    .transition(.slide.combined(with: .opacity))
                 }
             }
-            .opacity(isVisible ? 1 : 0)
-            .offset(y: isVisible ? 0 : 10)
-            .animation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.3), value: isVisible)
         }
         .padding(22)
         .background(.ultraThinMaterial)
@@ -390,16 +370,6 @@ struct AnimatedTextResultCard: View {
                 .stroke(Color.white.opacity(0.12), lineWidth: 1)
         )
         .shadow(color: Color.black.opacity(0.25), radius: 18, x: 0, y: 8)
-        .opacity(isVisible ? 1 : 0)
-        .offset(y: isVisible ? 0 : 30)
-        .animation(.spring(response: 0.6, dampingFraction: 0.75), value: isVisible)
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                withAnimation {
-                    isVisible = true
-                }
-            }
-        }
     }
 }
 
@@ -409,21 +379,8 @@ struct AnimatedActionButton: View {
     let color: Color
     let action: () -> Void
 
-    @State private var isPressed = false
-    @State private var isVisible = false
-
     var body: some View {
-        Button(action: {
-            withAnimation(.spring(response: 0.1, dampingFraction: 0.8)) {
-                isPressed = true
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                withAnimation(.spring(response: 0.1, dampingFraction: 0.8)) {
-                    isPressed = false
-                }
-            }
-            action()
-        }) {
+        Button(action: action) {
             HStack(spacing: 8) {
                 Image(systemName: systemImage)
                     .font(.system(size: 16, weight: .semibold))
@@ -436,15 +393,6 @@ struct AnimatedActionButton: View {
             .background(color.opacity(0.8))
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)
-        }
-        .scaleEffect(isPressed ? 0.95 : 1.0)
-        .opacity(isVisible ? 1 : 0)
-        .offset(y: isVisible ? 0 : 20)
-        .animation(.spring(response: 0.5, dampingFraction: 0.8), value: isVisible)
-        .onAppear {
-            withAnimation {
-                isVisible = true
-            }
         }
     }
 }
@@ -493,42 +441,11 @@ struct CameraErrorFallbackView: View {
 // MARK: - Scan Success Indicator
 
 struct ScanSuccessIndicator: View {
-    @State private var isVisible = false
-    @State private var scale: CGFloat = 0.5
-
     var body: some View {
         ZStack {
-            Circle()
-                .fill(Color.green.opacity(0.2))
-                .frame(width: 120, height: 120)
-                .scaleEffect(scale)
-                .opacity(isVisible ? 1 : 0)
-
-            Circle()
-                .fill(Color.green.opacity(0.4))
-                .frame(width: 80, height: 80)
-                .scaleEffect(scale * 0.8)
-                .opacity(isVisible ? 1 : 0)
-
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: 60))
                 .foregroundColor(.green)
-                .scaleEffect(scale)
-                .opacity(isVisible ? 1 : 0)
-        }
-        .onAppear {
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.6)) {
-                isVisible = true
-                scale = 1
-            }
-
-            // Auto-hide after 2 seconds
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                withAnimation(.easeOut(duration: 0.3)) {
-                    isVisible = false
-                    scale = 0.5
-                }
-            }
         }
     }
 }
