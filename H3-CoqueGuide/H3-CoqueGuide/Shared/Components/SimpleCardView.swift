@@ -52,15 +52,13 @@ struct SimpleCardView: View {
 
 #Preview {
     SimpleCardView(
-        title: "Bienvenido a CoqueGuide",
+        title: "Bienvenido al CoqueScan",
         description: """
         Explora el museo de forma inteligente con nuestro escáner.
 
         Para escanear objetos: Apunta la cámara y presiona el botón circular. El sistema identificará el objeto y te dará una descripción detallada.
 
         Para traducir texto: Presiona "Extraer Texto" para leer automáticamente el texto visible, luego tradúcelo a tu idioma preferido.
-
-        Los modelos de traducción se descargan automáticamente cuando los necesites por primera vez.
         """,
         actionTitle: "Comenzar",
         action: {}
