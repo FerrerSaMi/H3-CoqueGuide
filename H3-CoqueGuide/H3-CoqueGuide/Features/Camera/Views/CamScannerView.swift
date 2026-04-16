@@ -104,14 +104,16 @@ struct CamScannerView: View {
     // MARK: - Bottom Area
 
     private var bottomArea: some View {
-        VStack(spacing: 0) {
+        let extraPanelPadding: CGFloat = viewModel.detectedObject != nil ? 40 : 0
+
+        return VStack(spacing: 0) {
             if let obj = viewModel.detectedObject {
                 infoPanel(obj)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                     .padding(.bottom, 4)
             }
             shutterButton
-                .padding(.bottom, max(16, bottomSafeArea + 12))
+                .padding(.bottom, max(24, bottomSafeArea + 20 + extraPanelPadding))
         }
         .frame(maxWidth: .infinity)
         .background(
