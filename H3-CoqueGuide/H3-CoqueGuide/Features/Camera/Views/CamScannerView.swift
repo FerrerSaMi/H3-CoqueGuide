@@ -18,43 +18,19 @@ struct CamScannerView: View {
 
     // MARK: ViewModel
     @StateObject private var viewModel = CamScannerViewModel()
-    @State private var bottomSafeArea: CGFloat = 0
 
     // MARK: - Body
-
+    
     var body: some View {
-        ZStack {
-            // 1. Live camera feed
-            CameraPreview(session: viewModel.camera.session)
-                .ignoresSafeArea()
-
-            // 2. Scanner frame overlay
-            ScannerFrameOverlay(isScanning: viewModel.isScanning)
-                .ignoresSafeArea()
-                .allowsHitTesting(false)
-
-            // 3. UI layers
-            VStack(spacing: 0) {
-                topBar
-                Spacer()
-                bottomArea
+        CameraPreview(session: viewModel.camera.session)
+            .ignoresSafeArea()
+            .onAppear {
+                viewModel.onAppear()
             }
-
-            // 4. Permission denied
-            if viewModel.camera.isPermissionDenied {
-                permissionDeniedOverlay
+            .onDisappear {
+                viewModel.onDisappear()
             }
-        }
-        .onAppear {
-            viewModel.onAppear()
-        }
-        .onDisappear {
-            viewModel.onDisappear()
-        }
-        .ignoresSafeArea(edges: .bottom)
-        .preferredColorScheme(.dark)
-    }
-
+            .preferredColorScheme(.dark)
     // MARK: - Top Bar
 
     private var topBar: some View {
@@ -283,14 +259,6 @@ private struct SpeechProgressBar: View {
             }
         }
         .frame(height: 3)
-    }
-}
-
-private struct BottomSafeAreaKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
-
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = max(value, nextValue())
     }
 }
 
