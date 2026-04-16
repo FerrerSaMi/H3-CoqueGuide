@@ -165,13 +165,17 @@ struct CamScannerView: View {
         Button { viewModel.triggerScan() } label: {
             ZStack {
                 Circle()
-                    .strokeBorder(Color.white.opacity(0.5), lineWidth: 3)
-                    .frame(width: 72, height: 72)
+                    .fill(Color.white.opacity(0.12))
+                    .frame(width: 94, height: 94)
+
+                Circle()
+                    .stroke(Color.white, lineWidth: 4)
+                    .frame(width: 78, height: 78)
+
                 Circle()
                     .fill(viewModel.isScanning ? Color.orange : Color.white)
                     .frame(width: 58, height: 58)
-                    .scaleEffect(viewModel.isScanning ? 0.88 : 1.0)
-                    .animation(.easeInOut(duration: 0.35), value: viewModel.isScanning)
+                    .shadow(color: Color.black.opacity(0.18), radius: 8, x: 0, y: 4)
 
                 if viewModel.isScanning {
                     ProgressView()
@@ -179,10 +183,21 @@ struct CamScannerView: View {
                         .scaleEffect(1.1)
                 }
             }
+            .frame(width: 94, height: 94)
         }
+        .buttonStyle(ShutterScaleButtonStyle())
         .disabled(viewModel.isScanning)
         .accessibilityLabel("Escanear objeto")
         .accessibilityHint("Toma una foto y clasifica el objeto detectado")
+    }
+}
+
+private struct ShutterScaleButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.92 : 1.0)
+            .opacity(configuration.isPressed ? 0.92 : 1.0)
+            .animation(.spring(response: 0.26, dampingFraction: 0.7, blendDuration: 0), value: configuration.isPressed)
     }
 }
 
