@@ -34,6 +34,7 @@ final class CamScannerViewModel: ObservableObject {
     @Published var isDownloadingTranslationModel = false
     @Published var translationDownloadProgress: Float = 0.0
     @Published var translationError: String? = nil
+    @Published var showScanResults = false
 
     // MARK: Private
     private var cancellables = Set<AnyCancellable>()
@@ -168,23 +169,25 @@ final class CamScannerViewModel: ObservableObject {
         speech.stop()
         detectedObject = nil
         isPanelExpanded = false
+        showScanResults = false
         isScanning = true
         descriptionGenerationError = nil
 
         Task {
             do {
                 let result = try await camera.classifyCurrentFrame()
-                withAnimation {
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                     detectedObject = MuseumObject(
                         title: result.label,
                         era: "Etiquetado ML",
                         description: "Generando descripción automática...",
                         confidence: result.confidence
                     )
+                    showScanResults = true
                 }
 
                 if let generatedDescription = try await generateDescription(for: result.label) {
-                    withAnimation {
+                    withAnimation(.easeInOut(duration: 0.3)) {
                         detectedObject = MuseumObject(
                             title: result.label,
                             era: "Etiquetado ML",
@@ -197,12 +200,15 @@ final class CamScannerViewModel: ObservableObject {
                 isScanning = false
             } catch {
                 isScanning = false
-                detectedObject = MuseumObject(
-                    title: "Desconocido",
-                    era: "Etiquetado ML",
-                    description: "No se pudo obtener una etiqueta del modelo. Intenta escanear nuevamente.",
-                    confidence: 0.0
-                )
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                    detectedObject = MuseumObject(
+                        title: "Desconocido",
+                        era: "Etiquetado ML",
+                        description: "No se pudo obtener una etiqueta del modelo. Intenta escanear nuevamente.",
+                        confidence: 0.0
+                    )
+                    showScanResults = true
+                }
             }
         }
     }
@@ -280,7 +286,7 @@ final class CamScannerViewModel: ObservableObject {
     }
 
     func togglePanelExpanded() {
-        withAnimation(.easeInOut(duration: 0.25)) {
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
             isPanelExpanded.toggle()
         }
     }
