@@ -100,4 +100,13 @@ final class CamScannerViewModel: ObservableObject {
             isPanelExpanded.toggle()
         }
     }
+
+    /// Cierra el panel de información y detiene cualquier lectura activa.
+    func dismissInfoPanel() {
+        speech.stop()
+        withAnimation(.easeInOut(duration: 0.25)) {
+            detectedObject = nil
+            isPanelExpanded = false
+        }
+    }
 }
