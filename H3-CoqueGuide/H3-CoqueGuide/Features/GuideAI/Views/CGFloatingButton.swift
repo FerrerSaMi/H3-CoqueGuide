@@ -71,7 +71,7 @@ struct CGFloatingButton: View {
                 .shadow(color: Color.accentColor.opacity(0.5), radius: 4, x: 0, y: 2)
 
             Text("\(min(viewModel.pendingSuggestionsCount, 9))")
-                .font(.system(size: 11, weight: .bold))
+                .scalingFont(size: 11, weight: .bold)
                 .foregroundStyle(.white)
         }
         .offset(x: 3, y: -3)
@@ -128,10 +128,14 @@ struct CGOverlayModifier: ViewModifier {
     @AppStorage("cgFloatingButtonOffsetX") private var savedOffsetX: Double = 0
     @AppStorage("cgFloatingButtonOffsetY") private var savedOffsetY: Double = 0
     @State private var dragTranslation: CGSize = .zero
+    /// Marca si el último gesto fue un arrastre real para evitar que el tap abra el chat.
+    @State private var didDragMove: Bool = false
 
     private let buttonSize: CGFloat = 64
     private let horizontalPadding: CGFloat = 20
     private let verticalPadding: CGFloat = 88
+    /// Distancia mínima (pt) que debe recorrer el dedo para considerarlo arrastre.
+    private let dragThreshold: CGFloat = 6
 
     func body(content: Content) -> some View {
         GeometryReader { proxy in
@@ -153,6 +157,12 @@ struct CGOverlayModifier: ViewModifier {
                         // Botón flotante principal (draggable)
                         if !hideFloatingButton {
                             CGFloatingButton(viewModel: viewModel) {
+                                // Si venimos de un arrastre, ignoramos el tap para
+                                // no abrir el chat accidentalmente al soltar.
+                                guard !didDragMove else {
+                                    didDragMove = false
+                                    return
+                                }
                                 viewModel.openPanel()
                             }
                             .offset(
@@ -160,11 +170,23 @@ struct CGOverlayModifier: ViewModifier {
                                 y: clampedOffsetY(in: proxy.size) + dragTranslation.height
                             )
                             .simultaneousGesture(
-                                DragGesture(minimumDistance: 8)
+                                DragGesture(minimumDistance: dragThreshold)
                                     .onChanged { value in
+                                        // Solo consideramos arrastre real si se superó el umbral.
+                                        let distance = hypot(value.translation.width, value.translation.height)
+                                        if distance > dragThreshold {
+                                            didDragMove = true
+                                        }
                                         dragTranslation = value.translation
                                     }
                                     .onEnded { value in
+                                        let distance = hypot(value.translation.width, value.translation.height)
+                                        // Si apenas se movió, lo tratamos como tap y no actualizamos posición.
+                                        guard distance > dragThreshold else {
+                                            dragTranslation = .zero
+                                            didDragMove = false
+                                            return
+                                        }
                                         let proposedX = savedOffsetX + value.translation.width
                                         let proposedY = savedOffsetY + value.translation.height
                                         savedOffsetX = clamp(proposedX,
@@ -175,6 +197,11 @@ struct CGOverlayModifier: ViewModifier {
                                                              max: 0)
                                         withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                                             dragTranslation = .zero
+                                        }
+                                        // Mantenemos didDragMove=true para que el tap asociado
+                                        // a esta soltada sea ignorado. Se resetea en el próximo tap.
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                            didDragMove = false
                                         }
                                     }
                             )
