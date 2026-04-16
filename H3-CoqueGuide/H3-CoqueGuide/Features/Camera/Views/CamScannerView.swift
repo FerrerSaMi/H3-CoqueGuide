@@ -18,6 +18,7 @@ struct CamScannerView: View {
 
     // MARK: ViewModel
     @StateObject private var viewModel = CamScannerViewModel()
+    @State private var bottomSafeArea: CGFloat = 0
 
     // MARK: - Body
 
@@ -110,8 +111,15 @@ struct CamScannerView: View {
                     .padding(.bottom, 4)
             }
             shutterButton
-                .padding(.bottom, 16)
+                .padding(.bottom, max(16, bottomSafeArea + 12))
         }
+        .frame(maxWidth: .infinity)
+        .background(
+            GeometryReader { proxy in
+                Color.clear.preference(key: BottomSafeAreaKey.self, value: proxy.safeAreaInsets.bottom)
+            }
+        )
+        .onPreferenceChange(BottomSafeAreaKey.self) { bottomSafeArea = $0 }
         .animation(.spring(response: 0.45, dampingFraction: 0.82), value: viewModel.detectedObject != nil)
     }
 
@@ -296,6 +304,14 @@ private struct SpeechProgressBar: View {
             }
         }
         .frame(height: 3)
+    }
+}
+
+private struct BottomSafeAreaKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = max(value, nextValue())
     }
 }
 
