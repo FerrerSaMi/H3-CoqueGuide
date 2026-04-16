@@ -59,11 +59,11 @@ struct CamScannerView: View {
             // Título centrado
             VStack(spacing: 2) {
                 Text("ESCÁNER")
-                    .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                    .scalingFont(size: 11, weight: .semibold, design: .monospaced)
                     .tracking(3)
                     .foregroundStyle(.white.opacity(0.6))
                 Text("Apunta al objeto del museo")
-                    .font(.system(size: 13, weight: .medium))
+                    .scalingFont(size: 13, weight: .medium)
                     .foregroundStyle(.white)
             }
 
@@ -74,7 +74,7 @@ struct CamScannerView: View {
                     viewModel.toggleFlash()
                 } label: {
                     Image(systemName: viewModel.isFlashOn ? "bolt.fill" : "bolt.slash.fill")
-                        .font(.system(size: 17, weight: .semibold))
+                        .scalingFont(size: 17, weight: .semibold)
                         .foregroundStyle(viewModel.isFlashOn ? .yellow : .white)
                         .frame(width: 38, height: 38)
                         .background(.black.opacity(0.45))
@@ -112,16 +112,16 @@ struct CamScannerView: View {
             HStack(alignment: .top, spacing: 10) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(obj.title)
-                        .font(.system(size: 17, weight: .bold))
+                        .scalingFont(size: 17, weight: .bold)
                         .foregroundStyle(.white)
                     Text(obj.era)
-                        .font(.system(size: 12, weight: .medium, design: .monospaced))
+                        .scalingFont(size: 12, weight: .medium, design: .monospaced)
                         .foregroundStyle(.orange)
                         .tracking(1.5)
                 }
                 Spacer()
                 Text("\(Int(obj.confidence * 100))%")
-                    .font(.system(size: 11, weight: .bold, design: .monospaced))
+                    .scalingFont(size: 11, weight: .bold, design: .monospaced)
                     .foregroundStyle(.black)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
@@ -133,7 +133,7 @@ struct CamScannerView: View {
                     viewModel.dismissInfoPanel()
                 } label: {
                     Image(systemName: "xmark")
-                        .font(.system(size: 11, weight: .bold))
+                        .scalingFont(size: 11, weight: .bold)
                         .foregroundStyle(.white)
                         .frame(width: 24, height: 24)
                         .background(.white.opacity(0.15))
@@ -145,7 +145,7 @@ struct CamScannerView: View {
 
             // Descripción
             Text(obj.description)
-                .font(.system(size: 14))
+                .scalingFont(size: 14)
                 .foregroundStyle(.white.opacity(0.88))
                 .lineSpacing(3)
                 .lineLimit(viewModel.isPanelExpanded ? nil : 3)
@@ -164,7 +164,7 @@ struct CamScannerView: View {
                     viewModel.togglePanelExpanded()
                 } label: {
                     Text(viewModel.isPanelExpanded ? "Ver menos" : "Ver más")
-                        .font(.system(size: 13, weight: .medium))
+                        .scalingFont(size: 13, weight: .medium)
                         .foregroundStyle(.orange)
                 }
                 .accessibilityHint("Expande o contrae la descripción del objeto")
@@ -193,15 +193,15 @@ struct CamScannerView: View {
 
     private func askCoqueButton(for obj: MuseumObject) -> some View {
         Button {
-            let prompt = "Cuéntame más sobre \(obj.title)."
+            let prompt = L10n.scannerAskPrompt(objectTitle: obj.title)
             viewModel.dismissInfoPanel()
             coqueGuideVM.openPanelWithMessage(prompt)
         } label: {
             HStack(spacing: 8) {
                 Image(systemName: "sparkles")
-                    .font(.system(size: 13, weight: .bold))
-                Text("Pregúntale a Coque")
-                    .font(.system(size: 14, weight: .semibold))
+                    .scalingFont(size: 13, weight: .bold)
+                Text(L10n.scannerAskCoque)
+                    .scalingFont(size: 14, weight: .semibold)
             }
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
@@ -232,11 +232,11 @@ struct CamScannerView: View {
                     Image(systemName: "stop.fill")
                         .opacity(viewModel.speech.isSpeaking ? 1 : 0)
                 }
-                .font(.system(size: 13))
+                .scalingFont(size: 13)
                 .animation(.easeInOut(duration: 0.18), value: viewModel.speech.isSpeaking)
 
                 Text(viewModel.speech.isSpeaking ? "Detener" : "Escuchar")
-                    .font(.system(size: 13, weight: .semibold))
+                    .scalingFont(size: 13, weight: .semibold)
             }
             .foregroundStyle(.black)
             .padding(.horizontal, 14)
@@ -277,15 +277,15 @@ struct CamScannerView: View {
     private var permissionDeniedOverlay: some View {
         VStack(spacing: 16) {
             Image(systemName: "camera.slash.fill")
-                .font(.system(size: 40))
+                .scalingFont(size: 40)
                 .foregroundStyle(.orange)
 
             Text("Sin acceso a la cámara")
-                .font(.system(size: 18, weight: .bold))
+                .scalingFont(size: 18, weight: .bold)
                 .foregroundStyle(.white)
 
             Text("Activa el permiso en Configuración para usar el escaneo de objetos.")
-                .font(.system(size: 14))
+                .scalingFont(size: 14)
                 .foregroundStyle(.white.opacity(0.75))
                 .multilineTextAlignment(.center)
 
@@ -295,7 +295,7 @@ struct CamScannerView: View {
                 }
             } label: {
                 Text("Abrir Configuración")
-                    .font(.system(size: 15, weight: .semibold))
+                    .scalingFont(size: 15, weight: .semibold)
                     .foregroundStyle(.black)
                     .padding(.horizontal, 24)
                     .padding(.vertical, 12)

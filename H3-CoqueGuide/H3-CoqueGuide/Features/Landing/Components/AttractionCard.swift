@@ -21,7 +21,7 @@ struct AttractionCard: View {
                         .frame(width: 44, height: 44)
 
                     Image(systemName: attraction.icon)
-                        .font(.system(size: 20, weight: .semibold))
+                        .scalingFont(size: 20, weight: .semibold)
                         .foregroundStyle(attraction.color)
                 }
 
@@ -46,7 +46,7 @@ struct AttractionCard: View {
         }
         .buttonStyle(SpringPressStyle())
         .accessibilityLabel(attraction.name)
-        .accessibilityHint("Abre CoqueGuide con información sobre \(attraction.name)")
+        .accessibilityHint(L10n.attractionOpenHint(attraction.name))
     }
 }
 

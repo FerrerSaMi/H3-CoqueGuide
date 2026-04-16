@@ -13,12 +13,12 @@ struct PlaceholderView: View {
     var body: some View {
         VStack(spacing: 16) {
             Image(systemName: "hammer")
-                .font(.system(size: 48))
+                .scalingFont(size: 48, relativeTo: .largeTitle)
                 .foregroundStyle(.secondary)
             Text(title)
                 .font(.title2)
                 .fontWeight(.semibold)
-            Text("Próximamente")
+            Text(L10n.landingPlaceholderComingSoon)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }

@@ -133,6 +133,17 @@ final class GeminiAIService: CGAIServiceProtocol {
 
         var visitorBlock = ""
 
+        // Determinar el idioma de respuesta:
+        //   - Si el visitante eligió uno explícito en la encuesta, se respeta.
+        //   - Si no, caemos al idioma detectado del iPhone (AppLanguage.device).
+        let responseLanguage: AppLanguage = {
+            if let visitor {
+                return AppLanguage.fromProfile(visitor.preferredLanguage)
+            }
+            return AppLanguage.device
+        }()
+        let languageInstruction = responseLanguage.geminiInstruction
+
         if let visitor {
             // Adaptar personalidad según preferencia del visitante
             let personalityStyle: String
@@ -151,27 +162,7 @@ final class GeminiAIService: CGAIServiceProtocol {
 
             personalityBlock += "\n- Estilo de comunicación: \(personalityStyle)"
 
-            // Idioma preferido
-            let languageInstruction: String
-            switch visitor.preferredLanguage {
-            case "English":
-                languageInstruction = "You MUST respond ONLY in English. Do not use Spanish at all."
-            case "Français":
-                languageInstruction = "Tu DOIS répondre UNIQUEMENT en français. N'utilise pas l'espagnol."
-            case "Português":
-                languageInstruction = "Você DEVE responder APENAS em português. Não use espanhol."
-            case "Korean":
-                languageInstruction = "반드시 한국어로만 답변하세요. 스페인어를 사용하지 마세요."
-            case "Arabic":
-                languageInstruction = "يجب أن تجيب باللغة العربية فقط. لا تستخدم الإسبانية."
-            default:
-                languageInstruction = "Responde siempre en español mexicano."
-            }
-
             visitorBlock = """
-
-            IDIOMA DE RESPUESTA:
-            \(languageInstruction)
 
             PERFIL DEL VISITANTE:
             - Género: \(visitor.gender)
@@ -186,6 +177,9 @@ final class GeminiAIService: CGAIServiceProtocol {
         return """
         Eres "Coque", el asistente inteligente del Museo del Acero Horno3 en Monterrey, México. \
         Tu nombre viene del "coque", el combustible que se usaba en los Altos Hornos.
+
+        IDIOMA DE RESPUESTA:
+        \(languageInstruction)
 
         \(personalityBlock)
 
