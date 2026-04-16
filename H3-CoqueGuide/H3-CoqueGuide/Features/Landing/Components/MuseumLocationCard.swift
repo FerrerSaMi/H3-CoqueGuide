@@ -40,12 +40,12 @@ struct MuseumLocationCard: View {
                         .frame(width: 40, height: 40)
 
                     Image(systemName: "mappin.and.ellipse")
-                        .font(.system(size: 18, weight: .semibold))
+                        .scalingFont(size: 18, weight: .semibold)
                         .foregroundStyle(.red)
                 }
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Encuéntranos")
+                    Text(L10n.locationFindUs)
                         .font(.headline)
                         .fontWeight(.bold)
 
@@ -69,7 +69,7 @@ struct MuseumLocationCard: View {
             // Dirección
             HStack(spacing: 8) {
                 Image(systemName: "location.fill")
-                    .font(.system(size: 12))
+                    .scalingFont(size: 12, relativeTo: .caption)
                     .foregroundStyle(.secondary)
 
                 Text(museumAddress)
@@ -84,11 +84,10 @@ struct MuseumLocationCard: View {
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
-                        .font(.system(size: 14, weight: .semibold))
+                        .scalingFont(size: 14, weight: .semibold)
 
-                    Text("Cómo llegar")
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
+                    Text(L10n.locationHowToGetThere)
+                        .scalingFont(size: 15, weight: .semibold, relativeTo: .subheadline)
                 }
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
@@ -97,7 +96,7 @@ struct MuseumLocationCard: View {
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Abrir indicaciones en Apple Maps")
+            .accessibilityLabel(L10n.locationOpenInMapsA11y)
         }
         .padding(18)
         .background(Color(.secondarySystemGroupedBackground))

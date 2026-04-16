@@ -67,6 +67,33 @@ protocol CGAIServiceProtocol {
     func processMessage(_ text: String) async -> CGAIResponse
 }
 
+// MARK: - Configuración cargada desde JSON
+
+/// Datos de keywords y nombres de categorías cargados desde SimulatedResponses.json.
+struct SimulatedResponsesConfig: Decodable {
+    let categoryKeywords: [String: [String]]
+    let followUpKeywords: [String]
+    let englishIndicators: [String]
+    let categoryNames: [String: String]
+
+    static func load() -> SimulatedResponsesConfig {
+        guard let url = Bundle.main.url(forResource: "SimulatedResponses", withExtension: "json"),
+              let data = try? Data(contentsOf: url),
+              let decoded = try? JSONDecoder().decode(SimulatedResponsesConfig.self, from: data) else {
+            return .fallback
+        }
+        return decoded
+    }
+
+    /// Fallback mínimo por si el JSON no se encuentra en el bundle.
+    static let fallback = SimulatedResponsesConfig(
+        categoryKeywords: [:],
+        followUpKeywords: [],
+        englishIndicators: [],
+        categoryNames: [:]
+    )
+}
+
 // MARK: - Servicio simulado (sin dependencias externas)
 
 /// Implementación simulada que responde mediante sistema de puntaje por palabras clave.
@@ -82,9 +109,13 @@ final class CGSimulatedAIService: CGAIServiceProtocol {
     private var lastCategory: Category?
     private var conversationCount: Int = 0
 
+    // MARK: - Configuración cargada desde JSON
+
+    private let config = SimulatedResponsesConfig.load()
+
     // MARK: - Categorías del motor de reglas
 
-    private enum Category: CaseIterable {
+    private enum Category: String, CaseIterable {
         case greeting
         case thanks
         case help
@@ -99,79 +130,37 @@ final class CGSimulatedAIService: CGAIServiceProtocol {
         case suggestions
     }
 
-    // Nombres legibles por categoría (para el default inteligente)
-    private let categoryNames: [Category: String] = [
-        .orientation: "orientación y mapa",
-        .events: "eventos y actividades",
-        .scanning: "escaneo de piezas",
-        .exhibits: "exhibiciones y salas",
-        .languages: "idiomas",
-        .accessibility: "accesibilidad",
-        .museumInfo: "historia del museo",
-        .services: "servicios (baños, comida, tienda)",
-        .suggestions: "recomendaciones"
-    ]
+    // Nombres legibles por categoría (desde JSON)
+    private var categoryNames: [Category: String] {
+        var result: [Category: String] = [:]
+        for (key, value) in config.categoryNames {
+            if let cat = Category(rawValue: key) {
+                result[cat] = value
+            }
+        }
+        return result
+    }
 
-    // Keywords por categoría — incluye variantes sin acentos y typos comunes
-    private let categoryKeywords: [Category: [String]] = [
-        .greeting: ["hola", "buenos días", "buenos dias", "buenas tardes", "buenas noches",
-                     "buenas", "hi", "hello", "hey", "qué tal", "que tal", "saludos",
-                     "good morning", "good afternoon"],
-        .thanks: ["gracias", "thanks", "thank you", "perfecto",
-                   "excelente", "de acuerdo", "entendido", "genial", "vale", "ok"],
-        .help: ["ayuda", "help", "qué puedes", "que puedes", "qué haces", "que haces",
-                 "funciones", "capacidades", "cómo funciona", "como funciona",
-                 "what can you do"],
-        .orientation: ["mapa", "ubicación", "ubicacion", "cómo llego", "como llego",
-                        "orientación", "orientacion", "plano", "ruta", "perdido", "zona",
-                        "nivel", "piso", "entrada", "salida", "elevador", "rampa",
-                        "where is", "how do i get", "map", "location"],
-        .events: ["evento", "actividad", "show", "visita guiada",
-                   "programa", "agenda", "tour", "taller",
-                   "demostración", "demostracion", "espectáculo", "espectaculo",
-                   "función", "funcion", "events", "activities", "what's on"],
-        .scanning: ["escanear", "escaneo", "escaner", "qr", "código qr", "codigo qr",
-                     "scan", "escanea", "leer código", "leer codigo",
-                     "scanner"],
-        .exhibits: ["exhibición", "exhibicion", "exhibiciones", "exposición", "exposicion",
-                     "exposiciones", "sala", "salas", "galería", "galeria",
-                     "qué ver", "que ver", "qué hay", "que hay",
-                     "qué puedo ver", "que puedo ver", "recorrido", "atracción", "atraccion",
-                     "atracciones", "horno alto", "mirador", "muestra", "colección", "coleccion",
-                     "exhibits", "what to see", "gallery"],
-        .languages: ["idioma", "language", "inglés", "ingles", "english",
-                      "español", "espanol", "francés", "frances", "alemán", "aleman",
-                      "traducción", "traduccion", "traducir", "translate"],
-        .accessibility: ["accesibilidad", "discapacidad", "silla de ruedas",
-                          "rampa accesible", "audífonos", "audifonos", "braille",
-                          "necesidades especiales", "movilidad reducida",
-                          "wheelchair", "accessible", "disability"],
-        .museumInfo: ["museo", "horno3", "horno 3", "acero", "industrial",
-                       "historia", "fundación", "fundacion", "monterrey", "fundidora",
-                       "cuándo se fundó", "cuando se fundo", "inauguración", "inauguracion",
-                       "origen", "history", "about the museum"],
-        .services: ["comer", "comida", "restaurante", "restoran", "cafetería", "cafeteria",
-                     "café", "cafe", "baño", "bano", "sanitario", "tienda", "souvenirs",
-                     "regalo", "estacionamiento", "parqueo", "wifi", "cargar celular",
-                     "bathroom", "restroom", "food", "restaurant", "shop", "parking"],
-        .suggestions: ["no sé", "no se", "recomienda", "recomendación", "recomendacion",
-                        "sugerencia", "qué hago", "que hago", "aburrido", "sugiéreme",
-                        "sugiereme", "qué me recomiendas", "que me recomiendas",
-                        "por dónde empiezo", "por donde empiezo", "qué es lo mejor",
-                        "que es lo mejor", "recommend", "what should i do"]
-    ]
+    // Keywords por categoría (desde JSON)
+    private var categoryKeywords: [Category: [String]] {
+        var result: [Category: [String]] = [:]
+        for (key, value) in config.categoryKeywords {
+            if let cat = Category(rawValue: key) {
+                result[cat] = value
+            }
+        }
+        return result
+    }
 
-    // Keywords de follow-up que activan la memoria
-    private let followUpKeywords = ["cuéntame más", "cuentame mas", "más info", "mas info",
-                                     "dime más", "dime mas", "el primero", "el segundo",
-                                     "el tercero", "sí", "si", "claro", "dale",
-                                     "tell me more", "more info", "yes"]
+    // Keywords de follow-up (desde JSON)
+    private var followUpKeywords: [String] {
+        config.followUpKeywords
+    }
 
-    // Keywords en inglés para detección de idioma
-    private let englishIndicators = ["where", "what", "how", "when", "can you", "is there",
-                                      "do you", "tell me", "show me", "i want", "i need",
-                                      "please", "the", "bathroom", "museum", "events",
-                                      "map", "help", "thanks", "hello", "hi"]
+    // Keywords en inglés para detección de idioma (desde JSON)
+    private var englishIndicators: [String] {
+        config.englishIndicators
+    }
 
     // MARK: - Procesamiento de mensajes
 

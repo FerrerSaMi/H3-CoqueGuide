@@ -37,7 +37,7 @@ final class SurveyViewModel: ObservableObject {
     }
 
     var progressText: String {
-        "Pregunta \(currentStepIndex + 1) de \(steps.count)"
+        L10n.surveyProgress(current: currentStepIndex + 1, total: steps.count)
     }
     
     var hasCompletedSurvey: Bool {
@@ -74,7 +74,7 @@ final class SurveyViewModel: ObservableObject {
             selectedCoquePersonality = latest.coquePersonality
             aiDescription = latest.aiDescriptionText
         } catch {
-            errorMessage = "No se pudo cargar la encuesta guardada."
+            errorMessage = L10n.surveyLoadError
         }
     }
 
@@ -265,37 +265,37 @@ final class SurveyViewModel: ObservableObject {
     
     private func validateAnswers() -> Bool {
         if gender.isEmpty {
-            errorMessage = "Falta seleccionar el género."
+            errorMessage = L10n.sqValidateGender
             return false
         }
 
         if ageRange.isEmpty {
-            errorMessage = "Falta seleccionar el rango de edad."
+            errorMessage = L10n.sqValidateAge
             return false
         }
 
         if plannedTime.isEmpty {
-            errorMessage = "Falta seleccionar el tiempo del recorrido."
+            errorMessage = L10n.sqValidateTime
             return false
         }
 
         if attractionPreference.isEmpty {
-            errorMessage = "Falta seleccionar la preferencia de atracciones."
+            errorMessage = L10n.sqValidateAttraction
             return false
         }
 
         if specificAttraction.isEmpty {
-            errorMessage = "Falta seleccionar si buscas algo específico."
+            errorMessage = L10n.sqValidateSpecific
             return false
         }
 
         if preferredLanguage.isEmpty {
-            errorMessage = "Falta seleccionar el idioma."
+            errorMessage = L10n.sqValidateLanguage
             return false
         }
 
         if selectedCoquePersonality.isEmpty {
-            errorMessage = "Falta seleccionar la personalidad de Coque."
+            errorMessage = L10n.sqValidatePersonality
             return false
         }
 

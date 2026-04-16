@@ -71,7 +71,7 @@ struct CGFloatingButton: View {
                 .shadow(color: Color.accentColor.opacity(0.5), radius: 4, x: 0, y: 2)
 
             Text("\(min(viewModel.pendingSuggestionsCount, 9))")
-                .font(.system(size: 11, weight: .bold))
+                .scalingFont(size: 11, weight: .bold)
                 .foregroundStyle(.white)
         }
         .offset(x: 3, y: -3)
@@ -124,41 +124,128 @@ struct CGOverlayModifier: ViewModifier {
     let hideFloatingButton: Bool
     let navigator: CGNavigationCoordinator
 
+    // Posición persistida del botón flotante (offset desde la esquina inferior derecha)
+    @AppStorage("cgFloatingButtonOffsetX") private var savedOffsetX: Double = 0
+    @AppStorage("cgFloatingButtonOffsetY") private var savedOffsetY: Double = 0
+    @State private var dragTranslation: CGSize = .zero
+    /// Marca si el último gesto fue un arrastre real para evitar que el tap abra el chat.
+    @State private var didDragMove: Bool = false
+
+    private let buttonSize: CGFloat = 64
+    private let horizontalPadding: CGFloat = 20
+    private let verticalPadding: CGFloat = 88
+    /// Distancia mínima (pt) que debe recorrer el dedo para considerarlo arrastre.
+    private let dragThreshold: CGFloat = 6
+
     func body(content: Content) -> some View {
-        content
-            .overlay(alignment: .bottomTrailing) {
-                VStack(alignment: .trailing, spacing: 10) {
+        GeometryReader { proxy in
+            content
+                .overlay(alignment: .bottomTrailing) {
+                    VStack(alignment: .trailing, spacing: 10) {
 
-                    // Banner de sugerencia proactiva (aparece encima del botón)
-                    if let suggestion = viewModel.activeSuggestion {
-                        CGSuggestionBanner(
-                            suggestion: suggestion,
-                            onAccept: { viewModel.acceptSuggestion(suggestion) },
-                            onDismiss: { viewModel.dismissSuggestion() }
-                        )
-                        .frame(maxWidth: 260)
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                    }
+                        // Banner de sugerencia proactiva (aparece encima del botón)
+                        if let suggestion = viewModel.activeSuggestion {
+                            CGSuggestionBanner(
+                                suggestion: suggestion,
+                                onAccept: { viewModel.acceptSuggestion(suggestion) },
+                                onDismiss: { viewModel.dismissSuggestion() }
+                            )
+                            .frame(maxWidth: 260)
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                        }
 
-                    // Botón flotante principal
-                    if !hideFloatingButton {
-                        CGFloatingButton(viewModel: viewModel) {
-                            viewModel.openPanel()
+                        // Botón flotante principal (draggable)
+                        if !hideFloatingButton {
+                            CGFloatingButton(viewModel: viewModel) {
+                                // Si venimos de un arrastre, ignoramos el tap para
+                                // no abrir el chat accidentalmente al soltar.
+                                guard !didDragMove else {
+                                    didDragMove = false
+                                    return
+                                }
+                                viewModel.openPanel()
+                            }
+                            .offset(
+                                x: clampedOffsetX(in: proxy.size) + dragTranslation.width,
+                                y: clampedOffsetY(in: proxy.size) + dragTranslation.height
+                            )
+                            .simultaneousGesture(
+                                DragGesture(minimumDistance: dragThreshold)
+                                    .onChanged { value in
+                                        // Solo consideramos arrastre real si se superó el umbral.
+                                        let distance = hypot(value.translation.width, value.translation.height)
+                                        if distance > dragThreshold {
+                                            didDragMove = true
+                                        }
+                                        dragTranslation = value.translation
+                                    }
+                                    .onEnded { value in
+                                        let distance = hypot(value.translation.width, value.translation.height)
+                                        // Si apenas se movió, lo tratamos como tap y no actualizamos posición.
+                                        guard distance > dragThreshold else {
+                                            dragTranslation = .zero
+                                            didDragMove = false
+                                            return
+                                        }
+                                        let proposedX = savedOffsetX + value.translation.width
+                                        let proposedY = savedOffsetY + value.translation.height
+                                        savedOffsetX = clamp(proposedX,
+                                                             min: minOffsetX(in: proxy.size),
+                                                             max: 0)
+                                        savedOffsetY = clamp(proposedY,
+                                                             min: minOffsetY(in: proxy.size),
+                                                             max: 0)
+                                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                                            dragTranslation = .zero
+                                        }
+                                        // Mantenemos didDragMove=true para que el tap asociado
+                                        // a esta soltada sea ignorado. Se resetea en el próximo tap.
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                            didDragMove = false
+                                        }
+                                    }
+                            )
+                            .animation(.spring(response: 0.4, dampingFraction: 0.85), value: savedOffsetX)
+                            .animation(.spring(response: 0.4, dampingFraction: 0.85), value: savedOffsetY)
                         }
                     }
+                    .padding(.trailing, horizontalPadding)
+                    .padding(.bottom, verticalPadding)
+                    .animation(.spring(response: 0.45, dampingFraction: 0.75), value: viewModel.activeSuggestion?.id)
                 }
-                .padding(.trailing, 20)
-                .padding(.bottom, 88)
-                .animation(.spring(response: 0.45, dampingFraction: 0.75), value: viewModel.activeSuggestion?.id)
-            }
-            .sheet(isPresented: Binding(
-                get: { viewModel.isPanelOpen },
-                set: { viewModel.isPanelOpen = $0 }
-            )) {
-                CGPanelView(viewModel: viewModel)
-                    .environment(navigator)
-                    .presentationDragIndicator(.visible)
-                    .presentationDetents([.medium, .large])
-            }
+        }
+        .sheet(isPresented: Binding(
+            get: { viewModel.isPanelOpen },
+            set: { viewModel.isPanelOpen = $0 }
+        )) {
+            CGPanelView(viewModel: viewModel)
+                .environment(navigator)
+                .presentationDragIndicator(.visible)
+                .presentationDetents([.large])
+        }
+    }
+
+    // MARK: - Clamping del offset
+
+    /// Mínimo offset X permitido (mueve el botón hacia la izquierda del safe area).
+    private func minOffsetX(in size: CGSize) -> CGFloat {
+        -(size.width - buttonSize - horizontalPadding * 2)
+    }
+
+    /// Mínimo offset Y permitido (mueve el botón hacia arriba del safe area).
+    private func minOffsetY(in size: CGSize) -> CGFloat {
+        -(size.height - buttonSize - verticalPadding - 40)
+    }
+
+    private func clampedOffsetX(in size: CGSize) -> CGFloat {
+        clamp(savedOffsetX, min: minOffsetX(in: size), max: 0)
+    }
+
+    private func clampedOffsetY(in size: CGSize) -> CGFloat {
+        clamp(savedOffsetY, min: minOffsetY(in: size), max: 0)
+    }
+
+    private func clamp(_ value: Double, min lower: CGFloat, max upper: CGFloat) -> Double {
+        Swift.min(Swift.max(value, Double(lower)), Double(upper))
     }
 }

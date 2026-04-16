@@ -72,7 +72,7 @@ final class CGViewModel: ObservableObject {
     // MARK: - API pública
 
     /// Abre el panel de conversación.
-    /// Muestra el mensaje de bienvenida si la conversación está vacía.
+    /// Muestra el mensaje de bienvenida si la conversación está vacía y no hay mensaje pendiente.
     func openPanel(initialMessage: String? = nil) {
         isPanelOpen = true
         activeSuggestion = nil
@@ -83,7 +83,8 @@ final class CGViewModel: ObservableObject {
             return
         }
 
-        if messages.isEmpty {
+        // Si hay un mensaje pendiente, no mostramos welcome para evitar ruido visual
+        if messages.isEmpty && pendingMessage == nil {
             showWelcomeMessage()
         }
     }
@@ -94,10 +95,31 @@ final class CGViewModel: ObservableObject {
             // El panel ya está abierto, enviar directamente
             sendMessage(message)
         } else {
-            // Guardar mensaje pendiente y abrir el panel
+            // Primero marcamos el mensaje pendiente, luego abrimos el panel
+            // (el orden importa: openPanel chequea pendingMessage para decidir el welcome).
             pendingMessage = message
             openPanel()
         }
+    }
+
+    /// Abre el panel y envía un prompt silencioso al servicio de IA:
+    /// solicita respuesta pero **no** muestra el prompt como mensaje del usuario.
+    /// Útil para contextos largos (p. ej. el prompt de ruta generado tras la encuesta).
+    func openPanelWithSilentPrompt(_ prompt: String) {
+        let trimmed = prompt.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+
+        isPanelOpen = true
+        activeSuggestion = nil
+        pendingSuggestionsCount = 0
+
+        // Evita colisionar con otro mensaje pendiente que abriría el chat duplicado.
+        pendingMessage = nil
+
+        // Si ya está pensando (otra petición en vuelo), dejamos pasar la actual.
+        guard !isThinking else { return }
+
+        fetchResponse(for: trimmed)
     }
 
     /// Envía un mensaje del usuario y solicita respuesta al servicio de IA.
@@ -133,17 +155,12 @@ final class CGViewModel: ObservableObject {
     // MARK: - Internals
 
     private func showWelcomeMessage() {
-        let welcome = CGMessage.guideMessage(
-            "¡Hola! Soy **CoqueGuide**, tu asistente en el Museo del Acero Horno3. 🏭\n\n" +
-            "Puedo ayudarte con orientación, eventos, escaneo de objetos y accesibilidad.\n\n" +
-            "¿En qué te puedo ayudar hoy?"
-        )
-        // Pequeño retraso para que la apertura del panel sea visible antes del mensaje
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { [weak self] in
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                self?.messages.append(welcome)
-            }
-        }
+        // Usa el idioma detectado del iPhone (L10n.cgWelcome lo resuelve).
+        let welcome = CGMessage.guideMessage(L10n.cgWelcome)
+        // Lo insertamos de forma síncrona para que ya esté visible cuando el sheet
+        // termine de animarse; así evitamos el "trabón" perceptible de un delay +
+        // animación encadenada al primer frame.
+        messages.append(welcome)
     }
 
     private func fetchResponse(for text: String) {
@@ -161,32 +178,17 @@ final class CGViewModel: ObservableObject {
     // MARK: - Sugerencias proactivas
 
     /// Catálogo de sugerencias contextuales que CoqueGuide puede mostrar al visitante.
-    private let proactiveSuggestions: [CGSuggestion] = [
-        CGSuggestion(
-            text: "¿Quieres ver el mapa del museo?",
-            icon: "map"
-        ),
-        CGSuggestion(
-            text: "¿Sabías que hay una visita guiada disponible hoy?",
-            icon: "person.wave.2"
-        ),
-        CGSuggestion(
-            text: "¿Necesitas información sobre accesibilidad?",
-            icon: "figure.roll"
-        ),
-        CGSuggestion(
-            text: "Puedes escanear cualquier pieza del museo para saber más.",
-            icon: "qrcode.viewfinder"
-        ),
-        CGSuggestion(
-            text: "¿Quieres conocer los horarios y precios de entrada?",
-            icon: "ticket"
-        ),
-        CGSuggestion(
-            text: "¿Hay algo en lo que pueda ayudarte durante tu visita?",
-            icon: "sparkles"
-        ),
-    ]
+    /// Es `var` computada para que los textos se resuelvan con el idioma actual del dispositivo.
+    private var proactiveSuggestions: [CGSuggestion] {
+        [
+            CGSuggestion(text: L10n.suggestShowMap,      icon: "map"),
+            CGSuggestion(text: L10n.suggestGuidedTour,   icon: "person.wave.2"),
+            CGSuggestion(text: L10n.suggestAccessibility, icon: "figure.roll"),
+            CGSuggestion(text: L10n.suggestScan,         icon: "qrcode.viewfinder"),
+            CGSuggestion(text: L10n.suggestTickets,      icon: "ticket"),
+            CGSuggestion(text: L10n.suggestHelp,         icon: "sparkles"),
+        ]
+    }
 
     /// Inicia el ciclo de sugerencias proactivas con temporizador.
     private func startProactiveSuggestions() {

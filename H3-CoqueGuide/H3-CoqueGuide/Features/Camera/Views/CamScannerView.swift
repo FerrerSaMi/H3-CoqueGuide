@@ -7,154 +7,245 @@
 
 import SwiftUI
 import AVFoundation
-import SwiftData
+import UIKit
 
 // MARK: - CamScannerView
 
 struct CamScannerView: View {
 
+    // MARK: Environment
+    @EnvironmentObject private var coqueGuideVM: CGViewModel
+
     // MARK: ViewModel
     @StateObject private var viewModel = CamScannerViewModel()
-    @Environment(\.modelContext) private var modelContext
-    @State private var bottomSafeArea: CGFloat = 0
-    @State private var isIntroVisible = true
-    @State private var showLanguagePicker = false
-
-    // MARK: - Available Languages
-    private var availableLanguages: [String] {
-        viewModel.googleTranslationService.getSupportedLanguages()
-    }
 
     // MARK: - Body
 
     var body: some View {
         ZStack {
+            // 1. Live camera feed
             CameraPreview(session: viewModel.camera.session)
                 .ignoresSafeArea()
 
-            if isIntroVisible {
-                Color.black.opacity(0.42)
-                    .ignoresSafeArea()
-                    .transition(.opacity)
-                    .zIndex(1)
+            // 2. Scanner frame overlay
+            ScannerFrameOverlay(isScanning: viewModel.isScanning)
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
 
-                VStack {
-                    Spacer()
-
-                    SimpleCardView(
-                        title: "Bienvenido a CoqueGuide",
-                        description: """
-                        Explora el museo de forma inteligente con nuestro escáner.
-
-                        Para escanear objetos: Apunta la cámara y presiona el botón circular. El sistema identificará el objeto y te dará una descripción detallada.
-
-                        Para traducir texto: Presiona "Extraer Texto" para leer automáticamente el texto visible, luego tradúcelo a tu idioma preferido.
-
-                        Los modelos de traducción se descargan automáticamente cuando los necesites por primera vez.
-                        """,
-                        actionTitle: "Comenzar"
-                    ) {
-                        // Animar la salida de la intro y entrada de la cámara
-                        withAnimation(.easeIn(duration: 0.4)) {
-                            isIntroVisible = false
-                        }
-                        // Pequeño delay antes de iniciar la cámara para una transición suave
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                            viewModel.onAppear()
-                        }
-                    }
-                    .frame(maxWidth: 360)
-                    .zIndex(2)
-
-                    Spacer()
-                }
+            // 3. UI layers
+            VStack(spacing: 0) {
+                topBar
+                Spacer()
+                bottomArea
             }
 
-            if !isIntroVisible {
-                VStack {
-                    Spacer()
-
-                    VStack(spacing: 16) {
-                        if let text = viewModel.extractedText {
-                            AnimatedTextResultCard(text: text, translation: viewModel.translatedText, viewModel: viewModel)
-                        }
-
-                        HStack(spacing: 16) {
-                            AnimatedActionButton(
-                                title: "Extraer Texto",
-                                systemImage: "text.viewfinder",
-                                color: .green
-                            ) {
-                                Task { await viewModel.extractText() }
-                            }
-                            .opacity(viewModel.extractedText == nil ? 1 : 0.6)
-                            .scaleEffect(viewModel.extractedText == nil ? 1 : 0.95)
-
-                            shutterButton
-                        }
-                    }
-                    .padding(.bottom, max(24, bottomSafeArea + 18))
-                }
-                .frame(maxWidth: .infinity)
-                .background(
-                    GeometryReader { proxy in
-                        Color.clear.preference(key: BottomSafeAreaKey.self, value: proxy.safeAreaInsets.bottom)
-                    }
-                )
-                .onPreferenceChange(BottomSafeAreaKey.self) { bottomSafeArea = $0 }
-            }
-        }
-        .overlay {
-            if viewModel.showFallbackUI {
-                CameraErrorFallbackView(
-                    errorMessage: viewModel.cameraError ?? "Error desconocido de cámara",
-                    onRetry: viewModel.retryCameraSetup
-                )
-                .transition(.opacity)
-            }
-        }
-        .overlay {
-            if viewModel.showScanResults && !viewModel.isScanning && viewModel.detectedObject != nil {
-                ScanSuccessIndicator()
-                    .transition(.scale.combined(with: .opacity))
-                    .zIndex(10)
+            // 4. Permission denied
+            if viewModel.camera.isPermissionDenied {
+                permissionDeniedOverlay
             }
         }
         .onAppear {
-            viewModel.loadVisitorProfile(from: modelContext)
-            // Animar la transición de la intro con un pequeño delay
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                withAnimation(.easeOut(duration: 0.8)) {
-                    // La transición ya está manejada en el botón de continuar
+            viewModel.onAppear()
+        }
+        .onDisappear {
+            viewModel.onDisappear()
+        }
+    }
+
+    // MARK: - Top Bar
+
+    private var topBar: some View {
+        ZStack {
+            // Título centrado
+            VStack(spacing: 2) {
+                Text("ESCÁNER")
+                    .scalingFont(size: 11, weight: .semibold, design: .monospaced)
+                    .tracking(3)
+                    .foregroundStyle(.white.opacity(0.6))
+                Text("Apunta al objeto del museo")
+                    .scalingFont(size: 13, weight: .medium)
+                    .foregroundStyle(.white)
+            }
+
+            // Flash a la derecha
+            HStack {
+                Spacer()
+                Button {
+                    viewModel.toggleFlash()
+                } label: {
+                    Image(systemName: viewModel.isFlashOn ? "bolt.fill" : "bolt.slash.fill")
+                        .scalingFont(size: 17, weight: .semibold)
+                        .foregroundStyle(viewModel.isFlashOn ? .yellow : .white)
+                        .frame(width: 38, height: 38)
+                        .background(.black.opacity(0.45))
+                        .clipShape(Circle())
                 }
+                .accessibilityLabel(viewModel.isFlashOn ? "Apagar flash" : "Encender flash")
             }
         }
-        .onDisappear { viewModel.onDisappear() }
-        .sheet(isPresented: $showLanguagePicker) {
-            NavigationView {
-                List(availableLanguages, id: \.self) { language in
-                    Button(action: {
-                        viewModel.selectedTranslationLanguage = language
-                        viewModel.saveTranslationLanguagePreference(to: modelContext)
-                        showLanguagePicker = false
-                    }) {
-                        HStack {
-                            Text(language)
-                            Spacer()
-                            if viewModel.selectedTranslationLanguage == language {
-                                Image(systemName: "checkmark")
-                                    .foregroundColor(.blue)
-                            }
-                        }
-                    }
+        .padding(.horizontal, 20)
+        .padding(.top, 16)
+        .padding(.bottom, 8)
+    }
+
+    // MARK: - Bottom Area
+
+    private var bottomArea: some View {
+        VStack(spacing: 0) {
+            if let obj = viewModel.detectedObject {
+                infoPanel(obj)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .padding(.bottom, 4)
+            }
+            shutterButton
+                .padding(.bottom, 16)
+        }
+        .animation(.spring(response: 0.45, dampingFraction: 0.82), value: viewModel.detectedObject != nil)
+    }
+
+    // MARK: - Info Panel
+
+    private func infoPanel(_ obj: MuseumObject) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+
+            // Header
+            HStack(alignment: .top, spacing: 10) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(obj.title)
+                        .scalingFont(size: 17, weight: .bold)
+                        .foregroundStyle(.white)
+                    Text(obj.era)
+                        .scalingFont(size: 12, weight: .medium, design: .monospaced)
+                        .foregroundStyle(.orange)
+                        .tracking(1.5)
                 }
-                .navigationTitle("Seleccionar idioma")
-                .navigationBarItems(trailing: Button("Cancelar") {
-                    showLanguagePicker = false
-                })
+                Spacer()
+                Text("\(Int(obj.confidence * 100))%")
+                    .scalingFont(size: 11, weight: .bold, design: .monospaced)
+                    .foregroundStyle(.black)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(.orange)
+                    .clipShape(Capsule())
+                    .accessibilityLabel("Confianza: \(Int(obj.confidence * 100)) por ciento")
+
+                Button {
+                    viewModel.dismissInfoPanel()
+                } label: {
+                    Image(systemName: "xmark")
+                        .scalingFont(size: 11, weight: .bold)
+                        .foregroundStyle(.white)
+                        .frame(width: 24, height: 24)
+                        .background(.white.opacity(0.15))
+                        .clipShape(Circle())
+                }
+                .accessibilityLabel("Cerrar información")
+                .accessibilityHint("Oculta la descripción del objeto escaneado")
+            }
+
+            // Descripción
+            Text(obj.description)
+                .scalingFont(size: 14)
+                .foregroundStyle(.white.opacity(0.88))
+                .lineSpacing(3)
+                .lineLimit(viewModel.isPanelExpanded ? nil : 3)
+
+            // Barra de progreso de lectura (visible solo mientras habla)
+            if viewModel.speech.isSpeaking {
+                SpeechProgressBar(progress: viewModel.speech.progress)
+                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                    .accessibilityLabel("Progreso de lectura")
+                    .accessibilityValue("\(Int(viewModel.speech.progress * 100)) por ciento")
+            }
+
+            // Acciones
+            HStack(spacing: 12) {
+                Button {
+                    viewModel.togglePanelExpanded()
+                } label: {
+                    Text(viewModel.isPanelExpanded ? "Ver menos" : "Ver más")
+                        .scalingFont(size: 13, weight: .medium)
+                        .foregroundStyle(.orange)
+                }
+                .accessibilityHint("Expande o contrae la descripción del objeto")
+
+                Spacer()
+
+                speakButton(for: obj)
+            }
+
+            // CTA a Coque (solo cuando la pieza fue reconocida)
+            if !obj.isUnknown {
+                askCoqueButton(for: obj)
             }
         }
-        .preferredColorScheme(.dark)
+        .padding(18)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .strokeBorder(.white.opacity(0.12), lineWidth: 1)
+        )
+        .padding(.horizontal, 20)
+        .animation(.easeInOut(duration: 0.2), value: viewModel.speech.isSpeaking)
+    }
+
+    // MARK: - Ask Coque Button
+
+    private func askCoqueButton(for obj: MuseumObject) -> some View {
+        Button {
+            let prompt = L10n.scannerAskPrompt(objectTitle: obj.title)
+            viewModel.dismissInfoPanel()
+            coqueGuideVM.openPanelWithMessage(prompt)
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "sparkles")
+                    .scalingFont(size: 13, weight: .bold)
+                Text(L10n.scannerAskCoque)
+                    .scalingFont(size: 14, weight: .semibold)
+            }
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(
+                LinearGradient(
+                    colors: [Color.orange, Color.orange.opacity(0.78)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+        }
+        .accessibilityLabel("Pregúntale a Coque sobre \(obj.title)")
+        .accessibilityHint("Cierra el escáner y abre el asistente con el contexto de la pieza")
+    }
+
+    // MARK: - Speak Button
+
+    private func speakButton(for obj: MuseumObject) -> some View {
+        Button {
+            viewModel.toggleSpeech(for: obj.description)
+        } label: {
+            HStack(spacing: 6) {
+                ZStack {
+                    Image(systemName: "speaker.wave.2.fill")
+                        .opacity(viewModel.speech.isSpeaking ? 0 : 1)
+                    Image(systemName: "stop.fill")
+                        .opacity(viewModel.speech.isSpeaking ? 1 : 0)
+                }
+                .scalingFont(size: 13)
+                .animation(.easeInOut(duration: 0.18), value: viewModel.speech.isSpeaking)
+
+                Text(viewModel.speech.isSpeaking ? "Detener" : "Escuchar")
+                    .scalingFont(size: 13, weight: .semibold)
+            }
+            .foregroundStyle(.black)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .background(viewModel.speech.isSpeaking ? Color.white : Color.orange)
+            .clipShape(Capsule())
+            .animation(.easeInOut(duration: 0.2), value: viewModel.speech.isSpeaking)
+        }
+        .accessibilityLabel(viewModel.speech.isSpeaking ? "Detener lectura" : "Escuchar descripción")
     }
 
     // MARK: - Shutter Button
@@ -162,291 +253,85 @@ struct CamScannerView: View {
     private var shutterButton: some View {
         Button { viewModel.triggerScan() } label: {
             ZStack {
-                // Pulsing outer ring
                 Circle()
-                    .stroke(Color.white.opacity(0.3), lineWidth: 2)
-                    .frame(width: 110, height: 110)
-                    .scaleEffect(viewModel.isScanning ? 1.2 : 1.0)
-                    .opacity(viewModel.isScanning ? 0 : 0.6)
-                    .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: viewModel.isScanning)
-
-                // Main background
-                Circle()
-                    .fill(Color.white.opacity(0.12))
-                    .frame(width: 94, height: 94)
-                    .scaleEffect(viewModel.isScanning ? 1.05 : 1.0)
-                    .animation(.spring(response: 0.3, dampingFraction: 0.6), value: viewModel.isScanning)
-
-                // Inner ring
-                Circle()
-                    .stroke(Color.white, lineWidth: 4)
-                    .frame(width: 78, height: 78)
-                    .scaleEffect(viewModel.isScanning ? 0.95 : 1.0)
-                    .animation(.spring(response: 0.2, dampingFraction: 0.8), value: viewModel.isScanning)
-
-                // Fill circle
+                    .strokeBorder(.white.opacity(0.5), lineWidth: 3)
+                    .frame(width: 72, height: 72)
                 Circle()
                     .fill(viewModel.isScanning ? Color.orange : Color.white)
                     .frame(width: 58, height: 58)
-                    .shadow(color: Color.black.opacity(0.18), radius: 8, x: 0, y: 4)
-                    .scaleEffect(viewModel.isScanning ? 0.9 : 1.0)
-                    .animation(.spring(response: 0.25, dampingFraction: 0.7), value: viewModel.isScanning)
+                    .scaleEffect(viewModel.isScanning ? 0.88 : 1.0)
+                    .animation(.easeInOut(duration: 0.35), value: viewModel.isScanning)
 
-                // Progress indicator
                 if viewModel.isScanning {
-                    ProgressView()
-                        .tint(.black)
-                        .scaleEffect(1.1)
-                        .transition(.scale.combined(with: .opacity))
-                }
-
-                // Success checkmark (briefly shown after scan)
-                if viewModel.detectedObject != nil && !viewModel.isScanning {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundColor(.black)
-                        .transition(.scale.combined(with: .opacity))
-                        .onAppear {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                                withAnimation(.easeOut(duration: 0.3)) {
-                                    // This will trigger the transition out
-                                }
-                            }
-                        }
+                    ProgressView().tint(.black).scaleEffect(1.1)
                 }
             }
-            .frame(width: 94, height: 94)
-            .contentShape(Circle())
         }
-        .buttonStyle(ShutterButtonStyle())
         .disabled(viewModel.isScanning)
         .accessibilityLabel("Escanear objeto")
         .accessibilityHint("Toma una foto y clasifica el objeto detectado")
     }
-}
 
-private struct ShutterButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.85 : 1.0)
-            .opacity(configuration.isPressed ? 0.8 : 1.0)
-            .brightness(configuration.isPressed ? -0.1 : 0)
-            .animation(.spring(response: 0.2, dampingFraction: 0.6, blendDuration: 0), value: configuration.isPressed)
-    }
-}
+    // MARK: - Permission Denied Overlay
 
-private struct BottomSafeAreaKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
+    private var permissionDeniedOverlay: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "camera.slash.fill")
+                .scalingFont(size: 40)
+                .foregroundStyle(.orange)
 
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = max(value, nextValue())
-    }
-}
+            Text("Sin acceso a la cámara")
+                .scalingFont(size: 18, weight: .bold)
+                .foregroundStyle(.white)
 
-// MARK: - Animated Components
+            Text("Activa el permiso en Configuración para usar el escaneo de objetos.")
+                .scalingFont(size: 14)
+                .foregroundStyle(.white.opacity(0.75))
+                .multilineTextAlignment(.center)
 
-struct AnimatedTextResultCard: View {
-    let text: String
-    let translation: String?
-    let viewModel: CamScannerViewModel
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            // Texto detectado
-            VStack(alignment: .leading, spacing: 10) {
-                Text("Texto detectado")
-                    .font(.system(.headline, design: .default))
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                    .lineSpacing(4)
-
-                Text(text)
-                    .font(.system(.body, design: .default))
-                    .foregroundColor(.white)
-                    .lineSpacing(6)
-                    .multilineTextAlignment(.leading)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .padding(16)
-            .background(Color.white.opacity(0.08))
-            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-
-            // Selector de idioma
-            HStack {
-                Text("Traducir a:")
-                    .font(.system(.caption, design: .default))
-                    .foregroundColor(.white.opacity(0.75))
-
-                Spacer()
-
-                Button(action: {
-                    // This would need to be passed from parent
-                }) {
-                    Text(viewModel.selectedTranslationLanguage)
-                        .font(.system(.caption, design: .default))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .background(Color.blue.opacity(0.25))
-                        .clipShape(Capsule())
+            Button {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
                 }
-            }
-
-            // Traducción o estados de carga/error
-            Group {
-                if let translated = translation {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("Traducción")
-                            .font(.system(.headline, design: .default))
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
-                            .lineSpacing(4)
-
-                        Text(translated)
-                            .font(.system(.body, design: .default))
-                            .foregroundColor(.white.opacity(0.95))
-                            .lineSpacing(6)
-                            .multilineTextAlignment(.leading)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    .padding(16)
-                    .background(Color.blue.opacity(0.14))
-                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                } else if viewModel.isDownloadingTranslationModel {
-                    VStack(spacing: 12) {
-                        ProgressView(value: viewModel.translationDownloadProgress)
-                            .progressViewStyle(.linear)
-                            .tint(.white)
-                            .frame(height: 4)
-
-                        Text("Descargando modelo de traducción...")
-                            .font(.system(.caption, design: .default))
-                            .foregroundColor(.white.opacity(0.8))
-                    }
+            } label: {
+                Text("Abrir Configuración")
+                    .scalingFont(size: 15, weight: .semibold)
+                    .foregroundStyle(.black)
+                    .padding(.horizontal, 24)
                     .padding(.vertical, 12)
-                } else if let error = viewModel.translationError {
-                    VStack(spacing: 8) {
-                        Text("Error de traducción")
-                            .font(.system(.caption, design: .default))
-                            .foregroundColor(.red.opacity(0.8))
-
-                        Text(error)
-                            .font(.system(.caption2, design: .default))
-                            .foregroundColor(.white.opacity(0.6))
-                            .multilineTextAlignment(.center)
-                            .lineLimit(2)
-
-                        Button("Reintentar") {
-                            Task { await viewModel.translateExtractedText() }
-                        }
-                        .font(.system(.caption, design: .default))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                        .background(Color.blue.opacity(0.6))
-                        .clipShape(Capsule())
-                    }
-                    .padding(.vertical, 8)
-                } else {
-                    Button("Traducir") {
-                        Task { await viewModel.translateExtractedText() }
-                    }
-                    .foregroundColor(.white)
-                    .padding(.vertical, 12)
-                    .frame(maxWidth: .infinity)
-                    .background(Color.blue.opacity(0.8))
-                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                }
+                    .background(Color.orange)
+                    .clipShape(Capsule())
             }
+            .accessibilityHint("Abre la configuración del sistema para activar el permiso de cámara")
         }
-        .padding(22)
-        .background(.ultraThinMaterial)
-        .background(
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .fill(Color.white.opacity(0.10))
-        )
+        .padding(28)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24))
         .overlay(
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(Color.white.opacity(0.12), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 24)
+                .strokeBorder(.white.opacity(0.15), lineWidth: 1)
         )
-        .shadow(color: Color.black.opacity(0.25), radius: 18, x: 0, y: 8)
+        .padding(32)
     }
 }
 
-struct AnimatedActionButton: View {
-    let title: String
-    let systemImage: String
-    let color: Color
-    let action: () -> Void
+// MARK: - Speech Progress Bar
+
+private struct SpeechProgressBar: View {
+    let progress: Double
 
     var body: some View {
-        Button(action: action) {
-            HStack(spacing: 8) {
-                Image(systemName: systemImage)
-                    .font(.system(size: 16, weight: .semibold))
-                Text(title)
-                    .font(.system(size: 14, weight: .semibold))
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                Capsule()
+                    .fill(.white.opacity(0.15))
+                    .frame(height: 3)
+                Capsule()
+                    .fill(Color.orange)
+                    .frame(width: geo.size.width * progress, height: 3)
+                    .animation(.linear(duration: 0.1), value: progress)
             }
-            .foregroundColor(.white)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(color.opacity(0.8))
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-            .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)
         }
-    }
-}
-
-struct CameraErrorFallbackView: View {
-    let errorMessage: String
-    let onRetry: () -> Void
-
-    var body: some View {
-        ZStack {
-            Color.black.opacity(0.8)
-                .ignoresSafeArea()
-
-            VStack(spacing: 24) {
-                Image(systemName: "camera.fill")
-                    .font(.system(size: 64))
-                    .foregroundColor(.white.opacity(0.6))
-
-                Text("Error de Cámara")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-
-                Text(errorMessage)
-                    .font(.body)
-                    .foregroundColor(.white.opacity(0.8))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
-
-                Button(action: onRetry) {
-                    Text("Reintentar")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 32)
-                        .padding(.vertical, 16)
-                        .background(Color.blue)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
-                .padding(.top, 8)
-            }
-            .padding()
-        }
-    }
-}
-
-// MARK: - Scan Success Indicator
-
-struct ScanSuccessIndicator: View {
-    var body: some View {
-        ZStack {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 60))
-                .foregroundColor(.green)
-        }
+        .frame(height: 3)
     }
 }
 
@@ -454,4 +339,5 @@ struct ScanSuccessIndicator: View {
 
 #Preview {
     CamScannerView()
+        .environmentObject(CGViewModel())
 }
