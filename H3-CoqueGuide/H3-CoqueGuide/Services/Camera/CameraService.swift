@@ -20,6 +20,7 @@ enum CameraError: LocalizedError, Equatable {
     case inputError
     case captureError(String)
     case classificationFailed(String)
+    case textRecognitionFailed(String)
 
     var errorDescription: String? {
         switch self {
@@ -28,6 +29,7 @@ enum CameraError: LocalizedError, Equatable {
         case .inputError:          return "Error al configurar la entrada de cámara."
         case .captureError(let m): return m
         case .classificationFailed(let m): return "Error de clasificación: \(m)"
+        case .textRecognitionFailed(let m): return "Error de reconocimiento de texto: \(m)"
         }
     }
 }
@@ -115,6 +117,13 @@ final class CameraService: NSObject, ObservableObject {
         let image = try await capturePhoto()
         return try await classify(image: image)
     }
+
+    /// Extrae texto de la imagen actual usando OCR.
+    func extractTextFromCurrentFrame() async throws -> String {
+        let image = try await capturePhoto()
+        return try await extractText(from: image)
+    }
+
 
     // MARK: - Private helpers
 
@@ -210,6 +219,46 @@ final class CameraService: NSObject, ObservableObject {
                     try handler.perform([request])
                 } catch {
                     continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+
+    private func extractText(from image: UIImage) async throws -> String {
+        guard let cgImage = image.cgImage else {
+            throw CameraError.textRecognitionFailed("No se pudo convertir la imagen.")
+        }
+
+        return try await withCheckedThrowingContinuation { continuation in
+            sessionQueue.async {
+                do {
+                    let request = VNRecognizeTextRequest { request, error in
+                        if let error {
+                            continuation.resume(throwing: CameraError.textRecognitionFailed(error.localizedDescription))
+                            return
+                        }
+
+                        guard let observations = request.results as? [VNRecognizedTextObservation] else {
+                            continuation.resume(throwing: CameraError.textRecognitionFailed("No se obtuvieron resultados de reconocimiento de texto."))
+                            return
+                        }
+
+                        let recognizedText = observations.compactMap { observation in
+                            observation.topCandidates(1).first?.string
+                        }.joined(separator: " ")
+
+                        continuation.resume(returning: recognizedText)
+                    }
+
+                    request.recognitionLevel = .accurate
+                    request.usesLanguageCorrection = true
+                    request.recognitionLanguages = ["es-ES", "en-US"] // Priorizar español e inglés
+
+                    let orientation = CGImagePropertyOrientation(uiImageOrientation: image.imageOrientation)
+                    let handler = VNImageRequestHandler(cgImage: cgImage, orientation: orientation)
+                    try handler.perform([request])
+                } catch {
+                    continuation.resume(throwing: CameraError.textRecognitionFailed(error.localizedDescription))
                 }
             }
         }
