@@ -40,18 +40,18 @@ struct SurveyView: View {
                 descriptionContent
             }
         }
-        .navigationTitle("Encuesta")
+        .navigationTitle(L10n.surveyTitle)
         .navigationBarTitleDisplayMode(.inline)
         .task {
             viewModel.loadExistingProfile(from: modelContext)
         }
-        .alert("Primero cuéntame de ti ✨", isPresented: $showSurveyRequiredAlert) {
-            Button("Hacer encuesta") {
+        .alert(L10n.surveyAlertTitle, isPresented: $showSurveyRequiredAlert) {
+            Button(L10n.surveyStart) {
                 viewModel.startSurvey()
             }
-            Button("Después", role: .cancel) { }
+            Button(L10n.surveyAlertLater, role: .cancel) { }
         } message: {
-            Text("Contesta la encuesta para que Coque pueda crear una ruta personalizada con tus gustos, tu tiempo y tu estilo de visita.")
+            Text(L10n.surveyAlertMessage)
         }
     }
 }
@@ -67,14 +67,14 @@ private extension SurveyView {
                 .frame(width: 180, height: 180)
                 .shadow(radius: 10)
 
-            Text("Encuesta para mejor experiencia")
+            Text(L10n.surveyHomeTitle)
                 .font(.title2)
                 .fontWeight(.bold)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
                 .foregroundStyle(.primary)
 
-            Text("Elige una opción para comenzar")
+            Text(L10n.surveyHomeSubtitle)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
@@ -82,14 +82,14 @@ private extension SurveyView {
                 Button {
                     viewModel.startSurvey()
                 } label: {
-                    homeButton(title: "Hacer encuesta", icon: "play.fill")
+                    homeButton(title: L10n.surveyStart, icon: "play.fill")
                 }
                 .buttonStyle(.plain)
 
                 Button {
                     viewModel.openDescription()
                 } label: {
-                    homeButton(title: "Ver descripción del usuario", icon: "person.text.rectangle.fill")
+                    homeButton(title: L10n.surveyViewDescription, icon: "person.text.rectangle.fill")
                 }
                 .buttonStyle(.plain)
             }
@@ -129,7 +129,7 @@ private extension SurveyView {
             .padding(.top, 12)
 
             VStack(spacing: 10) {
-                Text(viewModel.currentStep.title)
+                Text(viewModel.currentStep.localizedTitle)
                     .font(.title2)
                     .fontWeight(.bold)
                     .multilineTextAlignment(.center)
@@ -147,7 +147,7 @@ private extension SurveyView {
                     )
 
                 if viewModel.currentStep == .attractionPreference {
-                    Text("Si eliges “Recomendado”, se elegirá una opción según tus respuestas.")
+                    Text(L10n.surveyRecommendHint)
                         .font(.footnote)
                         .multilineTextAlignment(.center)
                         .foregroundStyle(.secondary)
@@ -158,7 +158,7 @@ private extension SurveyView {
 
             if viewModel.isLoading {
                 Spacer()
-                ProgressView("Generando descripción...")
+                ProgressView(L10n.surveyLoading)
                     .font(.headline)
                 Spacer()
             } else {
@@ -169,14 +169,18 @@ private extension SurveyView {
                     ),
                     spacing: 14
                 ) {
-                    ForEach(Array(viewModel.currentStep.options.enumerated()), id: \.element) { index, option in
+                    let rawOptions = viewModel.currentStep.options
+                    let displayOptions = viewModel.currentStep.localizedOptions
+                    ForEach(rawOptions.indices, id: \.self) { index in
+                        let raw = rawOptions[index]
+                        let display = displayOptions[index]
                         Button {
-                            viewModel.selectOption(option, in: modelContext)
+                            viewModel.selectOption(raw, in: modelContext)
                         } label: {
                             optionCard(
-                                title: option,
+                                title: display,
                                 color: optionColors[index % optionColors.count],
-                                isSelected: viewModel.optionIsSelected(option)
+                                isSelected: viewModel.optionIsSelected(raw)
                             )
                         }
                         .buttonStyle(.plain)
@@ -208,14 +212,14 @@ private extension SurveyView {
                     .padding(.top, 10)
                     .shadow(radius: 12)
 
-                Text("Descripción del usuario")
+                Text(L10n.surveyDescriptionTitle)
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundStyle(.primary)
 
                 Group {
                     if viewModel.aiDescription.isEmpty {
-                        Text("Todavía no hay una descripción generada. Primero realiza la encuesta.")
+                        Text(L10n.surveyDescriptionEmpty)
                             .multilineTextAlignment(.center)
                             .foregroundStyle(.secondary)
                             .padding()
@@ -228,13 +232,12 @@ private extension SurveyView {
                             } label: {
                                 HStack {
                                     Image(systemName: "doc.text.magnifyingglass")
-                                        .font(.system(size: 16, weight: .semibold))
-                                    Text(isDescriptionExpanded ? "Ocultar descripción" : "Ver descripción generada")
-                                        .font(.subheadline)
-                                        .fontWeight(.semibold)
+                                        .scalingFont(size: 16, weight: .semibold)
+                                    Text(isDescriptionExpanded ? L10n.surveyHideDescription : L10n.surveyShowDescription)
+                                        .scalingFont(size: 15, weight: .semibold, relativeTo: .subheadline)
                                     Spacer()
                                     Image(systemName: isDescriptionExpanded ? "chevron.up" : "chevron.down")
-                                        .font(.system(size: 13, weight: .semibold))
+                                        .scalingFont(size: 13, weight: .semibold)
                                 }
                                 .foregroundStyle(.orange)
                                 .padding(16)
@@ -268,10 +271,10 @@ private extension SurveyView {
                     handleSendToCoque()
                 } label: {
                     VStack(spacing: 6) {
-                        Text("Mandársela a Coque")
+                        Text(L10n.surveySendToCoque)
                             .fontWeight(.semibold)
 
-                        Text(viewModel.canSendToCoque ? "Abrirá el chat con tu ruta personalizada" : "Primero necesitas contestar la encuesta")
+                        Text(viewModel.canSendToCoque ? L10n.surveySendReady : L10n.surveySendNotReady)
                             .font(.footnote)
                             .multilineTextAlignment(.center)
                             .opacity(0.92)
@@ -290,7 +293,7 @@ private extension SurveyView {
                 Button {
                     viewModel.backToHome()
                 } label: {
-                    Text("Volver")
+                    Text(L10n.surveyBack)
                         .fontWeight(.semibold)
                         .foregroundStyle(.orange)
                         .frame(maxWidth: .infinity)

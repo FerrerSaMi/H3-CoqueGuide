@@ -41,11 +41,11 @@ private struct CGQuickActionChip: View {
         Button(action: onTap) {
             HStack(spacing: 6) {
                 Image(systemName: action.icon)
-                    .font(.system(size: 13, weight: .semibold))
+                    .scalingFont(size: 13, weight: .semibold)
                     .foregroundStyle(Color.accentColor)
 
                 Text(action.title)
-                    .font(.system(size: 13, weight: .medium))
+                    .scalingFont(size: 13, weight: .medium)
                     .foregroundStyle(.primary)
             }
             .padding(.horizontal, 14)

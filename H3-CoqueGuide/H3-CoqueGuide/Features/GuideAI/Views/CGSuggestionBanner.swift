@@ -25,13 +25,13 @@ struct CGSuggestionBanner: View {
 
             // Ícono de la sugerencia
             Image(systemName: suggestion.icon)
-                .font(.system(size: 16, weight: .semibold))
+                .scalingFont(size: 16, weight: .semibold)
                 .foregroundStyle(Color.accentColor)
                 .frame(width: 30)
 
             // Texto de la sugerencia
             Text(suggestion.text)
-                .font(.system(size: 13, weight: .medium))
+                .scalingFont(size: 13, weight: .medium)
                 .foregroundStyle(.primary)
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
@@ -40,7 +40,7 @@ struct CGSuggestionBanner: View {
             // Botón de descarte
             Button(action: onDismiss) {
                 Image(systemName: "xmark")
-                    .font(.system(size: 10, weight: .bold))
+                    .scalingFont(size: 10, weight: .bold)
                     .foregroundStyle(.secondary)
                     .padding(6)
                     .background(Color(.tertiarySystemFill))

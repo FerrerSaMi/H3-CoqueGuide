@@ -76,7 +76,7 @@ struct MapaView: View {
                 .padding(.bottom, 8)
         }
         .background(Color(.systemGroupedBackground))
-        .navigationTitle("Mapa del Museo")
+        .navigationTitle(L10n.mapTitle)
         .navigationBarTitleDisplayMode(.inline)
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: selectedLocationInfo != nil)
     }
@@ -85,10 +85,10 @@ struct MapaView: View {
 
     private var levelSelector: some View {
         HStack(spacing: 0) {
-            levelTab(title: "Nivel 1", isSelected: showingFirstMap) {
+            levelTab(title: L10n.mapLevel1, isSelected: showingFirstMap) {
                 switchLevel(toFirst: true)
             }
-            levelTab(title: "Nivel 2", isSelected: !showingFirstMap) {
+            levelTab(title: L10n.mapLevel2, isSelected: !showingFirstMap) {
                 switchLevel(toFirst: false)
             }
         }
@@ -164,7 +164,7 @@ struct MapaView: View {
                         pinView(pin: pin)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel(pin.type == .service ? "Servicio: \(locations[pin.number]?.name ?? "")" : "Punto \(pin.number)")
+                    .accessibilityLabel(pin.type == .service ? L10n.mapServiceNamed(locations[pin.number]?.name ?? "") : L10n.mapPoint(pin.number))
                     .position(
                         x: imageRect.minX + (pin.x * imageRect.width),
                         y: imageRect.minY + (pin.y * imageRect.height)
@@ -212,11 +212,11 @@ struct MapaView: View {
 
             if let symbol = pin.type.symbolName {
                 Image(systemName: symbol)
-                    .font(.system(size: 14, weight: .bold))
+                    .scalingFont(size: 14, weight: .bold)
                     .foregroundStyle(isSelected ? .white : accentColor)
             } else {
                 Text("\(pin.number)")
-                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .scalingFont(size: 12, weight: .bold, design: .rounded)
                     .foregroundStyle(isSelected ? .white : accentColor)
             }
         }
@@ -236,17 +236,17 @@ struct MapaView: View {
 
                 if let symbol = info.type.symbolName {
                     Image(systemName: symbol)
-                        .font(.system(size: 18, weight: .bold))
+                        .scalingFont(size: 18, weight: .bold)
                         .foregroundStyle(.white)
                 } else {
                     Text("\(info.id)")
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .scalingFont(size: 16, weight: .bold, design: .rounded)
                         .foregroundStyle(.white)
                 }
             }
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(info.type == .service ? "Servicio" : "Punto \(info.id)")
+                Text(info.type == .service ? L10n.mapService : L10n.mapPoint(info.id))
                     .font(.caption)
                     .fontWeight(.medium)
                     .foregroundStyle(.secondary)
@@ -266,11 +266,11 @@ struct MapaView: View {
                 }
             } label: {
                 Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 22))
+                    .scalingFont(size: 22)
                     .foregroundStyle(.secondary)
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Cerrar información")
+            .accessibilityLabel(L10n.mapCloseInfo)
         }
         .padding(14)
         .background(Color(.secondarySystemGroupedBackground))
@@ -290,10 +290,9 @@ struct MapaView: View {
             } label: {
                 HStack(spacing: 5) {
                     Image(systemName: "figure.dress.line.vertical.figure")
-                        .font(.system(size: 12, weight: .semibold))
-                    Text("Servicios")
-                        .font(.caption)
-                        .fontWeight(.semibold)
+                        .scalingFont(size: 12, weight: .semibold)
+                    Text(L10n.mapServices)
+                        .scalingFont(size: 12, weight: .semibold, relativeTo: .caption)
                 }
                 .foregroundStyle(showServices ? .white : .blue)
                 .padding(.horizontal, 12)
@@ -302,11 +301,11 @@ struct MapaView: View {
                 .clipShape(Capsule())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(showServices ? "Ocultar servicios" : "Mostrar servicios")
+            .accessibilityLabel(showServices ? L10n.mapHideServices : L10n.mapShowServices)
 
             Spacer()
 
-            Label("Pellizca para zoom", systemImage: "hand.pinch")
+            Label(L10n.mapPinchToZoom, systemImage: "hand.pinch")
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
@@ -319,10 +318,9 @@ struct MapaView: View {
             } label: {
                 HStack(spacing: 4) {
                     Image(systemName: "arrow.counterclockwise")
-                        .font(.system(size: 12, weight: .semibold))
-                    Text("Reset")
-                        .font(.caption)
-                        .fontWeight(.semibold)
+                        .scalingFont(size: 12, weight: .semibold)
+                    Text(L10n.mapReset)
+                        .scalingFont(size: 12, weight: .semibold, relativeTo: .caption)
                 }
                 .foregroundStyle(.orange)
                 .padding(.horizontal, 12)

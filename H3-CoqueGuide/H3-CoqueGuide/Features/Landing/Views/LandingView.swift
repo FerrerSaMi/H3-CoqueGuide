@@ -28,30 +28,31 @@ struct LandingView: View {
     // MARK: - Carrusel
     @State private var currentGalleryIndex: Int = 0
     let autoScrollTimer = Timer.publish(every: 5, on: .main, in: .common).autoconnect()
-    private let galleryItems: [(image: String, title: String, subtitle: String)] = [
-        ("Galeria1", "Museo del Acero", "Horno3 - Monterrey, NL"),
-        ("Galeria2", "Historia Industrial", "Conoce el legado siderúrgico"),
-        ("Galeria3", "Exhibiciones", "Ciencia, arte y tecnología"),
-        ("Galeria4", "Experiencias", "Recorridos interactivos"),
-        ("Galeria5", "Cultura y Aprendizaje", "Un mundo por descubrir"),
-    ]
+    /// Los textos se calculan dinámicamente según el idioma del dispositivo.
+    private var galleryItems: [(image: String, title: String, subtitle: String)] {
+        [
+            ("Galeria1", L10n.galleryMuseumTitle,       L10n.galleryMuseumSubtitle),
+            ("Galeria2", L10n.galleryHistoryTitle,      L10n.galleryHistorySubtitle),
+            ("Galeria3", L10n.galleryExhibitionsTitle,  L10n.galleryExhibitionsSubtitle),
+            ("Galeria4", L10n.galleryExperiencesTitle,  L10n.galleryExperiencesSubtitle),
+            ("Galeria5", L10n.galleryCultureTitle,      L10n.galleryCultureSubtitle),
+        ]
+    }
 
     // MARK: - TabView
     @State private var selectedTab: Int = 0
     @AppStorage("isDarkModeEnabled") private var isDarkModeEnabled: Bool = false
 
-    private let homeInviteContent = CGHomeInviteContent.default
+    /// Contenido del card de CoqueGuide en home (computado para reflejar el idioma actual).
+    private var homeInviteContent: CGHomeInviteContent { .default }
 
-    /// Saludo dinámico según la hora del día
+    /// Saludo dinámico según la hora del día (localizado al idioma del iPhone).
     private var greetingText: String {
         let hour = Calendar.current.component(.hour, from: Date())
         switch hour {
-        case 6..<12:
-            return "Buenos días"
-        case 12..<18:
-            return "Buenas tardes"
-        default:
-            return "Buenas noches"
+        case 6..<12:  return L10n.greetingMorning
+        case 12..<18: return L10n.greetingAfternoon
+        default:      return L10n.greetingEvening
         }
     }
 
@@ -63,28 +64,28 @@ struct LandingView: View {
                 // TAB 0: Inicio
                 atraccionesTab
                     .tabItem {
-                        Label("Inicio", systemImage: "house.fill")
+                        Label(L10n.tabHome, systemImage: "house.fill")
                     }
                     .tag(0)
 
                 // TAB 1: Escaneo
                 CamScannerView()
                     .tabItem {
-                        Label("Escaneo", systemImage: "qrcode.viewfinder")
+                        Label(L10n.tabScan, systemImage: "qrcode.viewfinder")
                     }
                     .tag(1)
 
                 // TAB 2: Mapa
                 MapaView()
                     .tabItem {
-                        Label("Mapa", systemImage: "map.fill")
+                        Label(L10n.tabMap, systemImage: "map.fill")
                     }
                     .tag(2)
 
                 // TAB 3: Encuesta
                 SurveyView()
                     .tabItem {
-                        Label("Encuesta", systemImage: "checklist")
+                        Label(L10n.tabProfile, systemImage: "checklist")
                     }
                     .tag(3)
             }
@@ -95,13 +96,13 @@ struct LandingView: View {
                 case .map:
                     MapaView()
                 case .events:
-                    PlaceholderView(title: "Atracciones")
+                    PlaceholderView(title: L10n.landingPlaceholderAttractions)
                 case .scanning:
                     CamScannerView()
                 case .survey:
                     SurveyView()
                 case .chatbot:
-                    PlaceholderView(title: "Chatbot")
+                    PlaceholderView(title: L10n.landingPlaceholderChatbot)
                 }
             }
             .coqueGuideOverlay(viewModel: coqueGuideVM, hideFloatingButton: selectedTab == 0, navigator: navigationCoordinator)
@@ -216,7 +217,7 @@ struct LandingView: View {
                     }
                 } label: {
                     Image(systemName: isDarkModeEnabled ? "sun.max.fill" : "moon.fill")
-                        .font(.system(size: 16, weight: .medium))
+                        .scalingFont(size: 16, weight: .medium)
                         .foregroundStyle(isDarkModeEnabled ? .yellow : .secondary)
                         .frame(width: 36, height: 36)
                         .background(Color(.secondarySystemGroupedBackground))
@@ -225,7 +226,7 @@ struct LandingView: View {
                         .animation(.spring(response: 0.5, dampingFraction: 0.6), value: isDarkModeEnabled)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(isDarkModeEnabled ? "Cambiar a modo claro" : "Cambiar a modo oscuro")
+                .accessibilityLabel(isDarkModeEnabled ? L10n.landingDarkModeToLight : L10n.landingDarkModeToDark)
             }
             .padding(.horizontal, 20)
             .padding(.top, 16)
@@ -235,7 +236,7 @@ struct LandingView: View {
                 Text(greetingText)
                     .font(.title2)
                     .fontWeight(.bold)
-                Text("Explora todo lo que el museo tiene para ti")
+                Text(L10n.landingGreetingSubtitle)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
@@ -296,12 +297,12 @@ struct LandingView: View {
                     )
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(homeInviteContent.title)
+                    Text(L10n.cgHomeTitle)
                         .font(.title3)
                         .fontWeight(.bold)
                         .foregroundStyle(.white)
 
-                    Text("Tu asistente inteligente")
+                    Text(L10n.cgHeaderSubtitle)
                         .font(.caption)
                         .foregroundStyle(.white.opacity(0.85))
                 }
@@ -313,7 +314,7 @@ struct LandingView: View {
                     Circle()
                         .fill(Color.green)
                         .frame(width: 8, height: 8)
-                    Text("Activo")
+                    Text(L10n.cgStatusBadge)
                         .font(.caption2)
                         .fontWeight(.medium)
                         .foregroundStyle(.white.opacity(0.9))
@@ -325,7 +326,7 @@ struct LandingView: View {
             }
 
             // Mensaje de bienvenida
-            Text(homeInviteContent.message)
+            Text(L10n.cgHomeMessage)
                 .font(.subheadline)
                 .fontWeight(.medium)
                 .foregroundStyle(.white.opacity(0.95))
@@ -337,13 +338,13 @@ struct LandingView: View {
             } label: {
                 HStack(spacing: 10) {
                     Image(systemName: "message.fill")
-                        .font(.system(size: 15, weight: .bold))
-                    Text("Abrir chat con Coque")
+                        .scalingFont(size: 15, weight: .bold)
+                    Text(L10n.cgHomeCTA)
                         .font(.subheadline)
                         .fontWeight(.semibold)
                     Spacer()
                     Image(systemName: "arrow.right")
-                        .font(.system(size: 13, weight: .bold))
+                        .scalingFont(size: 13, weight: .bold)
                 }
                 .foregroundStyle(Color(red: 0.85, green: 0.35, blue: 0.10))
                 .padding(.horizontal, 16)
@@ -354,10 +355,10 @@ struct LandingView: View {
                 .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
             }
             .buttonStyle(.plain)
-            .accessibilityHint("Abre el chat con el asistente del museo")
+            .accessibilityHint(Text(L10n.cgHomeCTA))
 
             // Separador sutil
-            Text("Preguntas rápidas")
+            Text(L10n.cgQuickActionsLabel)
                 .font(.caption2)
                 .fontWeight(.semibold)
                 .tracking(0.5)
@@ -385,19 +386,18 @@ struct LandingView: View {
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .shadow(color: Color(red: 0.93, green: 0.45, blue: 0.15).opacity(0.3), radius: 8, x: 0, y: 4)
         .accessibilityElement(children: .contain)
-        .accessibilityLabel("CoqueGuide, tu asistente inteligente del museo")
+        .accessibilityLabel(L10n.landingCGAccessibilityLabel)
     }
 
     private func quickActionChip(_ action: CGQuickAction, perform: @escaping () -> Void) -> some View {
         Button(action: perform) {
             VStack(spacing: 6) {
                 Image(systemName: action.icon)
-                    .font(.system(size: 15, weight: .semibold))
+                    .scalingFont(size: 15, weight: .semibold)
                     .foregroundStyle(.white)
 
                 Text(action.title)
-                    .font(.caption)
-                    .fontWeight(.semibold)
+                    .scalingFont(size: 12, weight: .semibold, relativeTo: .caption)
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
@@ -420,15 +420,15 @@ struct LandingView: View {
 
     private var howToUseSection: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("Cómo funciona")
+            Text(L10n.landingHowToUseTitle)
                 .font(.title3)
                 .fontWeight(.bold)
 
             HStack(spacing: 0) {
                 howToUseStep(
                     icon: "qrcode.viewfinder",
-                    title: "Escanea",
-                    subtitle: "Apunta a un objeto del museo",
+                    title: L10n.landingStepScanTitle,
+                    subtitle: L10n.landingStepScanSubtitle,
                     color: Color(red: 0.35, green: 0.70, blue: 0.50)
                 )
 
@@ -436,8 +436,8 @@ struct LandingView: View {
 
                 howToUseStep(
                     icon: "sparkles",
-                    title: "Pregunta",
-                    subtitle: "CoqueGuide te responde",
+                    title: L10n.landingStepAskTitle,
+                    subtitle: L10n.landingStepAskSubtitle,
                     color: Color(red: 0.93, green: 0.45, blue: 0.15)
                 )
 
@@ -445,8 +445,8 @@ struct LandingView: View {
 
                 howToUseStep(
                     icon: "map.fill",
-                    title: "Explora",
-                    subtitle: "Navega por el museo",
+                    title: L10n.landingStepExploreTitle,
+                    subtitle: L10n.landingStepExploreSubtitle,
                     color: Color(red: 0.30, green: 0.50, blue: 0.75)
                 )
             }
@@ -464,17 +464,16 @@ struct LandingView: View {
                     .frame(width: 48, height: 48)
 
                 Image(systemName: icon)
-                    .font(.system(size: 20, weight: .semibold))
+                    .scalingFont(size: 20, weight: .semibold)
                     .foregroundStyle(color)
             }
 
             Text(title)
-                .font(.caption)
-                .fontWeight(.bold)
+                .scalingFont(size: 12, weight: .bold, relativeTo: .caption)
                 .foregroundStyle(.primary)
 
             Text(subtitle)
-                .font(.system(size: 10))
+                .scalingFont(size: 10, relativeTo: .caption2)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
@@ -484,7 +483,7 @@ struct LandingView: View {
 
     private var stepConnector: some View {
         Image(systemName: "chevron.right")
-            .font(.system(size: 12, weight: .bold))
+            .scalingFont(size: 12, weight: .bold)
             .foregroundStyle(.tertiary)
             .frame(width: 20)
     }
@@ -494,7 +493,7 @@ struct LandingView: View {
     private var attractionsSection: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Text("Explora el museo")
+                Text(L10n.landingAttractionsTitle)
                     .font(.title3)
                     .fontWeight(.bold)
 
