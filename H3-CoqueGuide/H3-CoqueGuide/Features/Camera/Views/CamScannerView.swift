@@ -42,9 +42,19 @@ struct CamScannerView: View {
                     Spacer()
 
                     SimpleCardView(
-                        title: "Cómo usar el escáner",
-                        description: "Apunta al objeto del museo con la cámara y pulsa Continuar. El escáner te mostrará la etiqueta del objeto y la confianza del modelo en el resultado.",
-                        actionTitle: "Continuar"
+                        title: "Descubre el Museo con CoqueGuide",
+                        description: """
+                        ¡Bienvenido al escáner inteligente del museo!
+
+                        🎯 **Escaneo de Objetos:**
+                        Apunta tu cámara a cualquier objeto del museo y presiona el botón circular. CoqueGuide analizará la imagen y te dirá qué objeto es, con qué confianza lo identificó y te dará una descripción detallada generada por IA.
+
+                        📝 **Traducción de Texto:**
+                        Si ves texto en los objetos del museo, presiona "Extraer Texto" para que CoqueGuide lo lea automáticamente. Luego podrás traducirlo a tu idioma preferido entre Español, Inglés, Francés, Portugués, Coreano y Árabe.
+
+                        💡 **Consejo:** Los modelos de traducción se descargan automáticamente la primera vez que los uses, asegurando traducciones rápidas y offline después.
+                        """,
+                        actionTitle: "Comenzar Exploración"
                     ) {
                         // Animar la salida de la intro y entrada de la cámara
                         withAnimation(.easeIn(duration: 0.4)) {
@@ -56,7 +66,6 @@ struct CamScannerView: View {
                         }
                     }
                     .frame(maxWidth: 360)
-                    .padding(.horizontal, 24)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                     .zIndex(2)
 
@@ -441,6 +450,8 @@ struct AnimatedActionButton: View {
         }
     }
 }
+
+struct CameraErrorFallbackView: View {
     let errorMessage: String
     let onRetry: () -> Void
 
@@ -479,7 +490,7 @@ struct AnimatedActionButton: View {
             .padding()
         }
     }
-
+}
 
 // MARK: - Scan Success Indicator
 

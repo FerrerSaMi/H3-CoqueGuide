@@ -71,8 +71,14 @@ final class CameraService: NSObject, ObservableObject {
 
     override init() {
         super.init()
-        session.delegate = self
+        NotificationCenter.default.addObserver(self, selector: #selector(handleSessionRuntimeError(_:)), name: .AVCaptureSessionRuntimeError, object: session)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleSessionWasInterrupted(_:)), name: .AVCaptureSessionWasInterrupted, object: session)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleSessionInterruptionEnded(_:)), name: .AVCaptureSessionInterruptionEnded, object: session)
         logger.info("CameraService initialized")
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 
     // MARK: - Public API
@@ -298,7 +304,7 @@ final class CameraService: NSObject, ObservableObject {
 
             if let format = device.activeFormat.supportedMaxPhotoDimensions.last {
                 photoOutput.maxPhotoDimensions = format
-                logger.debug("Set max photo dimensions: \(format)")
+                logger.debug("Set max photo dimensions: width=\(format.width), height=\(format.height)")
             }
 
             session.commitConfiguration()
@@ -368,19 +374,19 @@ final class CameraService: NSObject, ObservableObject {
 
                     let request = VNCoreMLRequest(model: self.visionModel!) { request, error in
                         if let error {
-                            self?.logger.error("ML classification request failed: \(error.localizedDescription)")
+                            self.logger.error("ML classification request failed: \(error.localizedDescription)")
                             continuation.resume(throwing: CameraError.classificationFailed(error.localizedDescription))
                             return
                         }
 
                         guard let observations = request.results as? [VNClassificationObservation], let topResult = observations.first else {
-                            self?.logger.error("No classification results obtained")
+                            self.logger.error("No classification results obtained")
                             continuation.resume(throwing: CameraError.classificationFailed("No se obtuvieron resultados de clasificación."))
                             return
                         }
 
                         let confidence = Double(topResult.confidence)
-                        self?.logger.info("Classification completed: \(topResult.identifier) (\(String(format: "%.2f", confidence * 100))% confidence)")
+                        self.logger.info("Classification completed: \(topResult.identifier) (\(String(format: "%.2f", confidence * 100))% confidence)")
                         continuation.resume(returning: (label: topResult.identifier, confidence: confidence))
                     }
                     request.imageCropAndScaleOption = .centerCrop
@@ -450,6 +456,32 @@ final class CameraService: NSObject, ObservableObject {
             }
         }
     }
+
+
+    // MARK: - AVCaptureSession Notifications Handlers
+
+    @objc private func handleSessionRuntimeError(_ notification: Notification) {
+        if let error = notification.userInfo?[AVCaptureSessionErrorKey] as? NSError {
+            logger.error("AVCaptureSession runtime error: \(error.localizedDescription)")
+            publishError(.sessionError("La sesión de cámara falló: \(error.localizedDescription)"))
+        } else {
+            logger.error("AVCaptureSession runtime error (unknown)")
+            publishError(.sessionError("La sesión de cámara falló"))
+        }
+    }
+
+    @objc private func handleSessionWasInterrupted(_ notification: Notification) {
+        logger.warning("AVCaptureSession was interrupted (notification)")
+        DispatchQueue.main.async { [weak self] in
+            self?.isRunning = false
+        }
+    }
+
+    @objc private func handleSessionInterruptionEnded(_ notification: Notification) {
+        logger.info("AVCaptureSession interruption ended (notification), restarting if needed")
+        startIfNeeded()
+    }
+
 }
 
 // MARK: - CGImagePropertyOrientation Extension
@@ -502,31 +534,3 @@ extension CameraService: AVCapturePhotoCaptureDelegate {
     }
 }
 
-// MARK: - AVCaptureSessionDelegate
-
-extension CameraService: AVCaptureSessionDelegate {
-    func session(_ session: AVCaptureSession, didFailWithError error: Error) {
-        logger.error("AVCaptureSession failed with error: \(error.localizedDescription)")
-        publishError(.sessionError("La sesión de cámara falló: \(error.localizedDescription)"))
-    }
-
-    func sessionWasInterrupted(_ session: AVCaptureSession) {
-        logger.warning("AVCaptureSession was interrupted")
-        DispatchQueue.main.async {
-            self.isRunning = false
-        }
-    }
-
-    func sessionInterruptionEnded(_ session: AVCaptureSession) {
-        logger.info("AVCaptureSession interruption ended, restarting if needed")
-        startIfNeeded()
-    }
-
-    func session(_ session: AVCaptureSession, didStopRunningWithError error: Error) {
-        logger.error("AVCaptureSession stopped with error: \(error.localizedDescription)")
-        publishError(.sessionError("La sesión de cámara se detuvo con error: \(error.localizedDescription)"))
-        DispatchQueue.main.async {
-            self.isRunning = false
-        }
-    }
-}

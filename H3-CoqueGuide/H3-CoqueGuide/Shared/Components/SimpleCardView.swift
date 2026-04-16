@@ -47,14 +47,15 @@ struct SimpleCardView: View {
                         .background(Color.accentColor)
                         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 }
-                .opacity(contentOpacity * 0.6)
-                .offset(y: contentOffset * 0.6)
-                .scaleEffect(contentOpacity)
+                // Remover animaciones que interfieren con la interacción del botón
+                .opacity(1) // Mantener opacidad completa para asegurar interactividad
+                .offset(y: 0) // Sin offset para el botón
+                .scaleEffect(1) // Escala normal
             }
             .padding(26)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .frame(maxWidth: 360, maxHeight: UIScreen.main.bounds.height * 0.68)
+        .frame(maxWidth: 360, maxHeight: UIScreen.main.bounds.height * 0.75)
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .shadow(color: Color.black.opacity(0.12), radius: 12, x: 0, y: 6)
@@ -79,9 +80,19 @@ struct SimpleCardView: View {
 
 #Preview {
     SimpleCardView(
-        title: "Bienvenido a CoqueGuide",
-        description: "Explora la colección del museo con una guía simple y moderna. Pulsa continuar para seguir.",
-        actionTitle: "Continuar",
+        title: "Descubre el Museo con CoqueGuide",
+        description: """
+        ¡Bienvenido al escáner inteligente del museo!
+
+        🎯 **Escaneo de Objetos:**
+        Apunta tu cámara a cualquier objeto del museo y presiona el botón circular. CoqueGuide analizará la imagen y te dirá qué objeto es, con qué confianza lo identificó y te dará una descripción detallada generada por IA.
+
+        📝 **Traducción de Texto:**
+        Si ves texto en los objetos del museo, presiona "Extraer Texto" para que CoqueGuide lo lea automáticamente. Luego podrás traducirlo a tu idioma preferido entre Español, Inglés, Francés, Portugués, Coreano y Árabe.
+
+        💡 **Consejo:** Los modelos de traducción se descargan automáticamente la primera vez que los uses, asegurando traducciones rápidas y offline después.
+        """,
+        actionTitle: "Comenzar Exploración",
         action: {}
     )
     .padding()
