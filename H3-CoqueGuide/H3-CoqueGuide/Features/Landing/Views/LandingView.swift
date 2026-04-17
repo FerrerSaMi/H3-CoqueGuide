@@ -15,9 +15,12 @@ struct LandingView: View {
     @Environment(\.modelContext) private var modelContext
 
     // MARK: - CoqueGuide ViewModel
-    // Usa Gemini API si hay key en Secrets.plist, sino usa servicio simulado
+    // Coque hace sus llamadas al backend propio (Node + Postgres + Gemini server-side).
+    // Si el backend está caído en tiempo de ejecución, BackendAIService devuelve un
+    // mensaje de error natural al usuario (sin fallback a simulado, para que no se
+    // mezclen fuentes de respuestas y los analíticos queden consistentes).
     @StateObject private var coqueGuideVM: CGViewModel = {
-        let service: CGAIServiceProtocol = GeminiAIService.fromSecretsPlist() ?? CGSimulatedAIService()
+        let service: CGAIServiceProtocol = BackendAIService()
         return CGViewModel(aiService: service)
     }()
 
@@ -117,6 +120,7 @@ struct LandingView: View {
             }
             .onAppear {
                 coqueGuideVM.loadVisitorProfile(from: modelContext)
+                Task { await CGEventService.shared.refresh() }
             }
             .onChange(of: selectedTab) { oldTab, newTab in
                 // Recargar perfil al volver del tab de Encuesta

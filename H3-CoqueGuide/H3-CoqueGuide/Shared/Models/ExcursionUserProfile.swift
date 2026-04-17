@@ -21,6 +21,9 @@ final class ExcursionUserProfile {
     var coquePersonality: String
     var aiDescriptionText: String
     var updatedAt: Date
+    /// UUID devuelto por `POST /profile` del backend. `nil` mientras no se haya
+    /// sincronizado (usuario sin red, perfil creado antes de la Iteración B, etc.).
+    var backendID: UUID?
 
     init(
         id: UUID = UUID(),
@@ -33,7 +36,8 @@ final class ExcursionUserProfile {
         preferredLanguage: String = "",
         coquePersonality: String = "",
         aiDescriptionText: String = "",
-        updatedAt: Date = .now
+        updatedAt: Date = .now,
+        backendID: UUID? = nil
     ) {
         self.id = id
         self.gender = gender
@@ -46,5 +50,6 @@ final class ExcursionUserProfile {
         self.coquePersonality = coquePersonality
         self.aiDescriptionText = aiDescriptionText
         self.updatedAt = updatedAt
+        self.backendID = backendID
     }
 }
