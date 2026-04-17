@@ -1,0 +1,13 @@
+# Dependencias
+node_modules/
+
+# Variables de entorno con credenciales — NUNCA commitear
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# macOS
+.DS_Store
