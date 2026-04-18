@@ -1128,6 +1128,195 @@ enum L10n {
         )
     }
 
+    // MARK: - Onboarding
+
+    static var onboardingSkip: String {
+        localize(es: "Saltar", en: "Skip", fr: "Passer", pt: "Pular", ko: "건너뛰기", ar: "تخطي")
+    }
+
+    static var onboardingSkipHint: String {
+        localize(
+            es: "Cierra la introducción y entra al museo.",
+            en: "Dismiss the intro and enter the museum.",
+            fr: "Ferme l'introduction et entre au musée.",
+            pt: "Fecha a introdução e entra no museu.",
+            ko: "소개를 닫고 박물관에 입장합니다.",
+            ar: "إغلاق المقدمة والدخول إلى المتحف."
+        )
+    }
+
+    static var onboardingNext: String {
+        localize(es: "Siguiente", en: "Next", fr: "Suivant", pt: "Próximo", ko: "다음", ar: "التالي")
+    }
+
+    static func onboardingStepLabel(current: Int, total: Int) -> String {
+        localize(
+            es: "Paso \(current) de \(total)",
+            en: "Step \(current) of \(total)",
+            fr: "Étape \(current) sur \(total)",
+            pt: "Passo \(current) de \(total)",
+            ko: "\(total)단계 중 \(current)단계",
+            ar: "الخطوة \(current) من \(total)"
+        )
+    }
+
+    // Página 1: Bienvenida
+    static var onboardingWelcomeTitle: String {
+        localize(
+            es: "Bienvenido al Museo del Acero Horno3",
+            en: "Welcome to the Horno3 Steel Museum",
+            fr: "Bienvenue au Musée de l'Acier Horno3",
+            pt: "Bem-vindo ao Museu do Aço Horno3",
+            ko: "Horno3 철강 박물관에 오신 것을 환영합니다",
+            ar: "مرحبًا بك في متحف هورنو3 للصلب"
+        )
+    }
+
+    static var onboardingWelcomeSubtitle: String {
+        localize(
+            es: "Coque te acompaña durante toda tu visita para hacerla inolvidable.",
+            en: "Coque will guide you throughout your visit to make it unforgettable.",
+            fr: "Coque t'accompagne tout au long de ta visite pour la rendre inoubliable.",
+            pt: "Coque te acompanha durante toda a visita para torná-la inesquecível.",
+            ko: "Coque가 방문 내내 함께하며 잊을 수 없는 경험을 선사합니다.",
+            ar: "سيرافقك Coque طوال زيارتك ليجعلها لا تُنسى."
+        )
+    }
+
+    // Página 2: Capacidades
+    static var onboardingCapabilitiesTitle: String {
+        localize(
+            es: "Qué puedes hacer",
+            en: "What you can do",
+            fr: "Ce que tu peux faire",
+            pt: "O que você pode fazer",
+            ko: "할 수 있는 것",
+            ar: "ما يمكنك فعله"
+        )
+    }
+
+    static var onboardingCapabilitiesSubtitle: String {
+        localize(
+            es: "Tres herramientas para aprovechar tu visita al máximo.",
+            en: "Three tools to make the most of your visit.",
+            fr: "Trois outils pour profiter au maximum de ta visite.",
+            pt: "Três ferramentas para aproveitar ao máximo sua visita.",
+            ko: "방문을 최대한 활용할 수 있는 세 가지 도구입니다.",
+            ar: "ثلاث أدوات للاستفادة القصوى من زيارتك."
+        )
+    }
+
+    static var onboardingCapScanTitle: String {
+        localize(
+            es: "Escanea objetos del museo",
+            en: "Scan museum objects",
+            fr: "Scanne les objets du musée",
+            pt: "Escaneia objetos do museu",
+            ko: "박물관 물품 스캔",
+            ar: "امسح قطع المتحف"
+        )
+    }
+
+    static var onboardingCapScanSubtitle: String {
+        localize(
+            es: "Apunta la cámara a una pieza y conoce su historia.",
+            en: "Point the camera at a piece to learn its story.",
+            fr: "Pointe la caméra vers une pièce pour connaître son histoire.",
+            pt: "Aponte a câmera para uma peça e conheça sua história.",
+            ko: "카메라를 유물에 가져다 대어 이야기를 알아보세요.",
+            ar: "وجّه الكاميرا إلى القطعة لمعرفة قصتها."
+        )
+    }
+
+    static var onboardingCapAskTitle: String {
+        localize(
+            es: "Pregúntale a Coque",
+            en: "Ask Coque",
+            fr: "Demande à Coque",
+            pt: "Pergunta ao Coque",
+            ko: "Coque에게 물어보기",
+            ar: "اسأل Coque"
+        )
+    }
+
+    static var onboardingCapAskSubtitle: String {
+        localize(
+            es: "Resuelve dudas o pide recomendaciones en cualquier momento.",
+            en: "Get answers or recommendations anytime.",
+            fr: "Obtiens des réponses ou des recommandations à tout moment.",
+            pt: "Tire dúvidas ou peça recomendações a qualquer momento.",
+            ko: "언제든지 질문하거나 추천을 받아보세요.",
+            ar: "احصل على إجابات أو توصيات في أي وقت."
+        )
+    }
+
+    static var onboardingCapMapTitle: String {
+        localize(
+            es: "Explora el mapa",
+            en: "Explore the map",
+            fr: "Explore la carte",
+            pt: "Explore o mapa",
+            ko: "지도 살펴보기",
+            ar: "استكشف الخريطة"
+        )
+    }
+
+    static var onboardingCapMapSubtitle: String {
+        localize(
+            es: "Ubica atracciones, servicios y rutas sugeridas.",
+            en: "Find attractions, services and suggested routes.",
+            fr: "Trouve les attractions, services et itinéraires suggérés.",
+            pt: "Encontre atrações, serviços e rotas sugeridas.",
+            ko: "명소, 시설, 추천 경로를 찾아보세요.",
+            ar: "اعثر على المعالم والخدمات والمسارات المقترحة."
+        )
+    }
+
+    // Página 3: Encuesta
+    static var onboardingSurveyTitle: String {
+        localize(
+            es: "Responde una encuesta rápida",
+            en: "Answer a quick survey",
+            fr: "Réponds à un rapide questionnaire",
+            pt: "Responda a uma pesquisa rápida",
+            ko: "간단한 설문 조사에 답해 주세요",
+            ar: "أجب عن استبيان سريع"
+        )
+    }
+
+    static var onboardingSurveySubtitle: String {
+        localize(
+            es: "Coque personalizará tu recorrido según tus preferencias. Solo toma un minuto.",
+            en: "Coque will personalize your tour based on your preferences. It only takes a minute.",
+            fr: "Coque personnalisera ta visite selon tes préférences. Cela ne prend qu'une minute.",
+            pt: "O Coque personalizará seu passeio de acordo com suas preferências. Leva apenas um minuto.",
+            ko: "Coque가 취향에 맞게 투어를 맞춤 설정합니다. 1분이면 충분합니다.",
+            ar: "سيخصص Coque جولتك وفقًا لتفضيلاتك. الأمر يستغرق دقيقة فقط."
+        )
+    }
+
+    static var onboardingStartSurvey: String {
+        localize(
+            es: "Comenzar encuesta",
+            en: "Start survey",
+            fr: "Commencer le questionnaire",
+            pt: "Iniciar pesquisa",
+            ko: "설문 조사 시작",
+            ar: "بدء الاستبيان"
+        )
+    }
+
+    static var onboardingSkipSurvey: String {
+        localize(
+            es: "Ahora no, gracias",
+            en: "Not now, thanks",
+            fr: "Pas maintenant, merci",
+            pt: "Agora não, obrigado",
+            ko: "지금은 괜찮습니다",
+            ar: "ليس الآن، شكرًا"
+        )
+    }
+
     // MARK: - Helper privado
 
     /// Devuelve la variante correspondiente al idioma del dispositivo.
