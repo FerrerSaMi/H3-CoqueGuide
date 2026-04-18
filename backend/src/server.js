@@ -232,6 +232,118 @@ app.get('/museum-events/today', async (_req, res) => {
 });
 
 /**
+ * POST /survey/description
+ * Genera la descripción del visitante a partir del perfil de la encuesta.
+ * Antes vivía en el cliente iOS (SurveyAIService) llamando a Gemini con la
+ * API key embebida. Ahora se centraliza aquí para que la key no viva en el
+ * binario.
+ *
+ * Body esperado (JSON):
+ * {
+ *   "gender": "...",
+ *   "age_range": "...",
+ *   "planned_time": "...",
+ *   "attraction_preference": "...",
+ *   "resolved_attraction_preference": "...",
+ *   "specific_attraction": "...",
+ *   "preferred_language": "Español" | "English" | ...,
+ *   "coque_personality": "..."
+ * }
+ *
+ * Respuesta: { ok: true, description: "..." }
+ */
+app.post('/survey/description', async (req, res) => {
+    const {
+        gender,
+        age_range,
+        planned_time,
+        attraction_preference,
+        resolved_attraction_preference,
+        specific_attraction,
+        preferred_language,
+        coque_personality,
+    } = req.body ?? {};
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+        return res.status(500).json({
+            ok: false,
+            error: 'GEMINI_API_KEY no está configurado en el server.',
+        });
+    }
+
+    const outputLanguageName = {
+        'Español':   'Spanish',
+        'English':   'English',
+        'Français':  'French',
+        'Português': 'Portuguese',
+        'Korean':    'Korean',
+        'Arabic':    'Arabic',
+    }[preferred_language] || 'Spanish';
+
+    const prompt = `Create one complete paragraph describing this museum visitor using all available data.
+
+Visitor data:
+- Gender: ${gender ?? ''}
+- Age range: ${age_range ?? ''}
+- Planned visit time: ${planned_time ?? ''}
+- Attraction preference selected: ${attraction_preference ?? ''}
+- Final attraction style to use: ${resolved_attraction_preference ?? ''}
+- Specific attraction requested: ${specific_attraction ?? ''}
+- Preferred language: ${preferred_language ?? ''}
+- Preferred Coque personality: ${coque_personality ?? ''}
+
+Rules:
+- Use every visitor data field to build a complete personality and preference description.
+- Do not stop mid-sentence or cut off any values.
+- End the paragraph with a complete sentence and a final period.
+- Write at least 100 words.
+- Prefer longer, complete content over short replies; do not shorten the response to save tokens.
+- If the selected preference was "Recomendado", use the resolved attraction style naturally.
+- If the visitor selected "No" for a specific attraction, do not invent one.
+- Keep the result to one paragraph only.
+- The paragraph must be written only in this language: ${outputLanguageName}.
+- Do not mix languages.`;
+
+    try {
+        const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+        const geminiRes = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                generationConfig: { maxOutputTokens: 2048, temperature: 0.2 },
+            }),
+        });
+
+        if (!geminiRes.ok) {
+            const errText = await geminiRes.text();
+            throw new Error(`Gemini ${geminiRes.status}: ${errText.slice(0, 200)}`);
+        }
+
+        const json = await geminiRes.json();
+        const description = (json?.candidates?.[0]?.content?.parts ?? [])
+            .map((p) => p.text ?? '')
+            .join('')
+            .trim();
+
+        if (!description) {
+            return res.status(502).json({
+                ok: false,
+                error: 'Gemini respondió vacío.',
+            });
+        }
+
+        res.json({ ok: true, description });
+    } catch (err) {
+        console.error('❌ POST /survey/description failed:', err.message);
+        res.status(500).json({ ok: false, error: err.message });
+    }
+});
+
+/**
  * POST /chat/message
  * MVP: recibe el texto del usuario, lo guarda, lo manda tal cual a Gemini,
  * guarda la respuesta y la devuelve. Sin lógica de personalidad/idioma todavía
