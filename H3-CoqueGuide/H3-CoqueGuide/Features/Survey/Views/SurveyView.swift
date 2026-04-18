@@ -106,7 +106,7 @@ private extension SurveyView {
                 Button {
                     viewModel.goBackOneStepOrHome()
                 } label: {
-                    Image(systemName: "chevron.left")
+                    Image(systemName: "chevron.backward")
                         .font(.headline)
                         .foregroundStyle(.primary)
                         .frame(width: 42, height: 42)

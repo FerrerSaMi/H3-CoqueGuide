@@ -365,7 +365,7 @@ struct LandingView: View {
                         .font(.subheadline)
                         .fontWeight(.semibold)
                     Spacer()
-                    Image(systemName: "arrow.right")
+                    Image(systemName: "arrow.forward")
                         .scalingFont(size: 13, weight: .bold)
                 }
                 .foregroundStyle(Color(red: 0.85, green: 0.35, blue: 0.10))
@@ -504,7 +504,7 @@ struct LandingView: View {
     }
 
     private var stepConnector: some View {
-        Image(systemName: "chevron.right")
+        Image(systemName: "chevron.forward")
             .scalingFont(size: 12, weight: .bold)
             .foregroundStyle(.tertiary)
             .frame(width: 20)
