@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct CarouselCard: View {
     let imageName: String
@@ -14,11 +15,15 @@ struct CarouselCard: View {
 
     var body: some View {
         ZStack(alignment: .bottomLeading) {
-            // Imagen de fondo
-            Image(imageName)
-                .resizable()
-                .scaledToFill()
-                .clipShape(RoundedRectangle(cornerRadius: 20))
+            // Imagen de fondo (con fallback si el asset no existe)
+            if let uiImage = UIImage(named: imageName) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFill()
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+            } else {
+                imageFallback
+            }
 
             // Overlay gradiente oscuro en la parte inferior
             LinearGradient(
@@ -46,5 +51,23 @@ struct CarouselCard: View {
         }
         .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
         .accessibilityLabel("\(title). \(subtitle)")
+    }
+
+    /// Placeholder cuando el asset no existe: evita que el usuario vea un
+    /// hueco gris sin contexto en el carrusel.
+    private var imageFallback: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color(.secondarySystemGroupedBackground))
+
+            VStack(spacing: 8) {
+                Image(systemName: "photo.slash")
+                    .font(.system(size: 32, weight: .regular))
+                    .foregroundStyle(.secondary)
+                Text(L10n.carouselImageUnavailable)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
     }
 }

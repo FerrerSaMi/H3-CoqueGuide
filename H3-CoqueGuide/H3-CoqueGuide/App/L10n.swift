@@ -773,6 +773,50 @@ enum L10n {
         localize(es: "Ocultar servicios", en: "Hide services", fr: "Masquer les services", pt: "Ocultar serviços", ko: "시설 숨기기", ar: "إخفاء الخدمات")
     }
 
+    static var mapEmptyPinsTitle: String {
+        localize(
+            es: "Sin puntos de interés",
+            en: "No points of interest",
+            fr: "Aucun point d'intérêt",
+            pt: "Sem pontos de interesse",
+            ko: "관심 지점 없음",
+            ar: "لا توجد نقاط اهتمام"
+        )
+    }
+
+    static var mapEmptyPinsMessage: String {
+        localize(
+            es: "No pudimos cargar la información de este nivel. Intenta recargar o consulta en recepción.",
+            en: "We couldn't load information for this level. Try reloading or ask at reception.",
+            fr: "Impossible de charger les informations de ce niveau. Essayez de recharger ou demandez à l'accueil.",
+            pt: "Não foi possível carregar as informações deste nível. Tente recarregar ou pergunte na recepção.",
+            ko: "이 층의 정보를 불러올 수 없습니다. 다시 시도하거나 안내데스크에 문의하세요.",
+            ar: "تعذر تحميل معلومات هذا المستوى. حاول إعادة التحميل أو استفسر في الاستقبال."
+        )
+    }
+
+    static var mapEmptyPinsReload: String {
+        localize(
+            es: "Recargar",
+            en: "Reload",
+            fr: "Recharger",
+            pt: "Recarregar",
+            ko: "다시 불러오기",
+            ar: "إعادة التحميل"
+        )
+    }
+
+    static var carouselImageUnavailable: String {
+        localize(
+            es: "Imagen no disponible",
+            en: "Image unavailable",
+            fr: "Image indisponible",
+            pt: "Imagem indisponível",
+            ko: "이미지를 사용할 수 없음",
+            ar: "الصورة غير متاحة"
+        )
+    }
+
     static var mapPinchToZoom: String {
         localize(es: "Pellizca para zoom", en: "Pinch to zoom", fr: "Pincez pour zoomer", pt: "Pince para dar zoom", ko: "확대하려면 핀치", ar: "اضغط للتكبير")
     }
