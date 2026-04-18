@@ -83,6 +83,7 @@ final class SurveyViewModel: ObservableObject {
         currentStepIndex = 0
         errorMessage = nil
         currentScreen = .question
+        AnalyticsService.shared.track("survey_started")
     }
 
     func openDescription() {
@@ -199,6 +200,11 @@ final class SurveyViewModel: ObservableObject {
             try context.save()
             currentScreen = .description
 
+            AnalyticsService.shared.track("survey_completed", metadata: [
+                "personality": selectedCoquePersonality,
+                "language": preferredLanguage,
+            ])
+
             // Sincronizar con el backend en background (fire-and-forget).
             // Si falla no se interrumpe la encuesta; el chat sigue funcionando
             // sin personalización por visitor_id hasta la próxima apertura.
@@ -246,6 +252,7 @@ final class SurveyViewModel: ObservableObject {
                 await MainActor.run {
                     profile.backendID = backendID
                     try? context.save()
+                    AnalyticsService.shared.setVisitor(backendID)
                 }
             }
         } catch {

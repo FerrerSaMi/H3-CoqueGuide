@@ -52,6 +52,7 @@ struct CGPanelView: View {
         .onAppear {
             processPendingMessage()
         }
+        .trackScreenTime("chat")
     }
 
     // MARK: - Scroll de mensajes

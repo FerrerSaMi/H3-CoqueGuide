@@ -54,6 +54,11 @@ final class BackendAIService: CGAIServiceProtocol {
             personality: visitorProfile?.coquePersonality
         )
 
+        AnalyticsService.shared.track("chat_message_sent", metadata: [
+            "personality": visitorProfile?.coquePersonality ?? "unknown",
+            "has_visitor_id": body.visitor_id != nil,
+        ])
+
         do {
             let response: ChatResponse = try await client.post(
                 "chat/message",
