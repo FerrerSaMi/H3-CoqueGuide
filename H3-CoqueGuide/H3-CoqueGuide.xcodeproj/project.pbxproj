@@ -21,9 +21,22 @@
 		94BCCD1D2F67B6230069322A /* H3-CoqueGuideTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "H3-CoqueGuideTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		94BCD0142F9291050069322A /* Exceptions for "H3-CoqueGuide" folder in "H3-CoqueGuide" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 1A58A5AB2F6311E300A27D19 /* H3-CoqueGuide */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		1A58A5AE2F6311E300A27D19 /* H3-CoqueGuide */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				94BCD0142F9291050069322A /* Exceptions for "H3-CoqueGuide" folder in "H3-CoqueGuide" target */,
+			);
 			path = "H3-CoqueGuide";
 			sourceTree = "<group>";
 		};
@@ -331,6 +344,7 @@
 				DEVELOPMENT_TEAM = 5GAZBWDQY6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "H3-CoqueGuide/Info.plist";
 				INFOPLIST_KEY_NSCameraUsageDescription = "La app necesita acceso a la camara para la funcion de escaneo.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -364,6 +378,7 @@
 				DEVELOPMENT_TEAM = 5GAZBWDQY6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "H3-CoqueGuide/Info.plist";
 				INFOPLIST_KEY_NSCameraUsageDescription = "La app necesita acceso a la camara para la funcion de escaneo.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

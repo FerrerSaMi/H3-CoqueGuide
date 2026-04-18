@@ -3,7 +3,9 @@
 //  H3-CoqueGuide
 //
 //  Created by Santiago Ferrer on 13/03/26.
-//  Refactorizado para usar GeminiHTTPClient compartido.
+//  Refactorizado para usar Apple Intelligence on-device y, como fallback,
+//  el backend propio (POST /survey/description). La API key de Gemini ya
+//  NO vive en el cliente — queda server-side.
 //
 
 import Foundation
@@ -16,13 +18,12 @@ struct SurveyAIService {
         do {
             return try await generateDescriptionWithAppleModel(for: profile)
         } catch {
-            if let apiKey = GeminiHTTPClient.loadAPIKey() {
-                return try await generateDescriptionWithGemini(for: profile, apiKey: apiKey)
-            } else {
-                throw error
-            }
+            // Fallback: pedirle al backend que la genere con Gemini server-side.
+            return try await generateDescriptionViaBackend(for: profile)
         }
     }
+
+    // MARK: - Apple Intelligence (on-device)
 
     private func generateDescriptionWithAppleModel(for profile: ExcursionUserProfile) async throws -> String {
         switch appleModel.availability {
@@ -59,35 +60,41 @@ struct SurveyAIService {
         return response.content.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    private func generateDescriptionWithGemini(for profile: ExcursionUserProfile, apiKey: String) async throws -> String {
-        let client = GeminiHTTPClient(apiKey: apiKey)
+    // MARK: - Fallback: backend propio
 
-        let prompt = buildPrompt(for: profile)
-
-        let contents: [[String: Any]] = [
-            [
-                "role": "user",
-                "parts": [["text": prompt]]
-            ]
-        ]
-
-        do {
-            let text = try await client.generateContent(
-                contents: contents,
-                maxOutputTokens: 2048,
-                temperature: 0.2
-            )
-            return text.trimmingCharacters(in: .whitespacesAndNewlines)
-        } catch let error as GeminiError {
-            switch error {
-            case .invalidURL:
-                throw SurveyAIError.invalidURL
-            case .badResponse(let statusCode):
-                throw SurveyAIError.geminiRequestFailed(statusCode: statusCode)
-            case .invalidJSON:
-                throw SurveyAIError.invalidResponse
-            }
+    private func generateDescriptionViaBackend(for profile: ExcursionUserProfile) async throws -> String {
+        struct Payload: Encodable {
+            let gender, age_range, planned_time: String
+            let attraction_preference, resolved_attraction_preference: String
+            let specific_attraction, preferred_language: String
+            let coque_personality: String
         }
+        struct Response: Decodable {
+            let ok: Bool
+            let description: String?
+            let error: String?
+        }
+
+        let payload = Payload(
+            gender: profile.gender,
+            age_range: profile.ageRange,
+            planned_time: profile.plannedTime,
+            attraction_preference: profile.attractionPreference,
+            resolved_attraction_preference: profile.resolvedAttractionPreference,
+            specific_attraction: profile.specificAttraction,
+            preferred_language: profile.preferredLanguage,
+            coque_personality: profile.coquePersonality
+        )
+
+        let response: Response = try await BackendHTTPClient.shared.post(
+            "survey/description", body: payload
+        )
+
+        guard response.ok, let text = response.description, !text.isEmpty else {
+            throw SurveyAIError.invalidResponse
+        }
+
+        return text.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     // MARK: - Prompt compartido
@@ -166,9 +173,7 @@ enum SurveyAIError: LocalizedError {
     case appleIntelligenceNotEnabled
     case modelNotReady
     case unavailable
-    case invalidURL
     case invalidResponse
-    case geminiRequestFailed(statusCode: Int)
 
     var errorDescription: String? {
         switch self {
@@ -180,12 +185,8 @@ enum SurveyAIError: LocalizedError {
             return "El modelo aún no está listo. Intenta de nuevo en un momento."
         case .unavailable:
             return "La IA no está disponible en este momento."
-        case .invalidURL:
-            return "No se pudo construir la URL de Gemini."
         case .invalidResponse:
-            return "Gemini respondió con un formato inesperado."
-        case .geminiRequestFailed(let statusCode):
-            return "Gemini devolvió un error HTTP \(statusCode)."
+            return "El servidor respondió con un formato inesperado."
         }
     }
 }

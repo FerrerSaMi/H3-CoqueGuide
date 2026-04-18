@@ -83,6 +83,7 @@ final class SurveyViewModel: ObservableObject {
         currentStepIndex = 0
         errorMessage = nil
         currentScreen = .question
+        AnalyticsService.shared.track("survey_started")
     }
 
     func openDescription() {
@@ -198,8 +199,64 @@ final class SurveyViewModel: ObservableObject {
 
             try context.save()
             currentScreen = .description
+
+            AnalyticsService.shared.track("survey_completed", metadata: [
+                "personality": selectedCoquePersonality,
+                "language": preferredLanguage,
+            ])
+
+            // Sincronizar con el backend en background (fire-and-forget).
+            // Si falla no se interrumpe la encuesta; el chat sigue funcionando
+            // sin personalización por visitor_id hasta la próxima apertura.
+            let capturedProfile = profile
+            Task.detached { [weak self] in
+                await self?.syncProfileToBackend(capturedProfile, context: context)
+            }
         } catch {
             errorMessage = error.localizedDescription
+        }
+    }
+
+    /// Envía el perfil al backend y guarda el `backendID` devuelto en SwiftData.
+    private func syncProfileToBackend(_ profile: ExcursionUserProfile, context: ModelContext) async {
+        struct ProfilePayload: Encodable {
+            let device_id: String
+            let gender, age_range, planned_time: String
+            let attraction_preference, resolved_attraction_preference: String
+            let specific_attraction, preferred_language: String
+            let coque_personality, ai_description_text: String
+        }
+        struct ProfileResponse: Decodable {
+            let ok: Bool
+            let id: UUID?
+        }
+
+        let payload = ProfilePayload(
+            device_id: AppConfig.deviceID,
+            gender: profile.gender,
+            age_range: profile.ageRange,
+            planned_time: profile.plannedTime,
+            attraction_preference: profile.attractionPreference,
+            resolved_attraction_preference: profile.resolvedAttractionPreference,
+            specific_attraction: profile.specificAttraction,
+            preferred_language: profile.preferredLanguage,
+            coque_personality: profile.coquePersonality,
+            ai_description_text: profile.aiDescriptionText
+        )
+
+        do {
+            let response: ProfileResponse = try await BackendHTTPClient.shared.post(
+                "profile", body: payload
+            )
+            if response.ok, let backendID = response.id {
+                await MainActor.run {
+                    profile.backendID = backendID
+                    try? context.save()
+                    AnalyticsService.shared.setVisitor(backendID)
+                }
+            }
+        } catch {
+            print("⚠️ SurveyViewModel: no se pudo sincronizar perfil al backend: \(error.localizedDescription)")
         }
     }
 

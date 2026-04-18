@@ -15,9 +15,12 @@ struct LandingView: View {
     @Environment(\.modelContext) private var modelContext
 
     // MARK: - CoqueGuide ViewModel
-    // Usa Gemini API si hay key en Secrets.plist, sino usa servicio simulado
+    // Coque hace sus llamadas al backend propio (Node + Postgres + Gemini server-side).
+    // Si el backend está caído en tiempo de ejecución, BackendAIService devuelve un
+    // mensaje de error natural al usuario (sin fallback a simulado, para que no se
+    // mezclen fuentes de respuestas y los analíticos queden consistentes).
     @StateObject private var coqueGuideVM: CGViewModel = {
-        let service: CGAIServiceProtocol = GeminiAIService.fromSecretsPlist() ?? CGSimulatedAIService()
+        let service: CGAIServiceProtocol = BackendAIService()
         return CGViewModel(aiService: service)
     }()
 
@@ -42,6 +45,9 @@ struct LandingView: View {
     // MARK: - TabView
     @State private var selectedTab: Int = 0
     @AppStorage("isDarkModeEnabled") private var isDarkModeEnabled: Bool = false
+
+    // MARK: - Analytics
+    @State private var hasTrackedAppOpen = false
 
     /// Contenido del card de CoqueGuide en home (computado para reflejar el idioma actual).
     private var homeInviteContent: CGHomeInviteContent { .default }
@@ -97,6 +103,8 @@ struct LandingView: View {
                     MapaView()
                 case .events:
                     PlaceholderView(title: L10n.landingPlaceholderAttractions)
+                        .onAppear { AnalyticsService.shared.track("events_opened") }
+                        .trackScreenTime("events")
                 case .scanning:
                     CamScannerView()
                 case .survey:
@@ -117,6 +125,19 @@ struct LandingView: View {
             }
             .onAppear {
                 coqueGuideVM.loadVisitorProfile(from: modelContext)
+                Task { await CGEventService.shared.refresh() }
+
+                // Analytics: app_opened una sola vez + bindear visitor_id si ya hay perfil.
+                if !hasTrackedAppOpen {
+                    hasTrackedAppOpen = true
+                    AnalyticsService.shared.track("app_opened")
+                }
+                let descriptor = FetchDescriptor<ExcursionUserProfile>(
+                    sortBy: [SortDescriptor(\.updatedAt, order: .reverse)]
+                )
+                if let profile = try? modelContext.fetch(descriptor).first {
+                    AnalyticsService.shared.setVisitor(profile.backendID)
+                }
             }
             .onChange(of: selectedTab) { oldTab, newTab in
                 // Recargar perfil al volver del tab de Encuesta
@@ -188,6 +209,7 @@ struct LandingView: View {
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
+            .trackScreenTime("home")
     }
 
     // MARK: - Header

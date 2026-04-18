@@ -46,10 +46,12 @@ struct CamScannerView: View {
         }
         .onAppear {
             viewModel.onAppear()
+            AnalyticsService.shared.track("scanner_opened")
         }
         .onDisappear {
             viewModel.onDisappear()
         }
+        .trackScreenTime("scanner")
     }
 
     // MARK: - Top Bar

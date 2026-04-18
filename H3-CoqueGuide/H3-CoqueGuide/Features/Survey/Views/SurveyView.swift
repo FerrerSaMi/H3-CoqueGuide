@@ -53,6 +53,7 @@ struct SurveyView: View {
         } message: {
             Text(L10n.surveyAlertMessage)
         }
+        .trackScreenTime("survey")
     }
 }
 

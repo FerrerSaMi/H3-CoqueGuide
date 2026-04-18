@@ -43,6 +43,12 @@ struct MapaView: View {
     }
 
     var body: some View {
+        mapBody
+            .onAppear { AnalyticsService.shared.track("map_opened") }
+            .trackScreenTime("map")
+    }
+
+    private var mapBody: some View {
         VStack(spacing: 0) {
             // MARK: - Header con selector de nivel
             levelSelector

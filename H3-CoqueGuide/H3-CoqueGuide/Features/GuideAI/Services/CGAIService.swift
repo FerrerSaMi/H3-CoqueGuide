@@ -42,6 +42,8 @@ struct CGVisitorProfile {
     let specificAttraction: String
     let preferredLanguage: String
     let coquePersonality: String
+    /// ID del perfil en el backend. `nil` si aún no se sincronizó.
+    let backendID: UUID?
 
     /// Crea un perfil desde un ExcursionUserProfile de SwiftData.
     init(from profile: ExcursionUserProfile) {
@@ -52,6 +54,7 @@ struct CGVisitorProfile {
         self.specificAttraction = profile.specificAttraction
         self.preferredLanguage = profile.preferredLanguage
         self.coquePersonality = profile.coquePersonality
+        self.backendID = profile.backendID
     }
 }
 
