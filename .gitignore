@@ -3,6 +3,7 @@ build/
 DerivedData/
 *.xcuserstate
 *.xcscmblueprint
+xcuserdata/
 
 # API Keys
 Secrets.plist
