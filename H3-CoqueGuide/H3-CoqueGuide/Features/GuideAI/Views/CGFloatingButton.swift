@@ -19,6 +19,7 @@ struct CGFloatingButton: View {
     let onTap: () -> Void
 
     @State private var isBouncing: Bool = false
+    @Environment(\.layoutDirection) private var layoutDirection
 
     var body: some View {
         Button(action: onTap) {
@@ -74,7 +75,9 @@ struct CGFloatingButton: View {
                 .scalingFont(size: 11, weight: .bold)
                 .foregroundStyle(.white)
         }
-        .offset(x: 3, y: -3)
+        // En RTL (árabe) el badge va en topLeading, así que el offset
+        // horizontal debe invertirse para que asome fuera del avatar.
+        .offset(x: layoutDirection == .rightToLeft ? -3 : 3, y: -3)
     }
 
     // MARK: - Animación

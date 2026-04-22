@@ -43,8 +43,20 @@ struct LandingView: View {
     }
 
     // MARK: - TabView
-    @State private var selectedTab: Int = 0
+    /// Permite que el llamador (p.ej. onboarding que eligió "Comenzar encuesta")
+    /// seleccione un tab inicial. Por defecto 0 (inicio).
+    @Binding var selectedTab: Int
     @AppStorage("isDarkModeEnabled") private var isDarkModeEnabled: Bool = false
+
+    // Inits para mantener compatibilidad con `LandingView()` (sin binding) y
+    // con la nueva entrada desde RootView (con binding).
+    init(initialTab: Binding<Int>) {
+        self._selectedTab = initialTab
+    }
+
+    init() {
+        self._selectedTab = .constant(0)
+    }
 
     // MARK: - Analytics
     @State private var hasTrackedAppOpen = false
@@ -365,7 +377,7 @@ struct LandingView: View {
                         .font(.subheadline)
                         .fontWeight(.semibold)
                     Spacer()
-                    Image(systemName: "arrow.right")
+                    Image(systemName: "arrow.forward")
                         .scalingFont(size: 13, weight: .bold)
                 }
                 .foregroundStyle(Color(red: 0.85, green: 0.35, blue: 0.10))
@@ -504,7 +516,7 @@ struct LandingView: View {
     }
 
     private var stepConnector: some View {
-        Image(systemName: "chevron.right")
+        Image(systemName: "chevron.forward")
             .scalingFont(size: 12, weight: .bold)
             .foregroundStyle(.tertiary)
             .frame(width: 20)

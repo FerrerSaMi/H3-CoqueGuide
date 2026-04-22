@@ -176,6 +176,13 @@ struct MapaView: View {
                         y: imageRect.minY + (pin.y * imageRect.height)
                     )
                 }
+
+                // Overlay cuando el nivel no tiene pins (config corrupta o vacía).
+                // Evita que el usuario vea un mapa sin nada y no sepa si falló algo.
+                if currentPins.isEmpty {
+                    emptyPinsOverlay
+                        .position(x: size.width / 2, y: size.height / 2)
+                }
             }
             .frame(width: size.width, height: size.height)
             .scaleEffect(mapScale)
@@ -282,6 +289,52 @@ struct MapaView: View {
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         .shadow(color: .black.opacity(0.08), radius: 6, x: 0, y: 3)
+    }
+
+    // MARK: - Empty Pins Overlay
+
+    /// Se muestra encima del mapa cuando el nivel no tiene ningún pin.
+    /// Botón "Recargar" cambia `mapTransitionID` para forzar un re-render
+    /// (y darle oportunidad a que `MapLocationsConfig` vuelva a leerse si
+    /// en el futuro el config pasa a ser async).
+    private var emptyPinsOverlay: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "mappin.slash")
+                .font(.system(size: 32, weight: .regular))
+                .foregroundStyle(.secondary)
+
+            Text(L10n.mapEmptyPinsTitle)
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .multilineTextAlignment(.center)
+                .foregroundStyle(.primary)
+
+            Text(L10n.mapEmptyPinsMessage)
+                .font(.caption)
+                .multilineTextAlignment(.center)
+                .foregroundStyle(.secondary)
+
+            Button {
+                withAnimation {
+                    mapTransitionID = UUID()
+                }
+            } label: {
+                Text(L10n.mapEmptyPinsReload)
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(Color.accentColor)
+                    .foregroundStyle(.white)
+                    .clipShape(Capsule())
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(18)
+        .frame(maxWidth: 260)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .shadow(color: .black.opacity(0.12), radius: 8, x: 0, y: 4)
     }
 
     // MARK: - Bottom Bar
