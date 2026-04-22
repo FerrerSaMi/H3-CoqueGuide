@@ -15,6 +15,7 @@ import cors from 'cors';
 import 'dotenv/config';
 import { pool, query } from './db.js';
 import { buildSystemPrompt, parseAssistantResponse } from './coquePrompt.js';
+import { callGemini } from './geminiClient.js';
 
 const app = express();
 const PORT = Number(process.env.PORT) || 8080;
@@ -264,14 +265,6 @@ app.post('/survey/description', async (req, res) => {
         coque_personality,
     } = req.body ?? {};
 
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-        return res.status(500).json({
-            ok: false,
-            error: 'GEMINI_API_KEY no está configurado en el server.',
-        });
-    }
-
     const outputLanguageName = {
         'Español':   'Spanish',
         'English':   'English',
@@ -306,28 +299,11 @@ Rules:
 - Do not mix languages.`;
 
     try {
-        const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
-        const geminiRes = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ role: 'user', parts: [{ text: prompt }] }],
-                generationConfig: { maxOutputTokens: 2048, temperature: 0.2 },
-            }),
+        const description = await callGemini({
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            temperature: 0.2,
+            maxOutputTokens: 2048,
         });
-
-        if (!geminiRes.ok) {
-            const errText = await geminiRes.text();
-            throw new Error(`Gemini ${geminiRes.status}: ${errText.slice(0, 200)}`);
-        }
-
-        const json = await geminiRes.json();
-        const description = (json?.candidates?.[0]?.content?.parts ?? [])
-            .map((p) => p.text ?? '')
-            .join('')
-            .trim();
 
         if (!description) {
             return res.status(502).json({
@@ -381,14 +357,6 @@ app.post('/chat/message', async (req, res) => {
         return res.status(400).json({
             ok: false,
             error: 'text es requerido (string).',
-        });
-    }
-
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-        return res.status(500).json({
-            ok: false,
-            error: 'GEMINI_API_KEY no está configurado en el server.',
         });
     }
 
@@ -462,30 +430,13 @@ app.post('/chat/message', async (req, res) => {
         );
 
         // 4) Llamar a Gemini con system_instruction + contents.
-        const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
-        const geminiRes = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents,
-                system_instruction: { parts: [{ text: systemInstruction }] },
-                generationConfig: { maxOutputTokens: 4096, temperature: 0.7 },
-            }),
+        const reply = await callGemini({
+            contents,
+            systemInstruction,
+            temperature: 0.7,
+            maxOutputTokens: 4096,
         });
-
-        if (!geminiRes.ok) {
-            const errText = await geminiRes.text();
-            throw new Error(`Gemini ${geminiRes.status}: ${errText.slice(0, 200)}`);
-        }
-
-        const geminiJson = await geminiRes.json();
-        const rawReply =
-            geminiJson?.candidates?.[0]?.content?.parts
-                ?.map((p) => p.text ?? '')
-                .join('')
-                .trim() || '(sin respuesta)';
+        const rawReply = reply || '(sin respuesta)';
 
         // 5) Parsear marcadores [CARD:*] y construir cards estructuradas.
         const { cleanText, cards } = parseAssistantResponse(rawReply, todaysEvents);
