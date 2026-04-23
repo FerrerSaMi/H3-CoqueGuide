@@ -32,13 +32,16 @@ struct LandingView: View {
     @State private var currentGalleryIndex: Int = 0
     let autoScrollTimer = Timer.publish(every: 5, on: .main, in: .common).autoconnect()
     /// Los textos se calculan dinámicamente según el idioma del dispositivo.
-    private var galleryItems: [(image: String, title: String, subtitle: String)] {
+    private var galleryItems: [(video: String, title: String, subtitle: String)] {
         [
             ("Galeria1", L10n.galleryMuseumTitle,       L10n.galleryMuseumSubtitle),
             ("Galeria2", L10n.galleryHistoryTitle,      L10n.galleryHistorySubtitle),
             ("Galeria3", L10n.galleryExhibitionsTitle,  L10n.galleryExhibitionsSubtitle),
             ("Galeria4", L10n.galleryExperiencesTitle,  L10n.galleryExperiencesSubtitle),
             ("Galeria5", L10n.galleryCultureTitle,      L10n.galleryCultureSubtitle),
+            ("Galeria6", L10n.galleryCultureTitle,      L10n.galleryCultureSubtitle),
+            ("Galeria7", L10n.galleryCultureTitle,      L10n.galleryCultureSubtitle),
+            ("Galeria8", L10n.galleryCultureTitle,      L10n.galleryCultureSubtitle),
         ]
     }
 
@@ -285,10 +288,11 @@ struct LandingView: View {
         VStack(spacing: 12) {
             TabView(selection: $currentGalleryIndex) {
                 ForEach(0..<galleryItems.count, id: \.self) { index in
-                    CarouselCard(
-                        imageName: galleryItems[index].image,
+                    CarouselVideoCard(
+                        videoName: galleryItems[index].video,
                         title: galleryItems[index].title,
-                        subtitle: galleryItems[index].subtitle
+                        subtitle: galleryItems[index].subtitle,
+                        fallbackImageName: galleryItems[index].video
                     )
                     .tag(index)
                 }

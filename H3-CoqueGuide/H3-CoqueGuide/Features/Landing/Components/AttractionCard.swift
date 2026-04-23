@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct AttractionCard: View {
     let attraction: Attraction
