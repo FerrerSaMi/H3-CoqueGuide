@@ -41,7 +41,7 @@ final class CGEventService {
     // MARK: - API pública (síncrona, devuelve cache actual)
 
     /// Devuelve los eventos en cache (mock al inicio, reales tras el primer `refresh()`).
-    /// Se llama desde GeminiAIService/CGSimulatedAIService de forma síncrona.
+    /// Se llama desde los servicios de CoqueGuide de forma síncrona.
     func todaysEvents() -> [CGEvent] { cachedEvents }
 
     func nextEvent() -> CGEvent? { cachedEvents.first }
