@@ -31,14 +31,14 @@ struct LandingView: View {
     /// Los textos se calculan dinámicamente según el idioma del dispositivo.
     private var galleryItems: [(video: String, title: String, subtitle: String)] {
         [
-            ("Galeria1", L10n.galleryMuseumTitle,       L10n.galleryMuseumSubtitle),
-            ("Galeria2", L10n.galleryHistoryTitle,      L10n.galleryHistorySubtitle),
-            ("Galeria3", L10n.galleryExhibitionsTitle,  L10n.galleryExhibitionsSubtitle),
-            ("Galeria4", L10n.galleryExperiencesTitle,  L10n.galleryExperiencesSubtitle),
-            ("Galeria5", L10n.galleryCultureTitle,      L10n.galleryCultureSubtitle),
-            ("Galeria6", L10n.galleryCultureTitle,      L10n.galleryCultureSubtitle),
-            ("Galeria7", L10n.galleryCultureTitle,      L10n.galleryCultureSubtitle),
-            ("Galeria8", L10n.galleryCultureTitle,      L10n.galleryCultureSubtitle),
+            ("Galeria1", L10n.galleryExperiencesTitle,  L10n.galleryExperiencesSubtitle),   // Show del Horno
+            ("Galeria2", L10n.galleryExhibitionsTitle,  L10n.galleryExhibitionsSubtitle),   // Laboratorio de Innovación
+            ("Galeria3", L10n.galleryCultureTitle,      L10n.galleryCultureSubtitle),       // Show del planeta Tierra
+            ("Galeria4", L10n.galleryExhibitionsTitle,  L10n.galleryExhibitionsSubtitle),   // Reacción en Cadena
+            ("Galeria5", L10n.galleryHistoryTitle,      L10n.galleryHistorySubtitle),       // Galeria de Historia
+            ("Galeria6", L10n.galleryExhibitionsTitle,  L10n.galleryExhibitionsSubtitle),   // Una ventana a la ciencia
+            ("Galeria7", L10n.galleryExperiencesTitle,  L10n.galleryExperiencesSubtitle),   // Pase a la cima
+            ("Galeria8", L10n.galleryMuseumTitle,       L10n.galleryMuseumSubtitle),        // Galeria de Acero
         ]
     }
 
