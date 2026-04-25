@@ -18,6 +18,7 @@ struct SurveyView: View {
     @State private var isComputingIdealInSurvey: Bool = false
     @State private var showIdealAttractionError: Bool = false
     @State private var idealAttractionErrorMessage: String = ""
+    @Namespace private var animationNamespace
 
     private let optionColors: [Color] = [
         Color.orange.opacity(0.95),
@@ -83,6 +84,10 @@ struct SurveyView: View {
 }
 
 private extension SurveyView {
+    var progressFraction: Double {
+        Double(viewModel.currentStepIndex + 1) / Double(max(1, viewModel.steps.count))
+    }
+
     var homeContent: some View {
         VStack(spacing: 24) {
             Spacer()
@@ -110,14 +115,14 @@ private extension SurveyView {
                 } label: {
                     homeButton(title: L10n.surveyStart, icon: "play.fill")
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PressableButtonStyle())
 
                 Button {
                     viewModel.openDescription()
                 } label: {
                     homeButton(title: L10n.surveyViewDescription, icon: "person.text.rectangle.fill")
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PressableButtonStyle())
             }
             .padding(.horizontal, 24)
 
@@ -129,7 +134,9 @@ private extension SurveyView {
         VStack(spacing: 18) {
             HStack {
                 Button {
-                    viewModel.goBackOneStepOrHome()
+                    withAnimation(.spring(response: 0.36, dampingFraction: 0.78)) {
+                        viewModel.goBackOneStepOrHome()
+                    }
                 } label: {
                     Image(systemName: "chevron.backward")
                         .font(.headline)
@@ -138,13 +145,22 @@ private extension SurveyView {
                         .background(Color.orange.opacity(0.22))
                         .clipShape(Circle())
                 }
+                .buttonStyle(PressableButtonStyle())
 
                 Spacer()
 
-                Text(viewModel.progressText)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(.secondary)
+                VStack(spacing: 6) {
+                    Text(viewModel.progressText)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.secondary)
+                        .id(viewModel.currentStepIndex)
+
+                    AnimatedProgressBar(fraction: progressFraction, height: 6)
+                        .frame(height: 6)
+                        .padding(.horizontal, 6)
+                        .transition(.opacity)
+                }
 
                 Spacer()
 
@@ -184,8 +200,12 @@ private extension SurveyView {
 
             if viewModel.isLoading {
                 Spacer()
-                ProgressView(L10n.surveyLoading)
-                    .font(.headline)
+                VStack(spacing: 12) {
+                    FancyLoadingView(size: 56)
+                    Text(L10n.surveyLoading)
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
+                }
                 Spacer()
             } else {
                 LazyVGrid(
@@ -201,7 +221,9 @@ private extension SurveyView {
                         let raw = rawOptions[index]
                         let display = displayOptions[index]
                         Button {
-                            viewModel.selectOption(raw, in: modelContext)
+                            withAnimation(.spring(response: 0.36, dampingFraction: 0.78)) {
+                                viewModel.selectOption(raw, in: modelContext)
+                            }
                         } label: {
                             optionCard(
                                 title: display,
@@ -209,7 +231,7 @@ private extension SurveyView {
                                 isSelected: viewModel.optionIsSelected(raw)
                             )
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(OptionCardStyle(isSelected: viewModel.optionIsSelected(raw)))
                     }
                 }
                 .padding(.horizontal, 20)
@@ -237,6 +259,7 @@ private extension SurveyView {
                     .frame(width: 170, height: 170)
                     .padding(.top, 10)
                     .shadow(radius: 12)
+                    .pulsingGlow(Color.accentColor)
 
                 Text(L10n.surveyDescriptionTitle)
                     .font(.title2)
@@ -272,7 +295,7 @@ private extension SurveyView {
                                         .fill(Color.orange.opacity(0.12))
                                 )
                             }
-                            .buttonStyle(.plain)
+                            .buttonStyle(PressableButtonStyle())
 
                             if isDescriptionExpanded {
                                 Text(viewModel.aiDescription)
@@ -313,7 +336,7 @@ private extension SurveyView {
                             .fill(viewModel.canSendToCoque ? Color.orange : Color.orange.opacity(0.65))
                     )
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PressableButtonStyle())
                 .padding(.horizontal, 20)
 
                 // Botón para ver atracción ideal generado a partir de la encuesta
@@ -326,7 +349,7 @@ private extension SurveyView {
                             .foregroundStyle(viewModel.canSendToCoque ? .primary : .secondary)
                         Spacer()
                         if isComputingIdealInSurvey {
-                            ProgressView()
+                            FancyLoadingView(size: 28)
                         }
                     }
                     .frame(maxWidth: .infinity)
@@ -336,7 +359,7 @@ private extension SurveyView {
                             .fill(viewModel.canSendToCoque ? Color(.secondarySystemBackground) : Color(.tertiarySystemGroupedBackground))
                     )
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PressableButtonStyle())
                 .padding(.horizontal, 20)
 
                 Button {
@@ -352,7 +375,7 @@ private extension SurveyView {
                                 .fill(Color.orange.opacity(0.12))
                         )
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PressableButtonStyle())
                 .padding(.horizontal, 20)
                 .padding(.bottom, 30)
             }
@@ -403,8 +426,8 @@ private extension SurveyView {
                 .stroke(isSelected ? Color.primary.opacity(0.45) : Color.clear, lineWidth: 3)
         )
         .shadow(color: .orange.opacity(0.16), radius: 8, x: 0, y: 5)
-        .scaleEffect(isSelected ? 0.98 : 1.0)
-        .animation(.easeInOut(duration: 0.18), value: isSelected)
+        .scaleEffect(isSelected ? 0.985 : 1.0)
+        .animation(.spring(response: 0.28, dampingFraction: 0.75), value: isSelected)
         
     }
     
