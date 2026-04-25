@@ -15,6 +15,9 @@ struct SurveyView: View {
     @State private var isDescriptionExpanded = false
     @State private var showIdealAttractionSheet = false
     @State private var idealAttractionForSheet: Attraction? = nil
+    @State private var isComputingIdealInSurvey: Bool = false
+    @State private var showIdealAttractionError: Bool = false
+    @State private var idealAttractionErrorMessage: String = ""
 
     private let optionColors: [Color] = [
         Color.orange.opacity(0.95),
@@ -54,6 +57,11 @@ struct SurveyView: View {
             Button(L10n.surveyAlertLater, role: .cancel) { }
         } message: {
             Text(L10n.surveyAlertMessage)
+        }
+        .alert("Error", isPresented: $showIdealAttractionError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(idealAttractionErrorMessage)
         }
         .trackScreenTime("survey")
         .sheet(isPresented: $showIdealAttractionSheet) {
@@ -312,15 +320,21 @@ private extension SurveyView {
                 Button {
                     handleViewIdealAttraction()
                 } label: {
-                    Text("Ver atracción ideal")
-                        .fontWeight(.semibold)
-                        .foregroundStyle(viewModel.canSendToCoque ? .primary : .secondary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(
-                            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                .fill(viewModel.canSendToCoque ? Color(.secondarySystemBackground) : Color(.tertiarySystemGroupedBackground))
-                        )
+                    HStack {
+                        Text("Ver atracción ideal")
+                            .fontWeight(.semibold)
+                            .foregroundStyle(viewModel.canSendToCoque ? .primary : .secondary)
+                        Spacer()
+                        if isComputingIdealInSurvey {
+                            ProgressView()
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .fill(viewModel.canSendToCoque ? Color(.secondarySystemBackground) : Color(.tertiarySystemGroupedBackground))
+                    )
                 }
                 .buttonStyle(.plain)
                 .padding(.horizontal, 20)
@@ -412,10 +426,68 @@ private extension SurveyView {
             return
         }
 
-        // Calcular atracción ideal localmente desde el viewModel
-        let attraction = viewModel.computeRecommendedAttraction()
-        idealAttractionForSheet = attraction
-        showIdealAttractionSheet = true
+        Task {
+            guard !isComputingIdealInSurvey else { return }
+            isComputingIdealInSurvey = true
+            defer { isComputingIdealInSurvey = false }
+
+            let descriptor = FetchDescriptor<ExcursionUserProfile>(
+                sortBy: [SortDescriptor(\.updatedAt, order: .reverse)]
+            )
+
+            do {
+                guard let profile = try modelContext.fetch(descriptor).first else {
+                    showSurveyRequiredAlert = true
+                    return
+                }
+
+                let aiService = SurveyAIService()
+
+                do {
+                    let id = try await aiService.generateIdealAttractionID(for: profile)
+                    if let mapped = Attraction.attraction(for: id) {
+                        idealAttractionForSheet = mapped
+                    } else {
+                        idealAttractionForSheet = viewModel.computeRecommendedAttraction()
+                        idealAttractionErrorMessage = "La IA devolvió: \(id). Mostrando recomendación local."
+                        showIdealAttractionError = true
+                    }
+                    showIdealAttractionSheet = true
+                } catch let err as SurveyAIError {
+                    switch err {
+                    case .deviceNotEligible, .appleIntelligenceNotEnabled, .modelNotReady, .unavailable:
+                        do {
+                            let id = try await aiService.generateIdealAttractionViaBackend(for: profile)
+                            if let mapped = Attraction.attraction(for: id) {
+                                idealAttractionForSheet = mapped
+                            } else {
+                                idealAttractionForSheet = viewModel.computeRecommendedAttraction()
+                                idealAttractionErrorMessage = "El servidor devolvió: \(id). Mostrando recomendación local."
+                                showIdealAttractionError = true
+                            }
+                            showIdealAttractionSheet = true
+                        } catch {
+                            idealAttractionForSheet = viewModel.computeRecommendedAttraction()
+                            idealAttractionErrorMessage = "No fue posible generar la atracción ideal: \(error.localizedDescription). Mostrando recomendación local."
+                            showIdealAttractionError = true
+                            showIdealAttractionSheet = true
+                        }
+                    default:
+                        idealAttractionForSheet = viewModel.computeRecommendedAttraction()
+                        idealAttractionErrorMessage = "No fue posible generar la atracción ideal: \(err.localizedDescription). Mostrando recomendación local."
+                        showIdealAttractionError = true
+                        showIdealAttractionSheet = true
+                    }
+                } catch {
+                    idealAttractionForSheet = viewModel.computeRecommendedAttraction()
+                    idealAttractionErrorMessage = "Error inesperado: \(error.localizedDescription). Mostrando recomendación local."
+                    showIdealAttractionError = true
+                    showIdealAttractionSheet = true
+                }
+            } catch {
+                showSurveyRequiredAlert = true
+            }
+        }
     }
 }
 
