@@ -393,4 +393,41 @@ final class SurveyViewModel: ObservableObject {
 
         return "Interacción"
     }
+
+    // Devuelve una `Attraction` recomendada usando las respuestas de la encuesta.
+    func computeRecommendedAttraction() -> Attraction {
+        let specific = specificAttraction.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !specific.isEmpty && specific.lowercased() != "no" {
+            if let match = Attraction.museumAttractions.first(where: {
+                $0.name.lowercased().contains(specific.lowercased()) || $0.subtitle.lowercased().contains(specific.lowercased())
+            }) {
+                return match
+            }
+        }
+
+        let pref = resolvedAttractionPreference.lowercased()
+
+        if pref.contains("interaccion") || pref.contains("interaction") {
+            return Attraction.museumAttractions.first { $0.icon == "flask.fill" } ?? Attraction.museumAttractions.first!
+        }
+
+        if pref.contains("historia") || pref.contains("escuchar") || pref.contains("history") {
+            return Attraction.museumAttractions.first { $0.icon == "flame.fill" } ?? Attraction.museumAttractions.first!
+        }
+
+        if pref.contains("show") || pref.contains("espectac") {
+            return Attraction.museumAttractions.first { $0.icon == "sparkles" } ?? Attraction.museumAttractions.first!
+        }
+
+        if pref.contains("galer") {
+            return Attraction.museumAttractions.first { $0.icon == "building.columns.fill" } ?? Attraction.museumAttractions.first!
+        }
+
+        if pref.contains("mirador") || pref.contains("view") {
+            return Attraction.museumAttractions.first { $0.icon == "binoculars.fill" } ?? Attraction.museumAttractions.first!
+        }
+
+        // Fallback simple
+        return Attraction.museumAttractions.first!
+    }
 }
