@@ -67,4 +67,25 @@ struct Attraction: Identifiable {
             ),
         ]
     }
+
+    /// Mapea un ID retornado por el servicio de IA/backend a una `Attraction`.
+    /// IDs soportados: HORNO_ALTO, GALLERY, STEEL_SHOW, LAB, VIEWPOINT, STEEL_MILL
+    static func attraction(for id: String) -> Attraction? {
+        switch id.uppercased() {
+        case "HORNO_ALTO":
+            return museumAttractions.indices.contains(0) ? museumAttractions[0] : nil
+        case "GALLERY":
+            return museumAttractions.indices.contains(1) ? museumAttractions[1] : nil
+        case "STEEL_SHOW":
+            return museumAttractions.indices.contains(2) ? museumAttractions[2] : nil
+        case "LAB":
+            return museumAttractions.indices.contains(3) ? museumAttractions[3] : nil
+        case "VIEWPOINT":
+            return museumAttractions.indices.contains(4) ? museumAttractions[4] : nil
+        case "STEEL_MILL":
+            return museumAttractions.indices.contains(5) ? museumAttractions[5] : nil
+        default:
+            return nil
+        }
+    }
 }
