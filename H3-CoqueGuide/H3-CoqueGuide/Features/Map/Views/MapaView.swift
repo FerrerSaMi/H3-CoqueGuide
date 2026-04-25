@@ -541,7 +541,7 @@ struct MapLocationsConfig: Decodable {
                 MapLocation(id: 11, name: "Salón Ciencia en Vivo", type: nil, x: 922, y: 915),
                 MapLocation(id: 12, name: "Salón Diseño y Simulación", type: nil, x: 822, y: 915),
                 MapLocation(id: 13, name: "Salón Manufactura Inteligente", type: nil, x: 715, y: 915),
-                MapLocation(id: 14, name: "Baños Nivel 1", type: "service", x: 475, y: 700)
+                MapLocation(id: 14, name: "Baños Nivel 1", type: "service", x: 475, y: 600)
             ]
         ),
         MapLevel(
