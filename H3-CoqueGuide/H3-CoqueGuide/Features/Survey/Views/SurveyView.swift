@@ -13,6 +13,8 @@ struct SurveyView: View {
     @StateObject private var viewModel = SurveyViewModel()
     @State private var showSurveyRequiredAlert = false
     @State private var isDescriptionExpanded = false
+    @State private var showIdealAttractionSheet = false
+    @State private var idealAttractionForSheet: Attraction? = nil
 
     private let optionColors: [Color] = [
         Color.orange.opacity(0.95),
@@ -54,6 +56,21 @@ struct SurveyView: View {
             Text(L10n.surveyAlertMessage)
         }
         .trackScreenTime("survey")
+        .sheet(isPresented: $showIdealAttractionSheet) {
+            if let attr = idealAttractionForSheet {
+                IdealAttractionResultView(
+                    attraction: attr,
+                    onMap: {
+                        NotificationCenter.default.post(name: .openMapFromIdealAttraction, object: nil)
+                        showIdealAttractionSheet = false
+                    },
+                    onAskCoque: {
+                        coqueGuideVM.openPanelWithMessage("Cuéntame sobre \(attr.name) en Horno3, por favor.")
+                        showIdealAttractionSheet = false
+                    }
+                )
+            }
+        }
     }
 }
 
@@ -291,6 +308,23 @@ private extension SurveyView {
                 .buttonStyle(.plain)
                 .padding(.horizontal, 20)
 
+                // Botón para ver atracción ideal generado a partir de la encuesta
+                Button {
+                    handleViewIdealAttraction()
+                } label: {
+                    Text("Ver atracción ideal")
+                        .fontWeight(.semibold)
+                        .foregroundStyle(viewModel.canSendToCoque ? .primary : .secondary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(
+                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                .fill(viewModel.canSendToCoque ? Color(.secondarySystemBackground) : Color(.tertiarySystemGroupedBackground))
+                        )
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, 20)
+
                 Button {
                     viewModel.backToHome()
                 } label: {
@@ -370,6 +404,18 @@ private extension SurveyView {
         // Envía el prompt como contexto silencioso: no aparecerá como burbuja
         // del usuario en el chat, solo se mostrará la respuesta de Coque.
         coqueGuideVM.openPanelWithSilentPrompt(prompt)
+    }
+
+    func handleViewIdealAttraction() {
+        guard viewModel.canSendToCoque else {
+            showSurveyRequiredAlert = true
+            return
+        }
+
+        // Calcular atracción ideal localmente desde el viewModel
+        let attraction = viewModel.computeRecommendedAttraction()
+        idealAttractionForSheet = attraction
+        showIdealAttractionSheet = true
     }
 }
 
