@@ -179,6 +179,8 @@ struct LandingView: View {
     @State private var idealAttraction: Attraction? = nil
     @State private var isComputingIdeal: Bool = false
     @State private var showSurveyAlertForIdeal: Bool = false
+    @State private var idealAttractionErrorMessage: String = ""
+    @State private var showIdealAttractionError: Bool = false
 
     // MARK: - Tab Content: Atracciones
 
@@ -251,6 +253,11 @@ struct LandingView: View {
                 Button(L10n.surveyAlertLater, role: .cancel) { }
             } message: {
                 Text(L10n.surveyAlertMessage)
+            }
+            .alert("Error", isPresented: $showIdealAttractionError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(idealAttractionErrorMessage)
             }
     }
 
@@ -656,16 +663,60 @@ struct LandingView: View {
         )
 
         do {
-            if let profile = try modelContext.fetch(descriptor).first, !profile.gender.isEmpty {
-                // Simple deterministic fallback algorithm (uses survey data).
-                let chosen = decideAttraction(for: profile)
-                idealAttraction = chosen
-                AnalyticsService.shared.track("ideal_attraction_computed", metadata: ["attraction": chosen.name])
-            } else {
+            guard let profile = try modelContext.fetch(descriptor).first, !profile.gender.isEmpty else {
                 showSurveyAlertForIdeal = true
+                return
+            }
+
+            let aiService = SurveyAIService()
+
+            do {
+                let id = try await aiService.generateIdealAttractionID(for: profile)
+                if let mapped = Attraction.attraction(for: id) {
+                    idealAttraction = mapped
+                    AnalyticsService.shared.track("ideal_attraction_computed", metadata: ["source": "appleIntelligence", "id": id])
+                } else {
+                    idealAttraction = decideAttraction(for: profile)
+                    idealAttractionErrorMessage = "La IA devolvió: \(id). Mostrando recomendación local."
+                    showIdealAttractionError = true
+                    AnalyticsService.shared.track("ideal_attraction_fallback_unrecognized", metadata: ["returned": id])
+                }
+            } catch let err as SurveyAIError {
+                switch err {
+                case .deviceNotEligible, .appleIntelligenceNotEnabled, .modelNotReady, .unavailable:
+                    // Intentar fallback al backend
+                    do {
+                        let id = try await aiService.generateIdealAttractionViaBackend(for: profile)
+                        if let mapped = Attraction.attraction(for: id) {
+                            idealAttraction = mapped
+                            AnalyticsService.shared.track("ideal_attraction_computed", metadata: ["source": "backend", "id": id])
+                        } else {
+                            idealAttraction = decideAttraction(for: profile)
+                            idealAttractionErrorMessage = "El servidor devolvió: \(id). Mostrando recomendación local."
+                            showIdealAttractionError = true
+                            AnalyticsService.shared.track("ideal_attraction_fallback_unrecognized", metadata: ["returned": id])
+                        }
+                    } catch {
+                        idealAttraction = decideAttraction(for: profile)
+                        idealAttractionErrorMessage = "No fue posible generar la atracción ideal: \(error.localizedDescription). Mostrando recomendación local."
+                        showIdealAttractionError = true
+                        AnalyticsService.shared.track("ideal_attraction_fallback_failed", metadata: ["error": error.localizedDescription])
+                    }
+                default:
+                    idealAttraction = decideAttraction(for: profile)
+                    idealAttractionErrorMessage = "No fue posible generar la atracción ideal: \(err.localizedDescription). Mostrando recomendación local."
+                    showIdealAttractionError = true
+                    AnalyticsService.shared.track("ideal_attraction_fallback_failed", metadata: ["error": err.localizedDescription])
+                }
+            } catch {
+                idealAttraction = decideAttraction(for: profile)
+                idealAttractionErrorMessage = "Error inesperado: \(error.localizedDescription). Mostrando recomendación local."
+                showIdealAttractionError = true
+                AnalyticsService.shared.track("ideal_attraction_fallback_failed", metadata: ["error": error.localizedDescription])
             }
         } catch {
-            showSurveyAlertForIdeal = true
+            idealAttractionErrorMessage = "No se pudo leer el perfil: \(error.localizedDescription)"
+            showIdealAttractionError = true
         }
     }
 
