@@ -535,6 +535,72 @@ enum L10n {
         )
     }
 
+    static var galleryInnovationTitle: String {
+        localize(
+            es: "Innovación",
+            en: "Innovation",
+            fr: "Innovation",
+            pt: "Inovação",
+            ko: "혁신",
+            ar: "الابتكار"
+        )
+    }
+
+    static var galleryInnovationSubtitle: String {
+        localize(
+            es: "Tecnología en movimiento",
+            en: "Technology in motion",
+            fr: "La technologie en mouvement",
+            pt: "Tecnologia em movimento",
+            ko: "움직이는 기술",
+            ar: "التكنولوجيا في حركة"
+        )
+    }
+
+    static var galleryArchitectureTitle: String {
+        localize(
+            es: "Arquitectura",
+            en: "Architecture",
+            fr: "Architecture",
+            pt: "Arquitetura",
+            ko: "건축",
+            ar: "العمارة"
+        )
+    }
+
+    static var galleryArchitectureSubtitle: String {
+        localize(
+            es: "El edificio del Horno 3",
+            en: "The Horno 3 building",
+            fr: "Le bâtiment du Horno 3",
+            pt: "O edifício do Horno 3",
+            ko: "Horno 3 건물",
+            ar: "مبنى Horno 3"
+        )
+    }
+
+    static var galleryCommunityTitle: String {
+        localize(
+            es: "Comunidad",
+            en: "Community",
+            fr: "Communauté",
+            pt: "Comunidade",
+            ko: "공동체",
+            ar: "المجتمع"
+        )
+    }
+
+    static var galleryCommunitySubtitle: String {
+        localize(
+            es: "Para todas las edades",
+            en: "For all ages",
+            fr: "Pour tous les âges",
+            pt: "Para todas as idades",
+            ko: "모든 연령을 위한",
+            ar: "لجميع الأعمار"
+        )
+    }
+
     // MARK: - Attractions (tarjetas horizontales)
 
     static var attrHornoAltoName: String {

@@ -38,10 +38,10 @@ struct LandingView: View {
             ("Galeria2", L10n.galleryHistoryTitle,      L10n.galleryHistorySubtitle),
             ("Galeria3", L10n.galleryExhibitionsTitle,  L10n.galleryExhibitionsSubtitle),
             ("Galeria4", L10n.galleryExperiencesTitle,  L10n.galleryExperiencesSubtitle),
-            ("Galeria5", L10n.galleryCultureTitle,      L10n.galleryCultureSubtitle),
-            ("Galeria6", L10n.galleryCultureTitle,      L10n.galleryCultureSubtitle),
-            ("Galeria7", L10n.galleryCultureTitle,      L10n.galleryCultureSubtitle),
-            ("Galeria8", L10n.galleryCultureTitle,      L10n.galleryCultureSubtitle),
+            ("Galeria5", L10n.galleryCultureTitle,       L10n.galleryCultureSubtitle),
+            ("Galeria6", L10n.galleryInnovationTitle,    L10n.galleryInnovationSubtitle),
+            ("Galeria7", L10n.galleryArchitectureTitle,  L10n.galleryArchitectureSubtitle),
+            ("Galeria8", L10n.galleryCommunityTitle,     L10n.galleryCommunitySubtitle),
         ]
     }
 
