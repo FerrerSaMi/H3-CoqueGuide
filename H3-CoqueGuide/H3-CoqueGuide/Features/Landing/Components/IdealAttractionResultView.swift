@@ -4,6 +4,7 @@ struct IdealAttractionResultView: View {
     let attraction: Attraction
     var onMap: (() -> Void)? = nil
     var onAskCoque: (() -> Void)? = nil
+    @State private var appeared: Bool = false
 
     var body: some View {
         VStack(spacing: 16) {
@@ -15,6 +16,7 @@ struct IdealAttractionResultView: View {
                     Image(systemName: attraction.icon)
                         .scalingFont(size: 24, weight: .bold)
                         .foregroundStyle(attraction.color)
+                        .pulsingGlow(attraction.color)
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
@@ -48,6 +50,7 @@ struct IdealAttractionResultView: View {
                         .background(RoundedRectangle(cornerRadius: 12).fill(Color.orange))
                         .foregroundStyle(.white)
                 }
+                .buttonStyle(PressableButtonStyle())
 
                 Button {
                     if let onAsk = onAskCoque { onAsk() }
@@ -59,9 +62,17 @@ struct IdealAttractionResultView: View {
                         .padding(.vertical, 14)
                         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.accentColor, lineWidth: 1))
                 }
+                .buttonStyle(PressableButtonStyle())
             }
         }
         .padding(20)
+        .scaleEffect(appeared ? 1 : 0.98)
+        .opacity(appeared ? 1 : 0)
+        .onAppear {
+            withAnimation(.spring(response: 0.36, dampingFraction: 0.78)) {
+                appeared = true
+            }
+        }
     }
 }
 
