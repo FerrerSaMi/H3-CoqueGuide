@@ -19,7 +19,8 @@ enum AppConfig {
     /// Cuando el deploy a Cloud Run esté listo, solo cambia la cadena de RELEASE.
     static let backendBaseURL: URL = {
         #if DEBUG
-        return URL(string: "http://localhost:8080")!
+        // Desarrollo: backend en Windows (IP proporcionada)
+        return URL(string: "http://192.168.1.85:8080")!
         #else
         // TODO: reemplazar cuando tengamos la URL de Cloud Run.
         return URL(string: "https://coqueguide-backend.example.com")!

@@ -636,7 +636,7 @@ struct LandingView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 .scaleEffect(1)
                 .transition(.scale.combined(with: .opacity))
-                .animation(.spring(response: 0.36, dampingFraction: 0.78), value: idealAttraction)
+                .animation(.spring(response: 0.36, dampingFraction: 0.78), value: idealAttraction?.id)
             } else {
                 Button {
                     Task { await computeIdealAttraction() }
