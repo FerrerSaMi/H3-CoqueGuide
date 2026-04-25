@@ -248,7 +248,9 @@ struct LandingView: View {
             .trackScreenTime("home")
             .alert(L10n.surveyAlertTitle, isPresented: $showSurveyAlertForIdeal) {
                 Button(L10n.surveyStart) {
-                    selectedTab = 3
+                    withAnimation(.spring(response: 0.36, dampingFraction: 0.78)) {
+                        selectedTab = 3
+                    }
                 }
                 Button(L10n.surveyAlertLater, role: .cancel) { }
             } message: {
@@ -583,6 +585,7 @@ struct LandingView: View {
                             Image(systemName: attraction.icon)
                                 .scalingFont(size: 20, weight: .bold)
                                 .foregroundStyle(attraction.color)
+                                .pulsingGlow(attraction.color)
                         }
 
                         VStack(alignment: .leading, spacing: 4) {
@@ -614,6 +617,7 @@ struct LandingView: View {
                                 .background(RoundedRectangle(cornerRadius: 12).fill(Color.orange))
                                 .foregroundStyle(.white)
                         }
+                        .buttonStyle(PressableButtonStyle())
 
                         Button {
                             coqueGuideVM.openPanelWithMessage("Cuéntame sobre \(attraction.name) en Horno3, por favor.")
@@ -624,11 +628,15 @@ struct LandingView: View {
                                 .padding(.vertical, 12)
                                 .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.accentColor, lineWidth: 1))
                         }
+                        .buttonStyle(PressableButtonStyle())
                     }
                 }
                 .padding(16)
                 .background(Color(.secondarySystemGroupedBackground))
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .scaleEffect(1)
+                .transition(.scale.combined(with: .opacity))
+                .animation(.spring(response: 0.36, dampingFraction: 0.78), value: idealAttraction)
             } else {
                 Button {
                     Task { await computeIdealAttraction() }
@@ -640,7 +648,7 @@ struct LandingView: View {
                             .fontWeight(.semibold)
                         Spacer()
                         if isComputingIdeal {
-                            ProgressView()
+                            FancyLoadingView(size: 22)
                         }
                     }
                     .foregroundStyle(.white)
@@ -648,7 +656,7 @@ struct LandingView: View {
                     .padding(.horizontal, 16)
                     .background(RoundedRectangle(cornerRadius: 14).fill(Color.accentColor))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PressableButtonStyle())
             }
         }
     }
@@ -673,10 +681,14 @@ struct LandingView: View {
             do {
                 let id = try await aiService.generateIdealAttractionID(for: profile)
                 if let mapped = Attraction.attraction(for: id) {
-                    idealAttraction = mapped
+                    withAnimation(.spring(response: 0.36, dampingFraction: 0.78)) {
+                        idealAttraction = mapped
+                    }
                     AnalyticsService.shared.track("ideal_attraction_computed", metadata: ["source": "appleIntelligence", "id": id])
                 } else {
-                    idealAttraction = decideAttraction(for: profile)
+                    withAnimation(.spring(response: 0.36, dampingFraction: 0.78)) {
+                        idealAttraction = decideAttraction(for: profile)
+                    }
                     idealAttractionErrorMessage = "La IA devolvió: \(id). Mostrando recomendación local."
                     showIdealAttractionError = true
                     AnalyticsService.shared.track("ideal_attraction_fallback_unrecognized", metadata: ["returned": id])
@@ -688,28 +700,38 @@ struct LandingView: View {
                     do {
                         let id = try await aiService.generateIdealAttractionViaBackend(for: profile)
                         if let mapped = Attraction.attraction(for: id) {
-                            idealAttraction = mapped
+                            withAnimation(.spring(response: 0.36, dampingFraction: 0.78)) {
+                                idealAttraction = mapped
+                            }
                             AnalyticsService.shared.track("ideal_attraction_computed", metadata: ["source": "backend", "id": id])
                         } else {
-                            idealAttraction = decideAttraction(for: profile)
+                            withAnimation(.spring(response: 0.36, dampingFraction: 0.78)) {
+                                idealAttraction = decideAttraction(for: profile)
+                            }
                             idealAttractionErrorMessage = "El servidor devolvió: \(id). Mostrando recomendación local."
                             showIdealAttractionError = true
                             AnalyticsService.shared.track("ideal_attraction_fallback_unrecognized", metadata: ["returned": id])
                         }
                     } catch {
-                        idealAttraction = decideAttraction(for: profile)
+                        withAnimation(.spring(response: 0.36, dampingFraction: 0.78)) {
+                            idealAttraction = decideAttraction(for: profile)
+                        }
                         idealAttractionErrorMessage = "No fue posible generar la atracción ideal: \(error.localizedDescription). Mostrando recomendación local."
                         showIdealAttractionError = true
                         AnalyticsService.shared.track("ideal_attraction_fallback_failed", metadata: ["error": error.localizedDescription])
                     }
                 default:
-                    idealAttraction = decideAttraction(for: profile)
+                    withAnimation(.spring(response: 0.36, dampingFraction: 0.78)) {
+                        idealAttraction = decideAttraction(for: profile)
+                    }
                     idealAttractionErrorMessage = "No fue posible generar la atracción ideal: \(err.localizedDescription). Mostrando recomendación local."
                     showIdealAttractionError = true
                     AnalyticsService.shared.track("ideal_attraction_fallback_failed", metadata: ["error": err.localizedDescription])
                 }
             } catch {
-                idealAttraction = decideAttraction(for: profile)
+                withAnimation(.spring(response: 0.36, dampingFraction: 0.78)) {
+                    idealAttraction = decideAttraction(for: profile)
+                }
                 idealAttractionErrorMessage = "Error inesperado: \(error.localizedDescription). Mostrando recomendación local."
                 showIdealAttractionError = true
                 AnalyticsService.shared.track("ideal_attraction_fallback_failed", metadata: ["error": error.localizedDescription])
