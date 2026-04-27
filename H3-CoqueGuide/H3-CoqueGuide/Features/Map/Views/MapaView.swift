@@ -19,6 +19,7 @@ struct MapaView: View {
     @State private var lastMapOffset: CGSize = .zero
     @State private var mapTransitionID = UUID()
     @State private var showServices: Bool = true
+    @Environment(NavigationState.self) private var navigationState
     private let mapConfig = MapLocationsConfig.load()
 
     private var locations: [Int: MapLocation] {
@@ -46,6 +47,34 @@ struct MapaView: View {
         mapBody
             .onAppear { AnalyticsService.shared.track("map_opened") }
             .trackScreenTime("map")
+            .onChange(of: navigationState.selectedMapLocationID) { _, newLocationID in
+                if let locationID = newLocationID {
+                    selectLocationFromGallery(locationID: locationID)
+                }
+            }
+    }
+    
+    // MARK: - Navegación desde carrusel
+    
+    private func selectLocationFromGallery(locationID: Int) {
+        if let location = locations[locationID] {
+            // Determinar el nivel correcto
+            if let mapLevel = mapConfig.levels.first(where: { $0.locations.contains(where: { $0.id == locationID }) }) {
+                showingFirstMap = mapLevel.id == 1
+            }
+            
+            // Seleccionar la ubicación
+            selectedLocationNumber = locationID
+            selectedLocationInfo = SelectedLocationInfo(
+                id: location.id, name: location.name,
+                type: location.locationType
+            )
+            
+            // Resetear después de navegar
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                navigationState.selectedMapLocationID = nil
+            }
+        }
     }
 
     private var mapBody: some View {

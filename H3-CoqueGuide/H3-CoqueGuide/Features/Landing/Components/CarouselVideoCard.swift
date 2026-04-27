@@ -14,6 +14,7 @@ struct CarouselVideoCard: View {
     let title: String
     let subtitle: String
     let fallbackImageName: String?
+    let onTap: (() -> Void)?
 
     var body: some View {
         ZStack(alignment: .bottomLeading) {
@@ -44,6 +45,9 @@ struct CarouselVideoCard: View {
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
         .accessibilityLabel("\(title). \(subtitle)")
+        .onTapGesture {
+            onTap?()
+        }
     }
 }
 
