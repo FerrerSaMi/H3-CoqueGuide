@@ -3,7 +3,7 @@
     "Acropora Pimienta": {
       "title": "Acrópora Pimienta",
       "era": "PLANETA TIERRA · Biodiversidad marina",
-      "description": "Especie de coral pétreo característica de los arrecifes del Caribe mexicano. Su presencia en Horno3 forma parte de la exhibición Planeta Tierra, que vincula la actividad industrial humana con los ecosistemas globales y las consecuencias del cambio climático sobre la vida marina."
+      "description": "Especie de coral pétreo característica de los arrecifes del Caribe mexicano. Su presencia en Horno³ forma parte de la exhibición Planeta Tierra, que vincula la actividad industrial humana con los ecosistemas globales y las consecuencias del cambio climático sobre la vida marina."
     },
     "Carretilla de fundición": {
       "title": "Carretilla de Fundición",
@@ -12,13 +12,13 @@
     },
     "Chevrolet 3100": {
       "title": "Chevrolet 3100",
-      "era": "1947 — 1955 · Pickup clásica",
-      "description": "El acero de esta Chevrolet 3100 viene del corazón de Monterrey. Producida por General Motors en los años 50, su carrocería de acero estampado fue forjada con material que salió de hornos como éste. Representa la exportación silenciosa de la industria regiomontana: mientras el Horno 3 producía acero líquido a 1,500°C, plantas automotrices norteamericanas lo transformaron en vehículos de calidad mundial. Esta pickup es testigo tangible de cómo Monterrey alimentó la modernización industrial de Norte América."
+      "era": "GALERÍA DEL ACERO · 1947–1955",
+      "description": "Pickup norteamericana fabricada por General Motors entre 1947 y 1955. Su carrocería de acero estampado ejemplifica el destino final del material que la Fundidora de Monterrey producía durante esas décadas para abastecer a la industria automotriz de México y Estados Unidos. Forma parte de la Galería del Acero como testimonio del producto terminado que el acero del Horno 3 hacía posible."
     },
     "Coche de muchos acabados": {
       "title": "Coche de Muchos Acabados",
       "era": "GALERÍA DEL ACERO · Muestra técnica",
-      "description": "Automóvil de exhibición que muestra distintos tratamientos superficiales del acero: pintura, cromado, galvanizado y acabado mate. Permite al visitante comprender cómo una sola aleación puede transformarse en múltiples apariencias según el proceso de acabado industrial."
+      "description": "Vehículo expositivo cuya carrocería presenta, sobre una sola pieza, los principales acabados industriales aplicables al acero: pintura horneada, cromado, galvanizado, terminado mate y pulido espejo. Permite al visitante comparar de un vistazo cómo un mismo material puede transformar su apariencia y resistencia según el tratamiento de superficie aplicado."
     },
     "Cuchara de Almeja": {
       "title": "Cuchara de Almeja",
@@ -37,13 +37,13 @@
     },
     "Elevador de Carga": {
       "title": "Elevador de Carga",
-      "era": "HORNO ALTO No. 3 · Infraestructura",
-      "description": "Sistema diagonal de elevación que llevaba la carga de mineral de hierro, coque y caliza hasta la boca del horno alto. Operaba continuamente durante los 76 años de actividad del Horno 3, alimentando la bestia industrial que definió a Monterrey."
+      "era": "GALERÍA DEL ACERO · Infraestructura del Horno 3",
+      "description": "Sistema diagonal de elevación que llevaba la carga de mineral de hierro, coque y caliza hasta la boca del horno alto. Operó durante los 18 años de actividad del Horno 3 (1968–1986), alimentando sin pausa al coloso industrial que marcó la historia siderúrgica de Monterrey."
     },
     "Estrella 04": {
       "title": "Estrella 04",
-      "era": "EXHIBICIÓN PERMANENTE · Pieza emblemática",
-      "description": "Componente metálico forjado que formó parte del sistema estructural del Horno Alto No. 3. Su nomenclatura alfanumérica conserva el código de identificación original con el que era referenciada durante las operaciones de mantenimiento de la Fundidora."
+      "era": "GALERÍA DEL ACERO · Pieza estructural original",
+      "description": "Componente metálico forjado que formó parte del sistema estructural del Horno Alto No. 3. Su matrícula 'Estrella 04' corresponde al código interno con el que la Fundidora identificaba piezas durante las labores de mantenimiento. Se conserva con su nomenclatura original como testimonio del rigor técnico que sostenía la operación de la planta."
     },
     "Maqueta Modelo Horno 3": {
       "title": "Maqueta del Horno 3",
@@ -63,7 +63,7 @@
     "Museo Horno 3": {
       "title": "Museo del Acero Horno³",
       "era": "MONUMENTO INDUSTRIAL · Inaugurado en 2007",
-      "description": "La estructura que habitas hoy como museo fue, entre 1968 y 1986, el corazón siderúrgico del noreste de México. El Alto Horno No. 3 de la Fundidora de Monterrey produjo acero durante 76 años. Hoy es Patrimonio Industrial de la Humanidad y un centro cultural de talla internacional."
+      "description": "La estructura que habitas hoy como museo fue, entre 1968 y 1986, parte del corazón siderúrgico del noreste de México. El Alto Horno No. 3 de la Fundidora de Monterrey produjo acero durante sus 18 años de operación, hasta el cierre de la planta. Forma parte del Parque Fundidora, declarado Monumento Artístico de la Nación en 2006, y desde 2007 funciona como museo y centro cultural de talla internacional."
     },
     "Reloj Checador": {
       "title": "Reloj Checador",
