@@ -17,9 +17,12 @@
         {"id": 11, "name": "Salón Ciencia en Vivo", "x": 922, "y": 915},
         {"id": 12, "name": "Salón Diseño y Simulación", "x": 822, "y": 915},
         {"id": 13, "name": "Salón Manufactura Inteligente", "x": 715, "y": 915},
-        {"id": 14, "name": "Baños · Norte", "type": "service", "x": 400, "y": 160},
-        {"id": 18, "name": "Baños · Centro", "type": "service", "x": 745, "y": 440},
-        {"id": 19, "name": "Baños · Sur", "type": "service", "x": 430, "y": 900}
+        {"id": 21, "name": "Tienda de souvenirs", "type": "shop", "x": 340, "y": 615},
+        {"id": 22, "name": "Snack", "type": "shop", "x": 630, "y": 915},
+        {"id": 23, "name": "Guardaropa", "type": "shop", "x": 270, "y": 810},
+        {"id": 14, "name": "Baños · Norte", "type": "service", "x": 380, "y": 220},
+        {"id": 18, "name": "Baños · Centro", "type": "service", "x": 780, "y": 440},
+        {"id": 19, "name": "Baños · Sur", "type": "service", "x": 400, "y": 830}
       ]
     },
     {
@@ -29,7 +32,7 @@
         {"id": 15, "name": "Terraza verde", "x": 162, "y": 442},
         {"id": 16, "name": "Salón Show del horno", "x": 388, "y": 355},
         {"id": 17, "name": "Planeta Tierra", "x": 600, "y": 480},
-        {"id": 20, "name": "Baños · Nivel 2", "type": "service", "x": 300, "y": 600}
+        {"id": 20, "name": "Baños · Nivel 2", "type": "service", "x": 490, "y": 775}
       ]
     }
   ]

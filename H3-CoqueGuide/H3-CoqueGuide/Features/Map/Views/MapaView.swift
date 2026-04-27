@@ -496,11 +496,13 @@ struct MapaView: View {
 enum LocationType: String, Decodable {
     case attraction
     case service
+    case shop
 
     var accentColor: Color {
         switch self {
         case .attraction: return .orange
         case .service:    return .blue
+        case .shop:       return .yellow
         }
     }
 
@@ -509,6 +511,7 @@ enum LocationType: String, Decodable {
         switch self {
         case .attraction: return nil
         case .service:    return "figure.dress.line.vertical.figure"
+        case .shop:       return "bag.fill"
         }
     }
 }
@@ -563,6 +566,12 @@ struct MapPin: Identifiable {
             if name.contains("baño") || name.contains("restroom") { return "figure.dress.line.vertical.figure" }
         }
         
+        // Tiendas
+        if type == .shop {
+            if name.contains("guardaropa") || name.contains("coat") { return "hanger" }
+            return "bag.fill"
+        }
+        
         // Default
         return "mappin.circle.fill"
     }
@@ -610,6 +619,12 @@ private struct SelectedLocationInfo: Identifiable, Equatable {
         // Servicios
         if type == .service {
             if name.contains("baño") || name.contains("restroom") { return "figure.dress.line.vertical.figure" }
+        }
+        
+        // Tiendas
+        if type == .shop {
+            if name.contains("guardaropa") || name.contains("coat") { return "hanger" }
+            return "bag.fill"
         }
         
         // Default
