@@ -455,7 +455,8 @@ final class CGSimulatedAIService: CGAIServiceProtocol {
         [
             "🌟 **¡Te recomiendo esto para empezar!**\n\n1. Visita el **Horno Alto original** — es la pieza central y lo más impresionante del museo\n2. Sube al **mirador** del Nivel 2 para una vista panorámica de Monterrey\n3. Revisa los **eventos del día** — puede haber talleres o visitas guiadas\n\n¿Te interesa alguna de estas opciones?",
             "🤔 ¡Déjame ayudarte!\n\nSi es tu **primera visita**, te sugiero:\n• Empieza por el **Nivel 1** con el Horno Alto\n• Luego sube al **Nivel 2** para la galería y el mirador\n• No te pierdas los **talleres interactivos** si hay alguno hoy\n\n¿Quieres ver el mapa para planear tu recorrido?",
-            "¡Hay mucho que hacer! 🎉\n\nMis favoritos:\n• 🔥 **Horno Alto** — La estrella del museo\n• 🔭 **Mirador** — Vistas increíbles de la ciudad\n• 🧪 **Sala interactiva** — Experimentos de ciencia\n• 📷 **Escanea piezas** — Descubre datos ocultos con el QR\n\n¿Qué suena mejor?"
+            "¡Hay mucho que hacer! 🎉\n\nMis favoritos:\n• 🔥 **Horno Alto** — La estrella del museo\n• 🔭 **Mirador** — Vistas increíbles de la ciudad\n• 🧪 **Sala interactiva** — Experimentos de ciencia\n• 📷 **Escanea piezas** — Descubre datos ocultos con el QR\n\n¿Qué suena mejor?",
+            "🎧 **¿Sabías que puedes escuchar la Galería de Historia?**\n\nTengo una recomendación especial:\n→ [Escucha la narración en Soundcloud](https://soundcloud.com/museo-del-acero/galeria-de-la-historia)\n\nEs una introducción magistral al legado del acero. Perfecta para entender la historia mientras exploras.\n\n¿Te gustaría conocer más de las galerías?"
         ].randomElement()!
     }
 
