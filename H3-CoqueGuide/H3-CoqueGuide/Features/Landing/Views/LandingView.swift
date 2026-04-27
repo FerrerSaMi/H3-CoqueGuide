@@ -34,14 +34,14 @@ struct LandingView: View {
     /// Los textos se calculan dinámicamente según el idioma del dispositivo.
     private var galleryItems: [(video: String, title: String, subtitle: String)] {
         [
-            ("Galeria1", L10n.galleryMuseumTitle,       L10n.galleryMuseumSubtitle),
-            ("Galeria2", L10n.galleryHistoryTitle,      L10n.galleryHistorySubtitle),
-            ("Galeria3", L10n.galleryExhibitionsTitle,  L10n.galleryExhibitionsSubtitle),
-            ("Galeria4", L10n.galleryExperiencesTitle,  L10n.galleryExperiencesSubtitle),
-            ("Galeria5", L10n.galleryCultureTitle,       L10n.galleryCultureSubtitle),
-            ("Galeria6", L10n.galleryInnovationTitle,    L10n.galleryInnovationSubtitle),
-            ("Galeria7", L10n.galleryArchitectureTitle,  L10n.galleryArchitectureSubtitle),
-            ("Galeria8", L10n.galleryCommunityTitle,     L10n.galleryCommunitySubtitle),
+            ("Galeria1", L10n.galleryExperiencesTitle,  L10n.galleryExperiencesSubtitle),   // Show del Horno
+            ("Galeria2", L10n.galleryExhibitionsTitle,  L10n.galleryExhibitionsSubtitle),   // Laboratorio de Innovación
+            ("Galeria3", L10n.galleryCultureTitle,      L10n.galleryCultureSubtitle),       // Show del planeta Tierra
+            ("Galeria4", L10n.galleryExhibitionsTitle,  L10n.galleryExhibitionsSubtitle),   // Reacción en Cadena
+            ("Galeria5", L10n.galleryHistoryTitle,      L10n.galleryHistorySubtitle),       // Galeria de Historia
+            ("Galeria6", L10n.galleryExhibitionsTitle,  L10n.galleryExhibitionsSubtitle),   // Una ventana a la ciencia
+            ("Galeria7", L10n.galleryExperiencesTitle,  L10n.galleryExperiencesSubtitle),   // Pase a la cima
+            ("Galeria8", L10n.galleryMuseumTitle,       L10n.galleryMuseumSubtitle),        // Galeria de Acero
         ]
     }
 
@@ -160,6 +160,14 @@ struct LandingView: View {
                     coqueGuideVM.loadVisitorProfile(from: modelContext)
                 }
             }
+            .onReceive(NotificationCenter.default.publisher(for: .openMapFromIdealAttraction)) { _ in
+                selectedTab = 2
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .askCoqueFromIdealAttraction)) { note in
+                if let name = note.userInfo?["name"] as? String {
+                    coqueGuideVM.openPanelWithMessage("Cuéntame sobre \(name) en Horno3, por favor.")
+                }
+            }
         }
         .environmentObject(coqueGuideVM)
         .preferredColorScheme(isDarkModeEnabled ? .dark : .light)
@@ -167,6 +175,12 @@ struct LandingView: View {
 
     // MARK: - Animación de aparición
     @State private var sectionsAppeared = false
+    // MARK: - Atracción ideal
+    @State private var idealAttraction: Attraction? = nil
+    @State private var isComputingIdeal: Bool = false
+    @State private var showSurveyAlertForIdeal: Bool = false
+    @State private var idealAttractionErrorMessage: String = ""
+    @State private var showIdealAttractionError: Bool = false
 
     // MARK: - Tab Content: Atracciones
 
@@ -191,6 +205,13 @@ struct LandingView: View {
                             .padding(.top, 14)
                             .opacity(sectionsAppeared ? 1 : 0)
                             .offset(y: sectionsAppeared ? 0 : 30)
+
+                        // MARK: - Atracción ideal (sección nueva)
+                        idealAttractionSection
+                            .padding(.horizontal, 20)
+                            .padding(.top, 12)
+                            .opacity(sectionsAppeared ? 1 : 0)
+                            .offset(y: sectionsAppeared ? 0 : 18)
 
                         // MARK: - Cómo usar la app
                         howToUseSection
@@ -225,6 +246,21 @@ struct LandingView: View {
             }
             .toolbar(.hidden, for: .navigationBar)
             .trackScreenTime("home")
+            .alert(L10n.surveyAlertTitle, isPresented: $showSurveyAlertForIdeal) {
+                Button(L10n.surveyStart) {
+                    withAnimation(.spring(response: 0.36, dampingFraction: 0.78)) {
+                        selectedTab = 3
+                    }
+                }
+                Button(L10n.surveyAlertLater, role: .cancel) { }
+            } message: {
+                Text(L10n.surveyAlertMessage)
+            }
+            .alert("Error", isPresented: $showIdealAttractionError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(idealAttractionErrorMessage)
+            }
     }
 
     // MARK: - Header
@@ -524,6 +560,228 @@ struct LandingView: View {
             .scalingFont(size: 12, weight: .bold)
             .foregroundStyle(.tertiary)
             .frame(width: 20)
+    }
+
+    // MARK: - Atracción ideal Section
+
+    private var idealAttractionSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Atracción ideal")
+                    .font(.title3)
+                    .fontWeight(.bold)
+
+                Spacer()
+            }
+
+            if let attraction = idealAttraction {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(spacing: 12) {
+                        ZStack {
+                            Circle()
+                                .fill(attraction.color.opacity(0.12))
+                                .frame(width: 56, height: 56)
+
+                            Image(systemName: attraction.icon)
+                                .scalingFont(size: 20, weight: .bold)
+                                .foregroundStyle(attraction.color)
+                                .pulsingGlow(attraction.color)
+                        }
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(attraction.name)
+                                .font(.title2)
+                                .fontWeight(.bold)
+
+                            Text(attraction.subtitle)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Spacer()
+                    }
+
+                    Text(attraction.message)
+                        .font(.subheadline)
+                        .foregroundStyle(.primary)
+                        .lineLimit(3)
+
+                    HStack(spacing: 12) {
+                        Button {
+                            selectedTab = 2 // ir al mapa
+                        } label: {
+                            Text("Ir al mapa")
+                                .fontWeight(.semibold)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(RoundedRectangle(cornerRadius: 12).fill(Color.orange))
+                                .foregroundStyle(.white)
+                        }
+                        .buttonStyle(PressableButtonStyle())
+
+                        Button {
+                            coqueGuideVM.openPanelWithMessage("Cuéntame sobre \(attraction.name) en Horno3, por favor.")
+                        } label: {
+                            Text("Preguntarle a Coque")
+                                .fontWeight(.semibold)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.accentColor, lineWidth: 1))
+                        }
+                        .buttonStyle(PressableButtonStyle())
+                    }
+                }
+                .padding(16)
+                .background(Color(.secondarySystemGroupedBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .scaleEffect(1)
+                .transition(.scale.combined(with: .opacity))
+                .animation(.spring(response: 0.36, dampingFraction: 0.78), value: idealAttraction?.id)
+            } else {
+                Button {
+                    Task { await computeIdealAttraction() }
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: "sparkles")
+                            .scalingFont(size: 16, weight: .semibold)
+                        Text("Descubrir mi atracción ideal")
+                            .fontWeight(.semibold)
+                        Spacer()
+                        if isComputingIdeal {
+                            FancyLoadingView(size: 22)
+                        }
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.vertical, 14)
+                    .padding(.horizontal, 16)
+                    .background(RoundedRectangle(cornerRadius: 14).fill(Color.accentColor))
+                }
+                .buttonStyle(PressableButtonStyle())
+            }
+        }
+    }
+
+    private func computeIdealAttraction() async {
+        guard !isComputingIdeal else { return }
+        isComputingIdeal = true
+        defer { isComputingIdeal = false }
+
+        let descriptor = FetchDescriptor<ExcursionUserProfile>(
+            sortBy: [SortDescriptor(\.updatedAt, order: .reverse)]
+        )
+
+        do {
+            guard let profile = try modelContext.fetch(descriptor).first, !profile.gender.isEmpty else {
+                showSurveyAlertForIdeal = true
+                return
+            }
+
+            let aiService = SurveyAIService()
+
+            do {
+                let id = try await aiService.generateIdealAttractionID(for: profile)
+                if let mapped = Attraction.attraction(for: id) {
+                    withAnimation(.spring(response: 0.36, dampingFraction: 0.78)) {
+                        idealAttraction = mapped
+                    }
+                    AnalyticsService.shared.track("ideal_attraction_computed", metadata: ["source": "appleIntelligence", "id": id])
+                } else {
+                    withAnimation(.spring(response: 0.36, dampingFraction: 0.78)) {
+                        idealAttraction = decideAttraction(for: profile)
+                    }
+                    idealAttractionErrorMessage = "La IA devolvió: \(id). Mostrando recomendación local."
+                    showIdealAttractionError = true
+                    AnalyticsService.shared.track("ideal_attraction_fallback_unrecognized", metadata: ["returned": id])
+                }
+            } catch let err as SurveyAIError {
+                switch err {
+                case .deviceNotEligible, .appleIntelligenceNotEnabled, .modelNotReady, .unavailable:
+                    // Intentar fallback al backend
+                    do {
+                        let id = try await aiService.generateIdealAttractionViaBackend(for: profile)
+                        if let mapped = Attraction.attraction(for: id) {
+                            withAnimation(.spring(response: 0.36, dampingFraction: 0.78)) {
+                                idealAttraction = mapped
+                            }
+                            AnalyticsService.shared.track("ideal_attraction_computed", metadata: ["source": "backend", "id": id])
+                        } else {
+                            withAnimation(.spring(response: 0.36, dampingFraction: 0.78)) {
+                                idealAttraction = decideAttraction(for: profile)
+                            }
+                            idealAttractionErrorMessage = "El servidor devolvió: \(id). Mostrando recomendación local."
+                            showIdealAttractionError = true
+                            AnalyticsService.shared.track("ideal_attraction_fallback_unrecognized", metadata: ["returned": id])
+                        }
+                    } catch {
+                        withAnimation(.spring(response: 0.36, dampingFraction: 0.78)) {
+                            idealAttraction = decideAttraction(for: profile)
+                        }
+                        idealAttractionErrorMessage = "No fue posible generar la atracción ideal: \(error.localizedDescription). Mostrando recomendación local."
+                        showIdealAttractionError = true
+                        AnalyticsService.shared.track("ideal_attraction_fallback_failed", metadata: ["error": error.localizedDescription])
+                    }
+                default:
+                    withAnimation(.spring(response: 0.36, dampingFraction: 0.78)) {
+                        idealAttraction = decideAttraction(for: profile)
+                    }
+                    idealAttractionErrorMessage = "No fue posible generar la atracción ideal: \(err.localizedDescription). Mostrando recomendación local."
+                    showIdealAttractionError = true
+                    AnalyticsService.shared.track("ideal_attraction_fallback_failed", metadata: ["error": err.localizedDescription])
+                }
+            } catch {
+                withAnimation(.spring(response: 0.36, dampingFraction: 0.78)) {
+                    idealAttraction = decideAttraction(for: profile)
+                }
+                idealAttractionErrorMessage = "Error inesperado: \(error.localizedDescription). Mostrando recomendación local."
+                showIdealAttractionError = true
+                AnalyticsService.shared.track("ideal_attraction_fallback_failed", metadata: ["error": error.localizedDescription])
+            }
+        } catch {
+            idealAttractionErrorMessage = "No se pudo leer el perfil: \(error.localizedDescription)"
+            showIdealAttractionError = true
+        }
+    }
+
+    private func decideAttraction(for profile: ExcursionUserProfile) -> Attraction {
+        // Prefer explicit specificAttraction if provided
+        let specific = profile.specificAttraction.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !specific.isEmpty && specific.lowercased() != "no" {
+            if let match = Attraction.museumAttractions.first(where: {
+                $0.name.lowercased().contains(specific.lowercased()) || $0.subtitle.lowercased().contains(specific.lowercased())
+            }) {
+                return match
+            }
+        }
+
+        let pref = profile.resolvedAttractionPreference.lowercased()
+
+        if pref.contains("interaccion") || pref.contains("interaction") {
+            return Attraction.museumAttractions.first { $0.icon == "flask.fill" } ?? Attraction.museumAttractions.first!
+        }
+
+        if pref.contains("historia") || pref.contains("escuchar") || pref.contains("history") {
+            return Attraction.museumAttractions.first { $0.icon == "flame.fill" } ?? Attraction.museumAttractions.first!
+        }
+
+        if pref.contains("show") || pref.contains("espectac") {
+            return Attraction.museumAttractions.first { $0.icon == "sparkles" } ?? Attraction.museumAttractions.first!
+        }
+
+        if pref.contains("galer") {
+            return Attraction.museumAttractions.first { $0.icon == "building.columns.fill" } ?? Attraction.museumAttractions.first!
+        }
+
+        if pref.contains("mirador") || pref.contains("view") {
+            return Attraction.museumAttractions.first { $0.icon == "binoculars.fill" } ?? Attraction.museumAttractions.first!
+        }
+
+        // Fallback según tiempo disponible
+        let time = profile.plannedTime.lowercased()
+        if time.contains("1 hora") || time.contains("1 hour") {
+            return Attraction.museumAttractions.first { $0.icon == "sparkles" } ?? Attraction.museumAttractions.first!
+        }
+
+        return Attraction.museumAttractions.first!
     }
 
     // MARK: - Atracciones Section
