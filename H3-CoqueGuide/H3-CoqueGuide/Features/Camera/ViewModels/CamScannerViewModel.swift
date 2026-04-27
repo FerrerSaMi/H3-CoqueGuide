@@ -67,21 +67,77 @@ final class CamScannerViewModel: ObservableObject {
 
         Task {
             do {
-                let result = try await camera.classifyCurrentFrame()
-                withAnimation {
-                    detectedObject = catalog.museumObject(
-                        forLabel: result.label,
-                        confidence: result.confidence
-                    )
+                // 1) Capturar imagen
+                let image = try await camera.capturePhoto()
+
+                // 2) Detectar si hay texto predominante
+                let (hasText, textCoverage) = try await camera.detectTextInImage(image)
+
+                // 3) Si hay texto dominante (> 30%), extraer y traducir
+                if hasText && textCoverage > 30 {
+                    do {
+                        let (original, translated) = try await camera.extractAndTranslateText(
+                            from: image,
+                            targetLanguage: "es"
+                        )
+
+                        withAnimation {
+                            // Mostrar texto extraído como "objeto"
+                            detectedObject = MuseumObject(
+                                title: "📝 Texto detectado",
+                                era: "OCR",
+                                description: translated.isEmpty
+                                    ? original
+                                    : "\(translated)",
+                                confidence: Double(textCoverage) / 100.0
+                            )
+                        }
+                        isScanning = false
+                    } catch {
+                        // Fallback: mostrar error pero mantener UI
+                        print("❌ OCR error: \(error)")
+                        withAnimation {
+                            detectedObject = MuseumObject(
+                                title: "Error en OCR",
+                                era: "REINTENTA",
+                                description: "No se pudo extraer el texto. Intenta de nuevo con mejor iluminación.",
+                                confidence: 0.0
+                            )
+                        }
+                        isScanning = false
+                    }
+                } else {
+                    // 4) Si no hay texto, usar CoreML normal
+                    do {
+                        let result = try await camera.classify(image: image)
+                        withAnimation {
+                            detectedObject = catalog.museumObject(
+                                forLabel: result.label,
+                                confidence: result.confidence
+                            )
+                        }
+                        isScanning = false
+                    } catch {
+                        withAnimation {
+                            detectedObject = MuseumObject(
+                                title: catalog.unknown.title,
+                                era: catalog.unknown.era,
+                                description: "No se pudo completar el escaneo. Intenta acercarte al objeto, mejorar la iluminación o encuadrarlo dentro del marco del escáner.",
+                                confidence: 0.0
+                            )
+                        }
+                        isScanning = false
+                    }
                 }
-                isScanning = false
             } catch {
+                // Error en detección de texto o captura
+                print("❌ Scan error: \(error)")
                 isScanning = false
                 withAnimation {
                     detectedObject = MuseumObject(
-                        title: catalog.unknown.title,
-                        era: catalog.unknown.era,
-                        description: "No se pudo completar el escaneo. Intenta acercarte al objeto, mejorar la iluminación o encuadrarlo dentro del marco del escáner.",
+                        title: "Error al escanear",
+                        era: "REINTENTA",
+                        description: "No se pudo procesar la imagen. Verifica tu conexión a internet y vuelve a intentar.",
                         confidence: 0.0
                     )
                 }

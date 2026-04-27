@@ -14,6 +14,8 @@ struct MuseumObject: Identifiable, Equatable {
     let era         : String
     let description : String
     let confidence  : Double
+    /// Origen del resultado: "object" (CoreML) o "text" (OCR/Gemini)
+    let source      : String = "object"
 
     /// Indica si el objeto no pudo ser reconocido por el modelo.
     var isUnknown: Bool {
