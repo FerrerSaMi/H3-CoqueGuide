@@ -80,33 +80,37 @@ struct CGQuickAction: Identifiable {
 
 extension CGQuickAction {
     /// Conjunto predeterminado de acciones rápidas disponibles en el panel.
-    static let defaults: [CGQuickAction] = [
-        CGQuickAction(
-            title: "Ver mapa",
-            icon: "map",
-            message: "¿Puedes mostrarme el mapa del museo?"
-        ),
-        CGQuickAction(
-            title: "Eventos",
-            icon: "calendar",
-            message: "¿Qué eventos hay disponibles hoy?"
-        ),
-        CGQuickAction(
-            title: "Escanear objeto",
-            icon: "qrcode.viewfinder",
-            message: "¿Cómo escaneo un objeto del museo?"
-        ),
-        CGQuickAction(
-            title: "Cambiar idioma",
-            icon: "globe",
-            message: "¿En qué idiomas está disponible la guía?"
-        ),
-        CGQuickAction(
-            title: "Accesibilidad",
-            icon: "figure.roll",
-            message: "¿Qué servicios de accesibilidad tiene el museo?"
-        ),
-    ]
+    /// Computed property para que los títulos y mensajes sigan el idioma actual
+    /// del iPhone en cada acceso (no se congelan al cargar la app).
+    static var defaults: [CGQuickAction] {
+        [
+            CGQuickAction(
+                title: L10n.qaMapTitle,
+                icon: "map",
+                message: L10n.qaMapMessage
+            ),
+            CGQuickAction(
+                title: L10n.qaEventsTitle,
+                icon: "calendar",
+                message: L10n.qaEventsMessage
+            ),
+            CGQuickAction(
+                title: L10n.qaScanTitle,
+                icon: "qrcode.viewfinder",
+                message: L10n.qaScanMessage
+            ),
+            CGQuickAction(
+                title: L10n.qaLanguageTitle,
+                icon: "globe",
+                message: L10n.qaLanguageMessage
+            ),
+            CGQuickAction(
+                title: L10n.qaAccessibilityTitle,
+                icon: "figure.roll",
+                message: L10n.qaAccessibilityMessage
+            ),
+        ]
+    }
 }
 
 // MARK: - Contenido de tarjeta invitadora Home

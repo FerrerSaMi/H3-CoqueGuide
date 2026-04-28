@@ -56,7 +56,12 @@ struct SurveyAIService {
 
         let prompt = buildPrompt(for: profile)
 
-        let response = try await session.respond(to: prompt)
+        let response: LanguageModelSession.Response<String>
+        do {
+            response = try await session.respond(to: prompt)
+        } catch {
+            throw SurveyAIError.unavailable
+        }
         return response.content.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
@@ -193,7 +198,12 @@ struct SurveyAIService {
         let session = LanguageModelSession(instructions: instructions)
         let prompt = buildPrompt(for: profile) + "\n\nWhich ID is best? Reply with only the ID token."
 
-        let response = try await session.respond(to: prompt)
+        let response: LanguageModelSession.Response<String>
+        do {
+            response = try await session.respond(to: prompt)
+        } catch {
+            throw SurveyAIError.unavailable
+        }
         let raw = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
 
         let allowed = ["HORNO_ALTO","GALLERY","STEEL_SHOW","LAB","VIEWPOINT","STEEL_MILL"]

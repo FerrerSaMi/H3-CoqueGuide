@@ -320,6 +320,75 @@ Rules:
 });
 
 /**
+ * POST /survey/ideal
+ * Devuelve el ID de la atracción ideal para el visitante a partir del perfil.
+ * Fallback server-side cuando Apple Intelligence no está disponible.
+ *
+ * Respuesta: { ok: true, id: "HORNO_ALTO" | "GALLERY" | "STEEL_SHOW" | "LAB" | "VIEWPOINT" | "STEEL_MILL" }
+ */
+app.post('/survey/ideal', async (req, res) => {
+    const {
+        gender,
+        age_range,
+        planned_time,
+        attraction_preference,
+        resolved_attraction_preference,
+        specific_attraction,
+        preferred_language,
+        coque_personality,
+    } = req.body ?? {};
+
+    const ALLOWED = ['HORNO_ALTO', 'GALLERY', 'STEEL_SHOW', 'LAB', 'VIEWPOINT', 'STEEL_MILL'];
+
+    const prompt = `You are Coque, the museum guide assistant at Horno3. Given this visitor data, choose exactly one of these IDs as the best single attraction recommendation: HORNO_ALTO, GALLERY, STEEL_SHOW, LAB, VIEWPOINT, STEEL_MILL.
+
+Visitor data:
+- Gender: ${gender ?? ''}
+- Age range: ${age_range ?? ''}
+- Planned visit time: ${planned_time ?? ''}
+- Attraction preference selected: ${attraction_preference ?? ''}
+- Final attraction style to use: ${resolved_attraction_preference ?? ''}
+- Specific attraction requested: ${specific_attraction ?? ''}
+- Preferred language: ${preferred_language ?? ''}
+- Preferred Coque personality: ${coque_personality ?? ''}
+
+Output must be only the chosen ID in UPPERCASE, nothing else.`;
+
+    try {
+        const raw = await callGemini({
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            temperature: 0.1,
+            maxOutputTokens: 1024,
+        });
+
+        console.log('🧭 /survey/ideal raw Gemini response:', JSON.stringify(raw));
+
+        const text = (raw ?? '').toUpperCase();
+        let chosen = ALLOWED.find(id => text.includes(id));
+
+        // Heurísticas de respaldo si Gemini devuelve un nombre en lugar del ID
+        if (!chosen) {
+            const lower = (raw ?? '').toLowerCase();
+            if (lower.includes('horno') || lower.includes('alto')) chosen = 'HORNO_ALTO';
+            else if (lower.includes('galer') || lower.includes('gallery')) chosen = 'GALLERY';
+            else if (lower.includes('show') || lower.includes('espectac')) chosen = 'STEEL_SHOW';
+            else if (lower.includes('lab')) chosen = 'LAB';
+            else if (lower.includes('mirador') || lower.includes('view') || lower.includes('binocular')) chosen = 'VIEWPOINT';
+            else if (lower.includes('acero') || lower.includes('mill') || lower.includes('steel')) chosen = 'STEEL_MILL';
+        }
+
+        if (!chosen) {
+            return res.status(502).json({ ok: false, error: 'Gemini no devolvió un ID válido.' });
+        }
+
+        res.json({ ok: true, id: chosen });
+    } catch (err) {
+        console.error('❌ POST /survey/ideal failed:', err.message);
+        res.status(500).json({ ok: false, error: err.message });
+    }
+});
+
+/**
  * POST /chat/message
  * MVP: recibe el texto del usuario, lo guarda, lo manda tal cual a Gemini,
  * guarda la respuesta y la devuelve. Sin lógica de personalidad/idioma todavía
