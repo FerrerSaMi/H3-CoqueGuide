@@ -522,11 +522,17 @@ struct MapPin: Identifiable {
     let x: CGFloat
     let y: CGFloat
     let type: LocationType
+    let customIcon: String?  // Icono personalizado del JSON
 
     var id: Int { number }
     
     /// Ícono representativo basado en el nombre del lugar
     var locationIcon: String {
+        // Usar icono personalizado del JSON si existe
+        if let customIcon = customIcon {
+            return customIcon
+        }
+        
         let name = self.name.lowercased()
         
         // Búsquedas específicas PRIMERO (multi-palabra)
@@ -718,7 +724,8 @@ struct MapLevel: Decodable {
                 name: location.name,
                 x: min(max((location.x * xAxisScaleFactor) / imageSize.width, 0), 1),
                 y: min(max(location.y / imageSize.height, 0), 1),
-                type: location.locationType
+                type: location.locationType,
+                customIcon: location.icon
             )
         }
     }
@@ -729,8 +736,19 @@ struct MapLocation: Decodable {
     let name: String
     /// Tipo (raw string). Ver `locationType` para el enum resuelto.
     let type: String?
+    let icon: String?  // Icono SF Symbols personalizado
     let x: CGFloat
     let y: CGFloat
+
+    /// Inicializador con valores por defecto para facilitar construcción en code
+    init(id: Int, name: String, type: String? = nil, icon: String? = nil, x: CGFloat, y: CGFloat) {
+        self.id = id
+        self.name = name
+        self.type = type
+        self.icon = icon
+        self.x = x
+        self.y = y
+    }
 
     /// Tipo resuelto con fallback a `.attraction` si falta o no es reconocido.
     var locationType: LocationType {
