@@ -34,10 +34,10 @@ enum CGCardType {
 
     var actionLabel: String {
         switch self {
-        case .event: return "Ver evento"
-        case .map:   return "Ir al mapa"
-        case .scan:  return "Abrir escáner"
-        case .info:  return "Más información"
+        case .event: return L10n.cardActionViewEvent
+        case .map:   return L10n.cardActionGoToMap
+        case .scan:  return L10n.cardActionOpenScanner
+        case .info:  return L10n.cardActionMoreInfo
         }
     }
 

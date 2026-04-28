@@ -74,7 +74,7 @@ struct SurveyView: View {
                         showIdealAttractionSheet = false
                     },
                     onAskCoque: {
-                        coqueGuideVM.openPanelWithMessage("Cuéntame sobre \(attr.name) en Horno3, por favor.")
+                        coqueGuideVM.openPanelWithMessage(L10n.askCoqueAbout(attr.name))
                         showIdealAttractionSheet = false
                     }
                 )
@@ -344,7 +344,7 @@ private extension SurveyView {
                     handleViewIdealAttraction()
                 } label: {
                     HStack {
-                        Text("Ver atracción ideal")
+                        Text(L10n.surveyShowIdealAttraction)
                             .fontWeight(.semibold)
                             .foregroundStyle(viewModel.canSendToCoque ? .primary : .secondary)
                         Spacer()

@@ -60,11 +60,11 @@ struct CamScannerView: View {
         ZStack {
             // Título centrado
             VStack(spacing: 2) {
-                Text("ESCÁNER")
+                Text(L10n.scannerHeaderTitle)
                     .scalingFont(size: 11, weight: .semibold, design: .monospaced)
                     .tracking(3)
                     .foregroundStyle(.white.opacity(0.6))
-                Text("Apunta al objeto del museo")
+                Text(L10n.scannerSubtitle)
                     .scalingFont(size: 13, weight: .medium)
                     .foregroundStyle(.white)
             }
@@ -217,8 +217,8 @@ struct CamScannerView: View {
             )
             .clipShape(RoundedRectangle(cornerRadius: 14))
         }
-        .accessibilityLabel("Pregúntale a Coque sobre \(obj.title)")
-        .accessibilityHint("Cierra el escáner y abre el asistente con el contexto de la pieza")
+        .accessibilityLabel(L10n.scannerAskCoqueAbout(obj.title))
+        .accessibilityHint(L10n.scannerAccessibilityHint)
     }
 
     // MARK: - Speak Button
@@ -282,11 +282,11 @@ struct CamScannerView: View {
                 .scalingFont(size: 40)
                 .foregroundStyle(.orange)
 
-            Text("Sin acceso a la cámara")
+            Text(L10n.scannerNoCameraAccessTitle)
                 .scalingFont(size: 18, weight: .bold)
                 .foregroundStyle(.white)
 
-            Text("Activa el permiso en Configuración para usar el escaneo de objetos.")
+            Text(L10n.scannerNoCameraAccessMessage)
                 .scalingFont(size: 14)
                 .foregroundStyle(.white.opacity(0.75))
                 .multilineTextAlignment(.center)
@@ -296,7 +296,7 @@ struct CamScannerView: View {
                     UIApplication.shared.open(url)
                 }
             } label: {
-                Text("Abrir Configuración")
+                Text(L10n.scannerOpenSettings)
                     .scalingFont(size: 15, weight: .semibold)
                     .foregroundStyle(.black)
                     .padding(.horizontal, 24)

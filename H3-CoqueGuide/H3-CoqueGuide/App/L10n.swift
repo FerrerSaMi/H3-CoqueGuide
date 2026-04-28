@@ -358,6 +358,233 @@ enum L10n {
         )
     }
 
+    static var landingEventsTitle: String {
+        localize(
+            es: "Eventos de hoy",
+            en: "Today's events",
+            fr: "Événements du jour",
+            pt: "Eventos de hoje",
+            ko: "오늘의 이벤트",
+            ar: "فعاليات اليوم"
+        )
+    }
+
+    static var landingEventsEmpty: String {
+        localize(
+            es: "No hay eventos programados para hoy.",
+            en: "No events scheduled for today.",
+            fr: "Aucun événement prévu aujourd'hui.",
+            pt: "Sem eventos programados para hoje.",
+            ko: "오늘 예정된 이벤트가 없습니다.",
+            ar: "لا توجد فعاليات مجدولة اليوم."
+        )
+    }
+
+    /// Mensaje genérico para abrir Coque preguntando sobre algo (evento, atracción, objeto).
+    static func askCoqueAbout(_ name: String) -> String {
+        localize(
+            es: "Cuéntame más sobre \(name) en Horno3, por favor.",
+            en: "Tell me more about \(name) at Horno3, please.",
+            fr: "Parle-moi de \(name) à Horno3, s'il te plaît.",
+            pt: "Conte-me mais sobre \(name) no Horno3, por favor.",
+            ko: "Horno3의 \(name)에 대해 더 알려주세요.",
+            ar: "أخبرني المزيد عن \(name) في Horno3 من فضلك."
+        )
+    }
+
+    // MARK: - Atracción ideal
+
+    static var landingMuseumName: String {
+        localize(
+            es: "Museo del Acero",
+            en: "Steel Museum",
+            fr: "Musée de l'Acier",
+            pt: "Museu do Aço",
+            ko: "철강 박물관",
+            ar: "متحف الصلب"
+        )
+    }
+
+    static var idealAttractionTitle: String {
+        localize(
+            es: "Atracción ideal",
+            en: "Ideal attraction",
+            fr: "Attraction idéale",
+            pt: "Atração ideal",
+            ko: "추천 어트랙션",
+            ar: "الجاذبية المثالية"
+        )
+    }
+
+    static var idealAttractionDiscoverButton: String {
+        localize(
+            es: "Descubrir mi atracción ideal",
+            en: "Discover my ideal attraction",
+            fr: "Découvrir mon attraction idéale",
+            pt: "Descobrir minha atração ideal",
+            ko: "내게 맞는 어트랙션 찾기",
+            ar: "اكتشف الجاذبية المثالية لي"
+        )
+    }
+
+    static var idealAttractionGoToMap: String {
+        localize(
+            es: "Ir al mapa",
+            en: "Go to map",
+            fr: "Aller à la carte",
+            pt: "Ir ao mapa",
+            ko: "지도로 이동",
+            ar: "إلى الخريطة"
+        )
+    }
+
+    static var idealAttractionAskCoqueButton: String {
+        localize(
+            es: "Preguntarle a Coque",
+            en: "Ask Coque",
+            fr: "Demander à Coque",
+            pt: "Perguntar ao Coque",
+            ko: "Coque에게 물어보기",
+            ar: "اسأل Coque"
+        )
+    }
+
+    static var surveyShowIdealAttraction: String {
+        localize(
+            es: "Ver atracción ideal",
+            en: "View ideal attraction",
+            fr: "Voir l'attraction idéale",
+            pt: "Ver atração ideal",
+            ko: "추천 어트랙션 보기",
+            ar: "عرض الجاذبية المثالية"
+        )
+    }
+
+    // MARK: - Scanner overlay (header sobre la cámara)
+
+    static var scannerHeaderTitle: String {
+        localize(
+            es: "ESCÁNER",
+            en: "SCANNER",
+            fr: "SCANNER",
+            pt: "SCANNER",
+            ko: "스캐너",
+            ar: "الماسح"
+        )
+    }
+
+    static func scannerAskCoqueAbout(_ name: String) -> String {
+        localize(
+            es: "Pregúntale a Coque sobre \(name)",
+            en: "Ask Coque about \(name)",
+            fr: "Demander à Coque sur \(name)",
+            pt: "Pergunte ao Coque sobre \(name)",
+            ko: "\(name)에 대해 Coque에게 물어보기",
+            ar: "اسأل Coque عن \(name)"
+        )
+    }
+
+    static var scannerNoCameraAccessTitle: String {
+        localize(
+            es: "Sin acceso a la cámara",
+            en: "No camera access",
+            fr: "Pas d'accès à la caméra",
+            pt: "Sem acesso à câmera",
+            ko: "카메라 접근 권한 없음",
+            ar: "لا يمكن الوصول إلى الكاميرا"
+        )
+    }
+
+    static var scannerNoCameraAccessMessage: String {
+        localize(
+            es: "Activa el permiso en Configuración para usar el escaneo de objetos.",
+            en: "Enable the permission in Settings to use object scanning.",
+            fr: "Activez l'autorisation dans Réglages pour utiliser la numérisation d'objets.",
+            pt: "Ative a permissão em Ajustes para usar a digitalização de objetos.",
+            ko: "설정에서 권한을 활성화하여 객체 스캔을 사용하세요.",
+            ar: "قم بتمكين الإذن في الإعدادات لاستخدام مسح الكائنات."
+        )
+    }
+
+    static var scannerOpenSettings: String {
+        localize(
+            es: "Abrir Configuración",
+            en: "Open Settings",
+            fr: "Ouvrir Réglages",
+            pt: "Abrir Ajustes",
+            ko: "설정 열기",
+            ar: "فتح الإعدادات"
+        )
+    }
+
+    static var scannerSubtitle: String {
+        localize(
+            es: "Apunta al objeto del museo",
+            en: "Aim at the museum object",
+            fr: "Visez l'objet du musée",
+            pt: "Aponte para o objeto do museu",
+            ko: "박물관 물체를 향해 조준하세요",
+            ar: "وجه الكاميرا نحو القطعة المعروضة"
+        )
+    }
+
+    // MARK: - Card actions (chat)
+
+    static var cardActionViewEvent: String {
+        localize(
+            es: "Ver evento",
+            en: "View event",
+            fr: "Voir l'événement",
+            pt: "Ver evento",
+            ko: "이벤트 보기",
+            ar: "عرض الفعالية"
+        )
+    }
+
+    static var cardActionGoToMap: String {
+        localize(
+            es: "Ir al mapa",
+            en: "Go to map",
+            fr: "Aller à la carte",
+            pt: "Ir ao mapa",
+            ko: "지도로 이동",
+            ar: "إلى الخريطة"
+        )
+    }
+
+    static var cardActionOpenScanner: String {
+        localize(
+            es: "Abrir escáner",
+            en: "Open scanner",
+            fr: "Ouvrir le scanner",
+            pt: "Abrir scanner",
+            ko: "스캐너 열기",
+            ar: "فتح الماسح"
+        )
+    }
+
+    static var cardActionMoreInfo: String {
+        localize(
+            es: "Más información",
+            en: "More info",
+            fr: "Plus d'infos",
+            pt: "Mais informações",
+            ko: "자세히 보기",
+            ar: "مزيد من المعلومات"
+        )
+    }
+
+    static var scannerAccessibilityHint: String {
+        localize(
+            es: "Cierra el escáner y abre el asistente con el contexto de la pieza",
+            en: "Closes the scanner and opens the assistant with the object context",
+            fr: "Ferme le scanner et ouvre l'assistant avec le contexte de l'objet",
+            pt: "Fecha o scanner e abre o assistente com o contexto do objeto",
+            ko: "스캐너를 닫고 해당 물체에 대한 정보로 어시스턴트를 엽니다",
+            ar: "يغلق الماسح ويفتح المساعد مع سياق القطعة"
+        )
+    }
+
     static var landingCGAccessibilityLabel: String {
         localize(
             es: "CoqueGuide, tu asistente inteligente del museo",
