@@ -807,6 +807,17 @@ enum L10n {
         )
     }
 
+    static var suggestHistoryAudio: String {
+        localize(
+            es: "🎧 Escucha la **narración de la Galería de Historia** en Soundcloud — una introducción magistral al legado del acero.",
+            en: "🎧 Listen to the **History Gallery narration** on Soundcloud — a masterful introduction to the steel legacy.",
+            fr: "🎧 Écoutez la **narration de la Galerie d'Histoire** sur Soundcloud — une introduction magistrale à l'héritage de l'acier.",
+            pt: "🎧 Ouça a **narração da Galeria de História** no Soundcloud — uma introdução magistral ao legado do aço.",
+            ko: "🎧 Soundcloud에서 **역사 갤러리 해설**을 들어보세요 — 철강 유산에 대한 훌륭한 소개입니다.",
+            ar: "🎧 استمع إلى **سرد معرض التاريخ** على Soundcloud — مقدمة رائعة لإرث الصلب."
+        )
+    }
+
     // MARK: - Map
 
     static var mapTitle: String {

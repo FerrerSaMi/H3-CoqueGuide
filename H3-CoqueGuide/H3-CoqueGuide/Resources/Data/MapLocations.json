@@ -17,6 +17,9 @@
         {"id": 11, "name": "Salón Ciencia en Vivo", "x": 922, "y": 915},
         {"id": 12, "name": "Salón Diseño y Simulación", "x": 822, "y": 915},
         {"id": 13, "name": "Salón Manufactura Inteligente", "x": 715, "y": 915},
+        {"id": 21, "name": "Tienda de souvenirs", "type": "shop", "x": 340, "y": 615},
+        {"id": 22, "name": "Snack", "type": "shop", "x": 630, "y": 915},
+        {"id": 23, "name": "Guardaropa", "type": "shop", "x": 270, "y": 810},
         {"id": 14, "name": "Baños · Norte", "type": "service", "x": 400, "y": 225},
         {"id": 18, "name": "Baños · Centro", "type": "service", "x": 755, "y": 442},
         {"id": 19, "name": "Baños · Sur", "type": "service", "x": 400, "y": 800}

@@ -19,6 +19,7 @@ struct MapaView: View {
     @State private var lastMapOffset: CGSize = .zero
     @State private var mapTransitionID = UUID()
     @State private var showServices: Bool = true
+    @Environment(NavigationState.self) private var navigationState
     private let mapConfig = MapLocationsConfig.load()
 
     private var locations: [Int: MapLocation] {
@@ -46,6 +47,34 @@ struct MapaView: View {
         mapBody
             .onAppear { AnalyticsService.shared.track("map_opened") }
             .trackScreenTime("map")
+            .onChange(of: navigationState.selectedMapLocationID) { _, newLocationID in
+                if let locationID = newLocationID {
+                    selectLocationFromGallery(locationID: locationID)
+                }
+            }
+    }
+    
+    // MARK: - Navegación desde carrusel
+    
+    private func selectLocationFromGallery(locationID: Int) {
+        if let location = locations[locationID] {
+            // Determinar el nivel correcto
+            if let mapLevel = mapConfig.levels.first(where: { $0.locations.contains(where: { $0.id == locationID }) }) {
+                showingFirstMap = mapLevel.id == 1
+            }
+            
+            // Seleccionar la ubicación
+            selectedLocationNumber = locationID
+            selectedLocationInfo = SelectedLocationInfo(
+                id: location.id, name: location.name,
+                type: location.locationType
+            )
+            
+            // Resetear después de navegar
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                navigationState.selectedMapLocationID = nil
+            }
+        }
     }
 
     private var mapBody: some View {
@@ -223,15 +252,10 @@ struct MapaView: View {
                 .stroke(accentColor, lineWidth: 2.5)
                 .frame(width: pinButtonSize, height: pinButtonSize)
 
-            if let symbol = pin.type.symbolName {
-                Image(systemName: symbol)
-                    .scalingFont(size: 14, weight: .bold)
-                    .foregroundStyle(isSelected ? .white : accentColor)
-            } else {
-                Text("\(pin.number)")
-                    .scalingFont(size: 12, weight: .bold, design: .rounded)
-                    .foregroundStyle(isSelected ? .white : accentColor)
-            }
+            // Mostrar ícono representativo en lugar de número
+            Image(systemName: pin.locationIcon)
+                .scalingFont(size: 14, weight: .bold)
+                .foregroundStyle(isSelected ? .white : accentColor)
         }
         .shadow(color: isSelected ? accentColor.opacity(0.4) : .black.opacity(0.18), radius: isSelected ? 6 : 2, x: 0, y: isSelected ? 3 : 1)
         .scaleEffect(isSelected ? 1.2 : 1.0)
@@ -264,10 +288,17 @@ struct MapaView: View {
                     .fontWeight(.medium)
                     .foregroundStyle(.secondary)
 
-                Text(info.name)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(.primary)
+                HStack(spacing: 6) {
+                    Image(systemName: info.locationIcon)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(info.type.accentColor)
+                    
+                    Text(info.name)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.primary)
+                }
             }
 
             Spacer()
@@ -465,11 +496,13 @@ struct MapaView: View {
 enum LocationType: String, Decodable {
     case attraction
     case service
+    case shop
 
     var accentColor: Color {
         switch self {
         case .attraction: return .orange
         case .service:    return .blue
+        case .shop:       return .yellow
         }
     }
 
@@ -478,23 +511,125 @@ enum LocationType: String, Decodable {
         switch self {
         case .attraction: return nil
         case .service:    return "figure.dress.line.vertical.figure"
+        case .shop:       return "bag.fill"
         }
     }
 }
 
 struct MapPin: Identifiable {
     let number: Int
+    let name: String
     let x: CGFloat
     let y: CGFloat
     let type: LocationType
 
     var id: Int { number }
+    
+    /// Ícono representativo basado en el nombre del lugar
+    var locationIcon: String {
+        let name = self.name.lowercased()
+        
+        // Búsquedas específicas PRIMERO (multi-palabra)
+        if name.contains("ciencia en vivo") || name.contains("live") { return "video.fill" }
+        if name.contains("show del horno") || name.contains("furnace show") { return "flame.fill" }
+        
+        // Galerías
+        if name.contains("historia") { return "book.fill" }
+        if name.contains("acero") || name.contains("steel") { return "gearshape.fill" }
+        if name.contains("horno") || name.contains("furnace") { return "flame.fill" }
+        if name.contains("planeta") || name.contains("tierra") || name.contains("earth") { return "globe" }
+        
+        // Laboratorios
+        if name.contains("laboratorio") || name.contains("laboratory") { return "flask.fill" }
+        if name.contains("ventana") { return "telescope" }
+        if name.contains("ciencia") || name.contains("science") { return "microscope" }
+        if name.contains("núcleo") || name.contains("nucleo") { return "atom" }
+        
+        // Espacios
+        if name.contains("terraza") || name.contains("green") { return "leaf.fill" }
+        if name.contains("mirador") || name.contains("viewpoint") { return "binoculars.fill" }
+        if name.contains("lobby") || name.contains("vestíbulo") { return "door.left.hand.open" }
+        if name.contains("patio") { return "tree.fill" }
+        if name.contains("explanada") { return "square.fill" }
+        
+        // Salones
+        if name.contains("salón") || name.contains("salon") { return "building.2.fill" }
+        if name.contains("newton") || name.contains("galilei") || name.contains("curie") { return "lightbulb.fill" }
+        if name.contains("simulación") || name.contains("simulation") { return "play.circle.fill" }
+        if name.contains("manufactura") || name.contains("manufacturing") { return "wrench.and.screwdriver.fill" }
+        if name.contains("diseño") || name.contains("design") { return "paintbrush.fill" }
+        if name.contains("lingote") { return "cube.fill" }
+        if name.contains("andador") { return "arrow.right" }
+        
+        // Servicios
+        if type == .service {
+            if name.contains("baño") || name.contains("restroom") { return "figure.dress.line.vertical.figure" }
+        }
+        
+        // Tiendas
+        if type == .shop {
+            if name.contains("guardaropa") || name.contains("coat") { return "hanger" }
+            return "bag.fill"
+        }
+        
+        // Default
+        return "mappin.circle.fill"
+    }
 }
 
 private struct SelectedLocationInfo: Identifiable, Equatable {
     let id: Int
     let name: String
     let type: LocationType
+    
+    /// Ícono representativo basado en el nombre del lugar
+    var locationIcon: String {
+        let name = self.name.lowercased()
+        
+        // Búsquedas específicas PRIMERO (multi-palabra)
+        if name.contains("ciencia en vivo") || name.contains("live") { return "video.fill" }
+        if name.contains("show del horno") || name.contains("furnace show") { return "flame.fill" }
+        
+        // Galerías
+        if name.contains("historia") { return "book.fill" }
+        if name.contains("acero") || name.contains("steel") { return "gearshape.fill" }
+        if name.contains("horno") || name.contains("furnace") { return "flame.fill" }
+        if name.contains("planeta") || name.contains("tierra") || name.contains("earth") { return "globe" }
+        
+        // Laboratorios
+        if name.contains("laboratorio") || name.contains("laboratory") { return "flask.fill" }
+        if name.contains("ventana") { return "telescope" }
+        if name.contains("ciencia") || name.contains("science") { return "microscope" }
+        if name.contains("núcleo") || name.contains("nucleo") { return "atom" }
+        
+        // Espacios
+        if name.contains("terraza") || name.contains("green") { return "leaf.fill" }
+        if name.contains("mirador") || name.contains("viewpoint") { return "binoculars.fill" }
+        if name.contains("lobby") || name.contains("vestíbulo") { return "door.left.hand.open" }
+        if name.contains("patio") { return "tree.fill" }
+        if name.contains("explanada") { return "square.fill" }
+        
+        // Salones
+        if name.contains("salón") || name.contains("salon") { return "building.2.fill" }
+        if name.contains("newton") || name.contains("galilei") || name.contains("curie") { return "lightbulb.fill" }
+        if name.contains("simulación") || name.contains("simulation") { return "play.circle.fill" }
+        if name.contains("manufactura") || name.contains("manufacturing") { return "wrench.and.screwdriver.fill" }
+        if name.contains("diseño") || name.contains("design") { return "paintbrush.fill" }
+        
+        // Servicios
+        if type == .service {
+            if name.contains("baño") || name.contains("restroom") { return "figure.dress.line.vertical.figure" }
+        }
+        
+        // Tiendas
+        if type == .shop {
+            if name.contains("guardaropa") || name.contains("coat") { return "hanger" }
+            return "bag.fill"
+        }
+        
+        // Default
+        return "mappin.circle.fill"
+    }
 }
 
 struct MapLocationsConfig: Decodable {
@@ -580,6 +715,7 @@ struct MapLevel: Decodable {
         return locations.map { location in
             MapPin(
                 number: location.id,
+                name: location.name,
                 x: min(max((location.x * xAxisScaleFactor) / imageSize.width, 0), 1),
                 y: min(max(location.y / imageSize.height, 0), 1),
                 type: location.locationType

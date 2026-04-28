@@ -27,6 +27,7 @@ struct LandingView: View {
     // MARK: - Navegación
     @State private var navigationPath = NavigationPath()
     @State private var navigationCoordinator = CGNavigationCoordinator()
+    @State private var navigationState = NavigationState()
 
     // MARK: - Carrusel
     @State private var currentGalleryIndex: Int = 0
@@ -170,6 +171,7 @@ struct LandingView: View {
             }
         }
         .environmentObject(coqueGuideVM)
+        .environment(navigationState)
         .preferredColorScheme(isDarkModeEnabled ? .dark : .light)
     }
 
@@ -328,7 +330,13 @@ struct LandingView: View {
                         videoName: galleryItems[index].video,
                         title: galleryItems[index].title,
                         subtitle: galleryItems[index].subtitle,
-                        fallbackImageName: galleryItems[index].video
+                        fallbackImageName: galleryItems[index].video,
+                        onTap: {
+                            navigationState.navigateToGalleryLocation(galleryIndex: index)
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                selectedTab = 2
+                            }
+                        }
                     )
                     .tag(index)
                 }
