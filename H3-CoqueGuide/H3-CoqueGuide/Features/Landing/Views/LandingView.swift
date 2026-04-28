@@ -161,6 +161,12 @@ struct LandingView: View {
                     coqueGuideVM.loadVisitorProfile(from: modelContext)
                 }
             }
+            .onChange(of: navigationState.tabSelectionIndex) { _, newTabIndex in
+                if let tabIndex = newTabIndex {
+                    selectedTab = tabIndex
+                    navigationState.tabSelectionIndex = nil
+                }
+            }
             .onReceive(NotificationCenter.default.publisher(for: .openMapFromIdealAttraction)) { _ in
                 selectedTab = 2
             }

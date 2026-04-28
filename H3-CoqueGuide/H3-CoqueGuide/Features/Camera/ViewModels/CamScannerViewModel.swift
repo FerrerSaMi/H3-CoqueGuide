@@ -15,6 +15,7 @@ final class CamScannerViewModel: ObservableObject {
     // MARK: - Services
     let camera = CameraService()
     let speech = SpeechService()
+    let missionViewModel = ScannerMissionViewModel()
 
     // MARK: - Catalog
     private let catalog = MuseumObjectsCatalog.load()
@@ -24,11 +25,23 @@ final class CamScannerViewModel: ObservableObject {
     @Published var isPanelExpanded = false
     @Published var isScanning = false
     @Published var isFlashOn = false
+    
+    // MARK: - Onboarding
+    @AppStorage("hasSeenScannerOnboarding") private var hasSeenScannerOnboarding = false
+    @Published var showScannerOnboarding = false
+    
+    // MARK: - Mission UI
+    @Published var showMissionSheet = false
 
     // MARK: - Lifecycle
 
     func onAppear() {
         camera.startSession()
+        
+        // Mostrar onboarding si es la primera vez
+        if !hasSeenScannerOnboarding {
+            showScannerOnboarding = true
+        }
     }
 
     func onDisappear() {
@@ -110,6 +123,13 @@ final class CamScannerViewModel: ObservableObject {
                     // 4) Si no hay texto, usar CoreML normal
                     do {
                         let result = try await camera.classify(image: image)
+                        
+                        // Verificar si es parte de la misión
+                        if missionViewModel.isPartOfMission(result.label) && !missionViewModel.isObjectFound(result.label) {
+                            missionViewModel.markObjectAsFound(result.label)
+                            // Opcionalmente: mostrar notificación visual (future feature)
+                        }
+                        
                         withAnimation {
                             detectedObject = catalog.museumObject(
                                 forLabel: result.label,
