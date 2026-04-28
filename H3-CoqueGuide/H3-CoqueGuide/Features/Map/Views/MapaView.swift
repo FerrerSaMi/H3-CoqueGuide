@@ -68,7 +68,8 @@ struct MapaView: View {
             selectedLocationNumber = locationID
             selectedLocationInfo = SelectedLocationInfo(
                 id: location.id, name: location.name,
-                type: location.locationType
+                type: location.locationType,
+                customIcon: location.icon
             )
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 navigationState.selectedMapLocationID = nil
@@ -186,7 +187,8 @@ struct MapaView: View {
                                         selectedLocationInfo = SelectedLocationInfo(
                                             id: pin.number,
                                             name: location.name,
-                                            type: location.locationType
+                                            type: location.locationType,
+                                            customIcon: location.icon
                                         )
                                     }
                                     if pin.number == 4 {
@@ -593,10 +595,16 @@ struct MapPin: Identifiable {
     let x: CGFloat
     let y: CGFloat
     let type: LocationType
+    let customIcon: String?  // Icono personalizado del JSON
 
     var id: Int { number }
 
     var locationIcon: String {
+        // Priorizar icono personalizado del JSON
+        if let customIcon = customIcon {
+            return customIcon
+        }
+        
         let name = self.name.lowercased()
         if name.contains("ciencia en vivo") || name.contains("live") { return "video.fill" }
         if name.contains("show del horno") || name.contains("furnace show") { return "flame.fill" }
@@ -635,8 +643,14 @@ private struct SelectedLocationInfo: Identifiable, Equatable {
     let id: Int
     let name: String
     let type: LocationType
+    let customIcon: String?
 
     var locationIcon: String {
+        // Priorizar icono personalizado del JSON
+        if let customIcon = customIcon {
+            return customIcon
+        }
+        
         let name = self.name.lowercased()
         if name.contains("ciencia en vivo") || name.contains("live") { return "video.fill" }
         if name.contains("show del horno") || name.contains("furnace show") { return "flame.fill" }
@@ -753,7 +767,8 @@ struct MapLevel: Decodable {
                 name: location.name,
                 x: min(max((location.x * xAxisScaleFactor) / imageSize.width, 0), 1),
                 y: min(max(location.y / imageSize.height, 0), 1),
-                type: location.locationType
+                type: location.locationType,
+                customIcon: location.icon
             )
         }
     }
@@ -763,8 +778,18 @@ struct MapLocation: Decodable {
     let id: Int
     let name: String
     let type: String?
+    let icon: String?
     let x: CGFloat
     let y: CGFloat
+
+    init(id: Int, name: String, type: String? = nil, icon: String? = nil, x: CGFloat, y: CGFloat) {
+        self.id = id
+        self.name = name
+        self.type = type
+        self.icon = icon
+        self.x = x
+        self.y = y
+    }
 
     var locationType: LocationType {
         guard let type, let parsed = LocationType(rawValue: type) else {
