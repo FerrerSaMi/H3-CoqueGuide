@@ -320,6 +320,75 @@ Rules:
 });
 
 /**
+ * POST /survey/ideal
+ * Devuelve el ID de la atracción ideal para el visitante a partir del perfil.
+ * Fallback server-side cuando Apple Intelligence no está disponible.
+ *
+ * Respuesta: { ok: true, id: "HORNO_ALTO" | "GALLERY" | "STEEL_SHOW" | "LAB" | "VIEWPOINT" | "STEEL_MILL" }
+ */
+app.post('/survey/ideal', async (req, res) => {
+    const {
+        gender,
+        age_range,
+        planned_time,
+        attraction_preference,
+        resolved_attraction_preference,
+        specific_attraction,
+        preferred_language,
+        coque_personality,
+    } = req.body ?? {};
+
+    const ALLOWED = ['HORNO_ALTO', 'GALLERY', 'STEEL_SHOW', 'LAB', 'VIEWPOINT', 'STEEL_MILL'];
+
+    const prompt = `You are Coque, the museum guide assistant at Horno3. Given this visitor data, choose exactly one of these IDs as the best single attraction recommendation: HORNO_ALTO, GALLERY, STEEL_SHOW, LAB, VIEWPOINT, STEEL_MILL.
+
+Visitor data:
+- Gender: ${gender ?? ''}
+- Age range: ${age_range ?? ''}
+- Planned visit time: ${planned_time ?? ''}
+- Attraction preference selected: ${attraction_preference ?? ''}
+- Final attraction style to use: ${resolved_attraction_preference ?? ''}
+- Specific attraction requested: ${specific_attraction ?? ''}
+- Preferred language: ${preferred_language ?? ''}
+- Preferred Coque personality: ${coque_personality ?? ''}
+
+Output must be only the chosen ID in UPPERCASE, nothing else.`;
+
+    try {
+        const raw = await callGemini({
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            temperature: 0.1,
+            maxOutputTokens: 1024,
+        });
+
+        console.log('🧭 /survey/ideal raw Gemini response:', JSON.stringify(raw));
+
+        const text = (raw ?? '').toUpperCase();
+        let chosen = ALLOWED.find(id => text.includes(id));
+
+        // Heurísticas de respaldo si Gemini devuelve un nombre en lugar del ID
+        if (!chosen) {
+            const lower = (raw ?? '').toLowerCase();
+            if (lower.includes('horno') || lower.includes('alto')) chosen = 'HORNO_ALTO';
+            else if (lower.includes('galer') || lower.includes('gallery')) chosen = 'GALLERY';
+            else if (lower.includes('show') || lower.includes('espectac')) chosen = 'STEEL_SHOW';
+            else if (lower.includes('lab')) chosen = 'LAB';
+            else if (lower.includes('mirador') || lower.includes('view') || lower.includes('binocular')) chosen = 'VIEWPOINT';
+            else if (lower.includes('acero') || lower.includes('mill') || lower.includes('steel')) chosen = 'STEEL_MILL';
+        }
+
+        if (!chosen) {
+            return res.status(502).json({ ok: false, error: 'Gemini no devolvió un ID válido.' });
+        }
+
+        res.json({ ok: true, id: chosen });
+    } catch (err) {
+        console.error('❌ POST /survey/ideal failed:', err.message);
+        res.status(500).json({ ok: false, error: err.message });
+    }
+});
+
+/**
  * POST /chat/message
  * MVP: recibe el texto del usuario, lo guarda, lo manda tal cual a Gemini,
  * guarda la respuesta y la devuelve. Sin lógica de personalidad/idioma todavía
@@ -467,6 +536,204 @@ app.post('/chat/message', async (req, res) => {
         });
     } catch (err) {
         console.error('❌ POST /chat/message failed:', err.message);
+        res.status(500).json({ ok: false, error: err.message });
+    }
+});
+
+/**
+ * POST /scanner/detect-text
+ * Analiza una imagen para detectar si contiene texto dominante.
+ * Usa Gemini Vision para clasificar sin extraer texto (más rápido).
+ *
+ * Body esperado (JSON):
+ * {
+ *   "image_base64": "data:image/jpeg;base64,..." o solo base64,
+ *   "language": "es"  // para el prompt
+ * }
+ *
+ * Respuesta: { ok: true, has_text: boolean, text_coverage_percent: number }
+ */
+app.post('/scanner/detect-text', async (req, res) => {
+    const { image_base64, language } = req.body ?? {};
+
+    if (!image_base64 || typeof image_base64 !== 'string') {
+        return res.status(400).json({
+            ok: false,
+            error: 'image_base64 es requerido (string).',
+        });
+    }
+
+    try {
+        // Preparar la imagen para Gemini Vision
+        let cleanBase64 = image_base64;
+        if (image_base64.includes(';base64,')) {
+            // data:image/jpeg;base64,... → extractar solo el base64
+            cleanBase64 = image_base64.split(';base64,')[1];
+        }
+
+        // Prompt corto para clasificar rápidamente
+        const prompt = `Analiza esta imagen. ¿Contiene texto dominante que ocupe más del 30% de la imagen?
+
+Responde SOLO con JSON válido (sin markdown, sin comentarios):
+{"has_text": boolean, "text_coverage_percent": 0-100}
+
+Notas:
+- has_text: true solo si el texto ocupa > 30%
+- text_coverage_percent: estimación visual del porcentaje de la imagen ocupado por texto legible
+- Si hay poco texto: has_text=false`;
+
+        const analysisText = await callGemini({
+            contents: [
+                {
+                    role: 'user',
+                    parts: [
+                        { text: prompt },
+                        {
+                            inlineData: {
+                                mimeType: 'image/jpeg',
+                                data: cleanBase64,
+                            },
+                        },
+                    ],
+                },
+            ],
+            temperature: 0.2,
+            maxOutputTokens: 200,
+        });
+
+        // Parsear respuesta JSON
+        const match = analysisText.match(/\{[\s\S]*\}/);
+        if (!match) {
+            return res.status(502).json({
+                ok: false,
+                error: 'Gemini no devolvió JSON válido.',
+            });
+        }
+
+        const analysis = JSON.parse(match[0]);
+
+        res.json({
+            ok: true,
+            has_text: analysis.has_text ?? false,
+            text_coverage_percent: analysis.text_coverage_percent ?? 0,
+        });
+    } catch (err) {
+        console.error('❌ POST /scanner/detect-text failed:', err.message);
+        res.status(500).json({ ok: false, error: err.message });
+    }
+});
+
+/**
+ * POST /scanner/extract-text
+ * Extrae TODO el texto de la imagen y lo traduce al idioma especificado.
+ * Devuelve texto original + traducción.
+ *
+ * Body esperado (JSON):
+ * {
+ *   "image_base64": "data:image/jpeg;base64,..." o solo base64,
+ *   "target_language": "es" | "en" | "fr" | etc.
+ * }
+ *
+ * Respuesta:
+ * {
+ *   ok: true,
+ *   original_text: "...",
+ *   translated_text: "..."
+ * }
+ */
+app.post('/scanner/extract-text', async (req, res) => {
+    const { image_base64, target_language } = req.body ?? {};
+
+    if (!image_base64 || typeof image_base64 !== 'string') {
+        return res.status(400).json({
+            ok: false,
+            error: 'image_base64 es requerido (string).',
+        });
+    }
+
+    try {
+        // Preparar la imagen para Gemini Vision
+        let cleanBase64 = image_base64;
+        if (image_base64.includes(';base64,')) {
+            cleanBase64 = image_base64.split(';base64,')[1];
+        }
+
+        const languageCode = target_language?.toLowerCase() ?? 'es';
+        const languageNames = {
+            es: 'Spanish',
+            en: 'English',
+            fr: 'French',
+            pt: 'Portuguese',
+            de: 'German',
+            it: 'Italian',
+            ko: 'Korean',
+            ar: 'Arabic',
+            zh: 'Chinese',
+            ja: 'Japanese',
+        };
+        const languageName = languageNames[languageCode] ?? 'Spanish';
+
+        const prompt = `Extrae TODO el texto de esta imagen. Luego tradúcelo al ${languageName}.
+
+Devuelve SOLO JSON válido (sin markdown):
+{
+  "original_text": "...",
+  "translated_text": "..."
+}
+
+Reglas importantes:
+- Extrae COMPLETO: cada palabra, número, símbolo
+- Si hay múltiples bloques de texto, concatena en orden: arriba→abajo, izquierda→derecha
+- Preserva saltos de línea si son importantes
+- Traducción completa: cada frase completa al ${languageName}
+- Si la imagen no tiene texto: "original_text": "", "translated_text": ""`;
+
+        const extractedText = await callGemini({
+            contents: [
+                {
+                    role: 'user',
+                    parts: [
+                        { text: prompt },
+                        {
+                            inlineData: {
+                                mimeType: 'image/jpeg',
+                                data: cleanBase64,
+                            },
+                        },
+                    ],
+                },
+            ],
+            temperature: 0.1,
+            maxOutputTokens: 4096,
+        });
+
+        // Parsear respuesta JSON
+        const match = extractedText.match(/\{[\s\S]*\}/);
+        if (!match) {
+            return res.status(502).json({
+                ok: false,
+                error: 'Gemini no devolvió JSON válido.',
+            });
+        }
+
+        const result = JSON.parse(match[0]);
+
+        if (!result.original_text && !result.translated_text) {
+            // Sin texto
+            return res.json({
+                ok: true,
+                original_text: '',
+                translated_text: '',
+            });
+        }
+
+        res.json({
+            ok: true,
+            original_text: result.original_text ?? '',
+            translated_text: result.translated_text ?? result.original_text ?? '',
+        });
+    } catch (err) {
+        console.error('❌ POST /scanner/extract-text failed:', err.message);
         res.status(500).json({ ok: false, error: err.message });
     }
 });

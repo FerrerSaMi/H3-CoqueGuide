@@ -12,6 +12,9 @@ final class NavigationState {
     /// ID de ubicación en el mapa a mostrar cuando se navega desde el carrusel
     var selectedMapLocationID: Int? = nil
     
+    /// Índice de tab a seleccionar (0: Home, 1: Scanner, 2: Map, 3: Survey)
+    var tabSelectionIndex: Int? = nil
+    
     /// Mapeo de índice de galería a ID de ubicación en el mapa
     static let galleryToMapLocation: [Int: (locationID: Int, level: Int)] = [
         0: (locationID: 16, level: 2),  // Galeria1 - Show del Horno → Salón Show del horno (Nivel 2)

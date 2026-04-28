@@ -1,8 +1,8 @@
 // =============================================================================
 // coquePrompt.js — System prompt y parser de "Coque"
 // =============================================================================
-// Espejo en Node de la lógica que vivía en GeminiAIService.swift del cliente
-// iOS. Centralizar acá significa:
+// System prompt y parser de la personalidad "Coque". Antes vivía en el cliente
+// iOS; se migró al backend en el Sprint 3. Centralizar acá significa:
 //   - El cliente solo manda `text` (y opcionalmente visitor_id/session_id).
 //   - Cambiar la personalidad o un idioma se hace en un solo lugar.
 //   - Los analíticos quedan consistentes (mismo prompt para todos los devices).

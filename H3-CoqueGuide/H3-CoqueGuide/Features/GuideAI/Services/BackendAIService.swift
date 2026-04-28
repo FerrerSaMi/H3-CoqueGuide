@@ -2,13 +2,12 @@
 //  BackendAIService.swift
 //  H3-CoqueGuide
 //
-//  Implementación de CGAIServiceProtocol que usa el backend propio en vez de
-//  llamar a Gemini directamente. Todo lo pesado (system prompt, personalidad,
-//  idioma, historial, cards) vive en el server — aquí solo mandamos `text` y
-//  parseamos lo que regresa.
+//  Implementación de CGAIServiceProtocol que habla con el backend propio.
+//  Todo lo pesado (system prompt, personalidad, idioma, historial, cards)
+//  vive en el server — aquí solo mandamos `text` y parseamos lo que regresa.
 //
-//  Beneficios vs. GeminiAIService:
-//    - La API key de Gemini nunca vive en el binario.
+//  Por qué el backend en vez de llamar al LLM directo desde iOS:
+//    - La API key del LLM nunca vive en el binario.
 //    - Las conversaciones quedan persistidas en Postgres.
 //    - Los cambios al prompt no requieren redeploy del app.
 //

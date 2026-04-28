@@ -19,6 +19,7 @@ struct MapaView: View {
     @State private var lastMapOffset: CGSize = .zero
     @State private var mapTransitionID = UUID()
     @State private var showServices: Bool = true
+    @State private var showCoqueHintSheet: Bool = false
     @Environment(NavigationState.self) private var navigationState
     private let mapConfig = MapLocationsConfig.load()
 
@@ -52,25 +53,23 @@ struct MapaView: View {
                     selectLocationFromGallery(locationID: locationID)
                 }
             }
+            .sheet(isPresented: $showCoqueHintSheet) {
+                coqueHintSheet
+            }
     }
-    
+
     // MARK: - Navegación desde carrusel
-    
+
     private func selectLocationFromGallery(locationID: Int) {
         if let location = locations[locationID] {
-            // Determinar el nivel correcto
             if let mapLevel = mapConfig.levels.first(where: { $0.locations.contains(where: { $0.id == locationID }) }) {
                 showingFirstMap = mapLevel.id == 1
             }
-            
-            // Seleccionar la ubicación
             selectedLocationNumber = locationID
             selectedLocationInfo = SelectedLocationInfo(
                 id: location.id, name: location.name,
                 type: location.locationType
             )
-            
-            // Resetear después de navegar
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 navigationState.selectedMapLocationID = nil
             }
@@ -79,13 +78,11 @@ struct MapaView: View {
 
     private var mapBody: some View {
         VStack(spacing: 0) {
-            // MARK: - Header con selector de nivel
             levelSelector
                 .padding(.horizontal, 20)
                 .padding(.top, 12)
                 .padding(.bottom, 8)
 
-            // MARK: - Mapa
             mapCanvas
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .overlay(
@@ -95,7 +92,6 @@ struct MapaView: View {
                 .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
                 .padding(.horizontal, 16)
 
-            // MARK: - Info del punto seleccionado
             if let info = selectedLocationInfo {
                 locationInfoCard(info)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -105,7 +101,6 @@ struct MapaView: View {
 
             Spacer()
 
-            // MARK: - Instrucciones / Reset / Toggle servicios
             bottomBar
                 .padding(.horizontal, 20)
                 .padding(.bottom, 8)
@@ -179,35 +174,59 @@ struct MapaView: View {
                     .transition(.opacity)
 
                 ForEach(currentPins) { pin in
-                    Button {
-                        withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
-                            if selectedLocationNumber == pin.number {
-                                selectedLocationNumber = nil
-                                selectedLocationInfo = nil
-                            } else {
-                                selectedLocationNumber = pin.number
-                                if let location = locations[pin.number] {
-                                    selectedLocationInfo = SelectedLocationInfo(
-                                        id: pin.number,
-                                        name: location.name,
-                                        type: location.locationType
-                                    )
+                    ZStack(alignment: .topTrailing) {
+                        Button {
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                                if selectedLocationNumber == pin.number {
+                                    selectedLocationNumber = nil
+                                    selectedLocationInfo = nil
+                                } else {
+                                    selectedLocationNumber = pin.number
+                                    if let location = locations[pin.number] {
+                                        selectedLocationInfo = SelectedLocationInfo(
+                                            id: pin.number,
+                                            name: location.name,
+                                            type: location.locationType
+                                        )
+                                    }
+                                    if pin.number == 4 {
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                                            showCoqueHintSheet = true
+                                        }
+                                    }
                                 }
                             }
+                        } label: {
+                            pinView(pin: pin)
                         }
-                    } label: {
-                        pinView(pin: pin)
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(pin.type == .service ? L10n.mapServiceNamed(locations[pin.number]?.name ?? "") : L10n.mapPoint(pin.number))
+
+                        if pin.number == 4 {
+                            VStack(spacing: 8) {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color(red: 0.93, green: 0.45, blue: 0.15).opacity(0.2))
+                                        .frame(width: 36, height: 36)
+                                    Image(systemName: "questionmark.circle.fill")
+                                        .font(.system(size: 20, weight: .bold))
+                                        .foregroundStyle(Color(red: 0.93, green: 0.45, blue: 0.15))
+                                        .scaleEffect(selectedLocationNumber == 4 ? 1.1 : 0.95)
+                                        .animation(
+                                            .easeInOut(duration: 0.6).repeatForever(autoreverses: true),
+                                            value: selectedLocationNumber != 4
+                                        )
+                                }
+                                .offset(x: 12, y: -12)
+                            }
+                        }
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(pin.type == .service ? L10n.mapServiceNamed(locations[pin.number]?.name ?? "") : L10n.mapPoint(pin.number))
                     .position(
                         x: imageRect.minX + (pin.x * imageRect.width),
                         y: imageRect.minY + (pin.y * imageRect.height)
                     )
                 }
 
-                // Overlay cuando el nivel no tiene pins (config corrupta o vacía).
-                // Evita que el usuario vea un mapa sin nada y no sepa si falló algo.
                 if currentPins.isEmpty {
                     emptyPinsOverlay
                         .position(x: size.width / 2, y: size.height / 2)
@@ -231,7 +250,6 @@ struct MapaView: View {
         let isSelected = selectedLocationNumber == pin.number
         let accentColor = pin.type.accentColor
         return ZStack {
-            // Pulso exterior animado
             if isSelected {
                 Circle()
                     .fill(accentColor.opacity(0.2))
@@ -243,16 +261,12 @@ struct MapaView: View {
                         value: isSelected
                     )
             }
-
             Circle()
                 .fill(isSelected ? accentColor : Color.white)
                 .frame(width: pinButtonSize, height: pinButtonSize)
-
             Circle()
                 .stroke(accentColor, lineWidth: 2.5)
                 .frame(width: pinButtonSize, height: pinButtonSize)
-
-            // Mostrar ícono representativo en lugar de número
             Image(systemName: pin.locationIcon)
                 .scalingFont(size: 14, weight: .bold)
                 .foregroundStyle(isSelected ? .white : accentColor)
@@ -270,7 +284,6 @@ struct MapaView: View {
                 Circle()
                     .fill(info.type.accentColor)
                     .frame(width: 40, height: 40)
-
                 if let symbol = info.type.symbolName {
                     Image(systemName: symbol)
                         .scalingFont(size: 18, weight: .bold)
@@ -281,28 +294,23 @@ struct MapaView: View {
                         .foregroundStyle(.white)
                 }
             }
-
             VStack(alignment: .leading, spacing: 3) {
                 Text(info.type == .service ? L10n.mapService : L10n.mapPoint(info.id))
                     .font(.caption)
                     .fontWeight(.medium)
                     .foregroundStyle(.secondary)
-
                 HStack(spacing: 6) {
                     Image(systemName: info.locationIcon)
                         .font(.subheadline)
                         .fontWeight(.semibold)
                         .foregroundStyle(info.type.accentColor)
-                    
                     Text(info.name)
                         .font(.subheadline)
                         .fontWeight(.semibold)
                         .foregroundStyle(.primary)
                 }
             }
-
             Spacer()
-
             Button {
                 withAnimation {
                     selectedLocationNumber = nil
@@ -324,27 +332,20 @@ struct MapaView: View {
 
     // MARK: - Empty Pins Overlay
 
-    /// Se muestra encima del mapa cuando el nivel no tiene ningún pin.
-    /// Botón "Recargar" cambia `mapTransitionID` para forzar un re-render
-    /// (y darle oportunidad a que `MapLocationsConfig` vuelva a leerse si
-    /// en el futuro el config pasa a ser async).
     private var emptyPinsOverlay: some View {
         VStack(spacing: 12) {
             Image(systemName: "mappin.slash")
                 .font(.system(size: 32, weight: .regular))
                 .foregroundStyle(.secondary)
-
             Text(L10n.mapEmptyPinsTitle)
                 .font(.subheadline)
                 .fontWeight(.semibold)
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.primary)
-
             Text(L10n.mapEmptyPinsMessage)
                 .font(.caption)
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
-
             Button {
                 withAnimation {
                     mapTransitionID = UUID()
@@ -372,7 +373,6 @@ struct MapaView: View {
 
     private var bottomBar: some View {
         HStack(spacing: 10) {
-            // Toggle de servicios
             Button {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                     showServices.toggle()
@@ -474,7 +474,6 @@ struct MapaView: View {
         guard container.width > 0, container.height > 0, imageAspectRatio > 0 else {
             return CGRect(origin: .zero, size: container)
         }
-
         let containerAspect = container.width / container.height
         if containerAspect > imageAspectRatio {
             let height = container.height
@@ -488,11 +487,84 @@ struct MapaView: View {
             return CGRect(x: 0, y: y, width: width, height: height)
         }
     }
-}
+
+    // MARK: - Coque Hint Sheet
+
+    private var coqueHintSheet: some View {
+        VStack(spacing: 20) {
+            VStack(spacing: 16) {
+                Image(systemName: "target")
+                    .font(.system(size: 56, weight: .regular))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [Color(red: 0.93, green: 0.45, blue: 0.15),
+                                     Color(red: 0.85, green: 0.35, blue: 0.10)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                VStack(spacing: 8) {
+                    Text("¡Coque tiene una misión! 🎯")
+                        .font(.headline)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.primary)
+                        .multilineTextAlignment(.center)
+                    Text("Usa el escáner para encontrar los objetos destacados del museo")
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+            }
+
+            Spacer()
+
+            Button {
+                navigationState.tabSelectionIndex = 1
+                showCoqueHintSheet = false
+                AnalyticsService.shared.track("coque_hint_go_to_scanner")
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "qrcode.viewfinder")
+                        .font(.system(size: 14, weight: .semibold))
+                    Text("Ir al escáner")
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                }
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(
+                    LinearGradient(
+                        colors: [Color(red: 0.93, green: 0.45, blue: 0.15),
+                                 Color(red: 0.85, green: 0.35, blue: 0.10)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .shadow(color: Color(red: 0.93, green: 0.45, blue: 0.15).opacity(0.3), radius: 6, x: 0, y: 3)
+            }
+
+            Button {
+                showCoqueHintSheet = false
+            } label: {
+                Text("Ahora no")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+            }
+        }
+        .padding(24)
+        .presentationDetents([.medium])
+        .presentationDragIndicator(.visible)
+    }
+
+} // ← Cierre de struct MapaView
 
 // MARK: - Models
 
-/// Tipo de ubicación del mapa. Determina el estilo visual del pin.
 enum LocationType: String, Decodable {
     case attraction
     case service
@@ -506,7 +578,6 @@ enum LocationType: String, Decodable {
         }
     }
 
-    /// SF Symbol mostrado dentro del pin. `nil` significa que se muestra el número.
     var symbolName: String? {
         switch self {
         case .attraction: return nil
@@ -525,8 +596,7 @@ struct MapPin: Identifiable {
     let customIcon: String?  // Icono personalizado del JSON
 
     var id: Int { number }
-    
-    /// Ícono representativo basado en el nombre del lugar
+
     var locationIcon: String {
         // Usar icono personalizado del JSON si existe
         if let customIcon = customIcon {
@@ -534,31 +604,21 @@ struct MapPin: Identifiable {
         }
         
         let name = self.name.lowercased()
-        
-        // Búsquedas específicas PRIMERO (multi-palabra)
         if name.contains("ciencia en vivo") || name.contains("live") { return "video.fill" }
         if name.contains("show del horno") || name.contains("furnace show") { return "flame.fill" }
-        
-        // Galerías
         if name.contains("historia") { return "book.fill" }
         if name.contains("acero") || name.contains("steel") { return "gearshape.fill" }
         if name.contains("horno") || name.contains("furnace") { return "flame.fill" }
         if name.contains("planeta") || name.contains("tierra") || name.contains("earth") { return "globe" }
-        
-        // Laboratorios
         if name.contains("laboratorio") || name.contains("laboratory") { return "flask.fill" }
         if name.contains("ventana") { return "telescope" }
         if name.contains("ciencia") || name.contains("science") { return "microscope" }
         if name.contains("núcleo") || name.contains("nucleo") { return "atom" }
-        
-        // Espacios
         if name.contains("terraza") || name.contains("green") { return "leaf.fill" }
         if name.contains("mirador") || name.contains("viewpoint") { return "binoculars.fill" }
         if name.contains("lobby") || name.contains("vestíbulo") { return "door.left.hand.open" }
         if name.contains("patio") { return "tree.fill" }
         if name.contains("explanada") { return "square.fill" }
-        
-        // Salones
         if name.contains("salón") || name.contains("salon") { return "building.2.fill" }
         if name.contains("newton") || name.contains("galilei") || name.contains("curie") { return "lightbulb.fill" }
         if name.contains("simulación") || name.contains("simulation") { return "play.circle.fill" }
@@ -566,19 +626,13 @@ struct MapPin: Identifiable {
         if name.contains("diseño") || name.contains("design") { return "paintbrush.fill" }
         if name.contains("lingote") { return "cube.fill" }
         if name.contains("andador") { return "arrow.right" }
-        
-        // Servicios
         if type == .service {
             if name.contains("baño") || name.contains("restroom") { return "figure.dress.line.vertical.figure" }
         }
-        
-        // Tiendas
         if type == .shop {
             if name.contains("guardaropa") || name.contains("coat") { return "hanger" }
             return "bag.fill"
         }
-        
-        // Default
         return "mappin.circle.fill"
     }
 }
@@ -587,53 +641,36 @@ private struct SelectedLocationInfo: Identifiable, Equatable {
     let id: Int
     let name: String
     let type: LocationType
-    
-    /// Ícono representativo basado en el nombre del lugar
+
     var locationIcon: String {
         let name = self.name.lowercased()
-        
-        // Búsquedas específicas PRIMERO (multi-palabra)
         if name.contains("ciencia en vivo") || name.contains("live") { return "video.fill" }
         if name.contains("show del horno") || name.contains("furnace show") { return "flame.fill" }
-        
-        // Galerías
         if name.contains("historia") { return "book.fill" }
         if name.contains("acero") || name.contains("steel") { return "gearshape.fill" }
         if name.contains("horno") || name.contains("furnace") { return "flame.fill" }
         if name.contains("planeta") || name.contains("tierra") || name.contains("earth") { return "globe" }
-        
-        // Laboratorios
         if name.contains("laboratorio") || name.contains("laboratory") { return "flask.fill" }
         if name.contains("ventana") { return "telescope" }
         if name.contains("ciencia") || name.contains("science") { return "microscope" }
         if name.contains("núcleo") || name.contains("nucleo") { return "atom" }
-        
-        // Espacios
         if name.contains("terraza") || name.contains("green") { return "leaf.fill" }
         if name.contains("mirador") || name.contains("viewpoint") { return "binoculars.fill" }
         if name.contains("lobby") || name.contains("vestíbulo") { return "door.left.hand.open" }
         if name.contains("patio") { return "tree.fill" }
         if name.contains("explanada") { return "square.fill" }
-        
-        // Salones
         if name.contains("salón") || name.contains("salon") { return "building.2.fill" }
         if name.contains("newton") || name.contains("galilei") || name.contains("curie") { return "lightbulb.fill" }
-        if name.contains("simulación") || name.contains("simulation") { return "play.circle.fill" }
+        if name.contains("simulación") || name.contains("simulation") { return "play.circuit.fill" }
         if name.contains("manufactura") || name.contains("manufacturing") { return "wrench.and.screwdriver.fill" }
         if name.contains("diseño") || name.contains("design") { return "paintbrush.fill" }
-        
-        // Servicios
         if type == .service {
             if name.contains("baño") || name.contains("restroom") { return "figure.dress.line.vertical.figure" }
         }
-        
-        // Tiendas
         if type == .shop {
             if name.contains("guardaropa") || name.contains("coat") { return "hanger" }
             return "bag.fill"
         }
-        
-        // Default
         return "mappin.circle.fill"
     }
 }
@@ -682,7 +719,7 @@ struct MapLocationsConfig: Decodable {
                 MapLocation(id: 11, name: "Salón Ciencia en Vivo", type: nil, x: 922, y: 915),
                 MapLocation(id: 12, name: "Salón Diseño y Simulación", type: nil, x: 822, y: 915),
                 MapLocation(id: 13, name: "Salón Manufactura Inteligente", type: nil, x: 715, y: 915),
-                MapLocation(id: 14, name: "Baños Nivel 1", type: "service", x: 475, y: 700)
+                MapLocation(id: 14, name: "Baños Nivel 1", type: "service", x: 475, y: 600)
             ]
         ),
         MapLevel(
@@ -709,7 +746,6 @@ struct MapLevel: Decodable {
         guard let image = UIImage(named: imageName), image.size.width > 0, image.size.height > 0 else {
             return []
         }
-
         return normalizedPins(forImageSize: image.size)
     }
 
@@ -717,7 +753,6 @@ struct MapLevel: Decodable {
         guard imageSize.width > 0, imageSize.height > 0 else {
             return []
         }
-
         return locations.map { location in
             MapPin(
                 number: location.id,
@@ -734,7 +769,6 @@ struct MapLevel: Decodable {
 struct MapLocation: Decodable {
     let id: Int
     let name: String
-    /// Tipo (raw string). Ver `locationType` para el enum resuelto.
     let type: String?
     let icon: String?  // Icono SF Symbols personalizado
     let x: CGFloat
