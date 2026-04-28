@@ -52,6 +52,16 @@ struct CamScannerView: View {
             viewModel.onDisappear()
         }
         .trackScreenTime("scanner")
+        // Onboarding full screen
+        .fullScreenCover(isPresented: $viewModel.showScannerOnboarding) {
+            ScannerOnboardingView {
+                viewModel.showScannerOnboarding = false
+            }
+        }
+        // Misión sheet
+        .sheet(isPresented: $viewModel.showMissionSheet) {
+            ScannerMissionSheetView()
+        }
     }
 
     // MARK: - Top Bar
@@ -69,9 +79,24 @@ struct CamScannerView: View {
                     .foregroundStyle(.white)
             }
 
-            // Flash a la derecha
-            HStack {
+            // Botones a la derecha (misión + flash)
+            HStack(spacing: 12) {
                 Spacer()
+                
+                // Botón de misión
+                Button {
+                    viewModel.showMissionSheet = true
+                } label: {
+                    Image(systemName: "list.bullet.clipboard")
+                        .scalingFont(size: 17, weight: .semibold)
+                        .foregroundStyle(.white)
+                        .frame(width: 38, height: 38)
+                        .background(.black.opacity(0.45))
+                        .clipShape(Circle())
+                }
+                .accessibilityLabel("Abrir misión")
+                
+                // Flash
                 Button {
                     viewModel.toggleFlash()
                 } label: {

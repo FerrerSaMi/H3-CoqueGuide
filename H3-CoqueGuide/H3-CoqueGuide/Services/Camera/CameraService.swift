@@ -5,6 +5,7 @@
 //  Created by Angel De Jesus Sanchez Figueroa on 15/03/26.
 //
 
+import Foundation
 import AVFoundation
 import Combine
 import UIKit
@@ -116,6 +117,86 @@ final class CameraService: NSObject, ObservableObject {
         return try await classify(image: image)
     }
 
+    /// Detecta si una imagen contiene texto dominante (> 30%).
+    /// Retorna (hasText, textCoveragePercent).
+    func detectTextInImage(_ image: UIImage) async throws -> (hasText: Bool, coverage: Int) {
+        guard let base64 = imageToBase64(image) else {
+            throw CameraError.captureError("No se pudo convertir la imagen a base64.")
+        }
+
+        struct DetectTextRequest: Encodable {
+            let image_base64: String
+            let language: String
+        }
+
+        struct DetectTextResponse: Decodable {
+            let ok: Bool
+            let has_text: Bool
+            let text_coverage_percent: Int
+            let error: String?
+        }
+
+        do {
+            let response: DetectTextResponse = try await BackendHTTPClient.shared.post(
+                "scanner/detect-text",
+                body: DetectTextRequest(image_base64: base64, language: "es")
+            )
+
+            guard response.ok else {
+                throw CameraError.captureError(response.error ?? "Error al detectar texto.")
+            }
+
+            return (response.has_text, response.text_coverage_percent)
+        } catch {
+            throw CameraError.captureError("Error de red al detectar texto: \(error.localizedDescription)")
+        }
+    }
+
+    /// Extrae texto de la imagen y lo traduce al idioma especificado.
+    /// Retorna (textoOriginal, textoTraducido).
+    func extractAndTranslateText(from image: UIImage, targetLanguage: String = "es") async throws -> (original: String, translated: String) {
+        guard let base64 = imageToBase64(image) else {
+            throw CameraError.captureError("No se pudo convertir la imagen a base64.")
+        }
+
+        struct ExtractTextRequest: Encodable {
+            let image_base64: String
+            let target_language: String
+        }
+
+        struct ExtractTextResponse: Decodable {
+            let ok: Bool
+            let original_text: String
+            let translated_text: String
+            let error: String?
+        }
+
+        do {
+            let response: ExtractTextResponse = try await BackendHTTPClient.shared.post(
+                "scanner/extract-text",
+                body: ExtractTextRequest(image_base64: base64, target_language: targetLanguage)
+            )
+
+            guard response.ok else {
+                throw CameraError.captureError(response.error ?? "Error al extraer texto.")
+            }
+
+            return (response.original_text, response.translated_text)
+        } catch {
+            throw CameraError.captureError("Error de red al extraer texto: \(error.localizedDescription)")
+        }
+    }
+
+    // MARK: - Private Helpers
+
+    /// Convierte UIImage a base64 string.
+    private func imageToBase64(_ image: UIImage) -> String? {
+        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+            return nil
+        }
+        return imageData.base64EncodedString()
+    }
+
     // MARK: - Private helpers
 
     private func configureAndStart() {
@@ -166,7 +247,7 @@ final class CameraService: NSObject, ObservableObject {
         }
     }
 
-    private func classify(image: UIImage) async throws -> (label: String, confidence: Double) {
+    func classify(image: UIImage) async throws -> (label: String, confidence: Double) {
         guard let cgImage = image.cgImage else {
             throw CameraError.classificationFailed("No se pudo convertir la imagen.")
         }
