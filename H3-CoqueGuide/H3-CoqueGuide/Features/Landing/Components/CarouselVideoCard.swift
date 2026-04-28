@@ -128,13 +128,17 @@ private final class LoopingVideoPlayerController: ObservableObject {
     }
 
     private func videoURL(named name: String) -> URL? {
-        // Primero intentar cargar como NSDataAsset (desde Assets.xcassets)
+        // Primero intentar cargar como NSDataAsset (desde Assets.xcassets).
+        // Cacheamos el .mp4 en tmp: si ya lo escribimos en una sesión anterior
+        // del card, reusamos el archivo en vez de volver a descomprimir el asset.
         if let dataAsset = NSDataAsset(name: name) {
             let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(name).mp4")
-            try? dataAsset.data.write(to: url)
+            if !FileManager.default.fileExists(atPath: url.path) {
+                try? dataAsset.data.write(to: url)
+            }
             return url
         }
-        
+
         // Fallback: buscar directamente en el bundle
         let allowedExtensions = ["mp4", "mov", "m4v"]
         for fileExtension in allowedExtensions {

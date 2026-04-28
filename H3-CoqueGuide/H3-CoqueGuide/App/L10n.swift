@@ -167,6 +167,68 @@ enum L10n {
         )
     }
 
+    // MARK: - Quick actions (chat panel)
+
+    static var qaEventsTitle: String {
+        localize(es: "Eventos", en: "Events", fr: "Événements", pt: "Eventos", ko: "이벤트", ar: "الفعاليات")
+    }
+
+    static var qaEventsMessage: String {
+        localize(
+            es: "¿Qué eventos hay disponibles hoy?",
+            en: "What events are available today?",
+            fr: "Quels événements sont disponibles aujourd'hui ?",
+            pt: "Quais eventos estão disponíveis hoje?",
+            ko: "오늘 어떤 이벤트가 있나요?",
+            ar: "ما هي الفعاليات المتاحة اليوم؟"
+        )
+    }
+
+    static var qaScanTitle: String {
+        localize(es: "Escanear objeto", en: "Scan object", fr: "Scanner un objet", pt: "Escanear objeto", ko: "물체 스캔", ar: "مسح عنصر")
+    }
+
+    static var qaScanMessage: String {
+        localize(
+            es: "¿Cómo escaneo un objeto del museo?",
+            en: "How do I scan a museum object?",
+            fr: "Comment scanner un objet du musée ?",
+            pt: "Como eu escaneio um objeto do museu?",
+            ko: "박물관 물체를 어떻게 스캔하나요?",
+            ar: "كيف أمسح عنصرًا من المتحف؟"
+        )
+    }
+
+    static var qaLanguageTitle: String {
+        localize(es: "Cambiar idioma", en: "Change language", fr: "Changer de langue", pt: "Mudar idioma", ko: "언어 변경", ar: "تغيير اللغة")
+    }
+
+    static var qaLanguageMessage: String {
+        localize(
+            es: "¿En qué idiomas está disponible la guía?",
+            en: "What languages is the guide available in?",
+            fr: "Dans quelles langues le guide est-il disponible ?",
+            pt: "Em quais idiomas o guia está disponível?",
+            ko: "가이드는 어떤 언어로 제공되나요?",
+            ar: "ما هي اللغات المتوفرة للدليل؟"
+        )
+    }
+
+    static var qaAccessibilityTitle: String {
+        localize(es: "Accesibilidad", en: "Accessibility", fr: "Accessibilité", pt: "Acessibilidade", ko: "접근성", ar: "إمكانية الوصول")
+    }
+
+    static var qaAccessibilityMessage: String {
+        localize(
+            es: "¿Qué servicios de accesibilidad tiene el museo?",
+            en: "What accessibility services does the museum have?",
+            fr: "Quels services d'accessibilité le musée propose-t-il ?",
+            pt: "Quais serviços de acessibilidade o museu oferece?",
+            ko: "박물관에는 어떤 접근성 서비스가 있나요?",
+            ar: "ما هي خدمات إمكانية الوصول المتوفرة في المتحف؟"
+        )
+    }
+
     // MARK: - Scanner
 
     static var scannerTitle: String { localize(es: "Escaneo", en: "Scan", fr: "Scanner", pt: "Escanear", ko: "스캔", ar: "مسح") }
