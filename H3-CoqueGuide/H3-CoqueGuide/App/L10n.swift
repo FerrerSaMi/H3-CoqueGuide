@@ -817,6 +817,15 @@ enum L10n {
         localize(es: "Escuchar descripción", en: "Listen to description", fr: "Écouter la description", pt: "Ouvir descrição", ko: "설명 듣기", ar: "استمع إلى الوصف")
     }
 
+    /// Botón de TTS sobre los mensajes de Coque en el chat.
+    static var chatListenMessage: String {
+        localize(es: "Escuchar mensaje", en: "Listen to message", fr: "Écouter le message", pt: "Ouvir mensagem", ko: "메시지 듣기", ar: "استمع إلى الرسالة")
+    }
+
+    static var chatStopListening: String {
+        localize(es: "Detener lectura", en: "Stop reading", fr: "Arrêter la lecture", pt: "Parar leitura", ko: "읽기 중지", ar: "إيقاف القراءة")
+    }
+
     static var scannerStopListeningLabel: String {
         localize(es: "Detener lectura", en: "Stop reading", fr: "Arrêter la lecture", pt: "Parar leitura", ko: "읽기 중지", ar: "إيقاف القراءة")
     }

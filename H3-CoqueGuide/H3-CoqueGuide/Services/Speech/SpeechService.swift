@@ -18,7 +18,14 @@ final class SpeechService: NSObject, ObservableObject {
  
     // MARK: Published
     @Published var isSpeaking = false
+    @Published var isPaused = false
     @Published var progress: Double = 0.0
+
+    /// Callback opcional que dispara cuando la lectura termina **naturalmente**
+    /// (didFinish), no cuando es cancelada explícitamente con `stop()` o
+    /// preempted por una nueva llamada a `speak()`. Útil para que el caller
+    /// limpie estado solo cuando el audio terminó por sí solo.
+    var onNaturalFinish: (() -> Void)?
  
     // MARK: Private
     private let synthesizer = AVSpeechSynthesizer()
@@ -38,7 +45,7 @@ final class SpeechService: NSObject, ObservableObject {
         if synthesizer.isSpeaking {
             stop()
         } else {
-            speak(text)
+            speakInternal(text)
         }
     }
  
@@ -47,10 +54,35 @@ final class SpeechService: NSObject, ObservableObject {
         synthesizer.stopSpeaking(at: .immediate)
         reset()
     }
+
+    /// Pausa la reproducción en el límite de palabra para que se escuche natural
+    /// al reanudar. Si no hay nada hablando o ya está pausado, no hace nada.
+    func pause() {
+        guard synthesizer.isSpeaking, !synthesizer.isPaused else { return }
+        synthesizer.pauseSpeaking(at: .word)
+        DispatchQueue.main.async { self.isPaused = true }
+    }
+
+    /// Reanuda una reproducción pausada. Si no estaba pausado, no hace nada.
+    func resume() {
+        guard synthesizer.isPaused else { return }
+        synthesizer.continueSpeaking()
+        DispatchQueue.main.async { self.isPaused = false }
+    }
  
+    /// Inicia la reproducción del texto. Si ya hay algo sonando, lo detiene
+    /// primero. Usar este método cuando se sabe que se quiere arrancar (en
+    /// lugar de `toggle`, que decide play/stop según estado actual).
+    func speak(_ text: String) {
+        if synthesizer.isSpeaking || synthesizer.isPaused {
+            synthesizer.stopSpeaking(at: .immediate)
+        }
+        speakInternal(text)
+    }
+
     // MARK: - Private
- 
-    private func speak(_ text: String) {
+
+    private func speakInternal(_ text: String) {
         guard !text.isEmpty else { return }
 
         totalLength  = text.count
@@ -132,6 +164,7 @@ final class SpeechService: NSObject, ObservableObject {
     private func reset() {
         DispatchQueue.main.async {
             self.isSpeaking = false
+            self.isPaused   = false
             self.progress   = 0
         }
     }
@@ -147,10 +180,12 @@ extension SpeechService: AVSpeechSynthesizerDelegate {
  
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
         reset()
+        DispatchQueue.main.async { self.onNaturalFinish?() }
     }
- 
+
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
         reset()
+        // No notificamos onNaturalFinish: la cancelación viene de nosotros.
     }
  
     /// Actualiza el progreso de lectura en tiempo real.

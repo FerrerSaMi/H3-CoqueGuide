@@ -13,7 +13,29 @@ import SwiftUI
 struct CGMessageBubble: View {
 
     let message: CGMessage
+    /// VM compartido para acceder al servicio TTS y al estado de lectura.
+    @ObservedObject var viewModel: CGViewModel
+    /// Observamos directamente el SpeechService para que la UI reaccione
+    /// a cambios de `isPaused` (no se propagan automáticamente vía viewModel).
+    @ObservedObject var speech: SpeechService
+
     private var isUser: Bool { message.sender == .user }
+    private var isThisMessageActive: Bool { viewModel.currentSpeakingMessageID == message.id }
+    private var isThisMessagePlaying: Bool { isThisMessageActive && !speech.isPaused }
+    private var isThisMessagePaused: Bool { isThisMessageActive && speech.isPaused }
+
+    /// Ícono según el estado de TTS de este mensaje.
+    private var ttsIconName: String {
+        if isThisMessagePlaying { return "pause.fill" }
+        if isThisMessagePaused { return "play.fill" }
+        return "speaker.wave.2.fill"
+    }
+
+    /// Etiqueta de accesibilidad acorde al estado.
+    private var ttsAccessibilityLabel: String {
+        if isThisMessagePlaying { return L10n.chatStopListening }
+        return L10n.chatListenMessage
+    }
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 8) {
@@ -80,11 +102,35 @@ struct CGMessageBubble: View {
                     }
                 }
 
-                // Timestamp
-                Text(message.timestamp, style: .time)
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-                    .padding(.horizontal, 6)
+                // Timestamp + botón de TTS (solo asistente con texto)
+                HStack(spacing: 8) {
+                    Text(message.timestamp, style: .time)
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+
+                    if !isUser, let text = message.text, !text.isEmpty {
+                        Button {
+                            viewModel.toggleSpeak(message: message)
+                        } label: {
+                            Image(systemName: ttsIconName)
+                                .scalingFont(size: 14, weight: .semibold)
+                                .foregroundStyle(isThisMessageActive ? Color.orange : .secondary)
+                                .frame(width: 32, height: 32)
+                                .background(
+                                    Circle()
+                                        .fill(isThisMessageActive ? Color.orange.opacity(0.18) : Color(.tertiarySystemFill))
+                                )
+                                .overlay(
+                                    Circle()
+                                        .stroke(isThisMessageActive ? Color.orange.opacity(0.4) : Color.clear, lineWidth: 1)
+                                )
+                                .contentTransition(.symbolEffect(.replace))
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(ttsAccessibilityLabel)
+                    }
+                }
+                .padding(.horizontal, 6)
             }
 
             // Empuja el mensaje del asistente a la izquierda
