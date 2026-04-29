@@ -23,7 +23,16 @@ final class CGViewModel: ObservableObject {
     @Published private(set) var isThinking: Bool = false
 
     /// Controla la presentación del panel de conversación.
-    @Published var isPanelOpen: Bool = false
+    /// Al cerrarse, se detiene cualquier lectura TTS en curso para no
+    /// seguir sonando si el usuario sale del chat.
+    @Published var isPanelOpen: Bool = false {
+        didSet {
+            if !isPanelOpen, currentSpeakingMessageID != nil {
+                speech.stop()
+                currentSpeakingMessageID = nil
+            }
+        }
+    }
 
     /// Sugerencia proactiva actualmente visible. `nil` = oculta.
     @Published private(set) var activeSuggestion: CGSuggestion? = nil
@@ -48,6 +57,16 @@ final class CGViewModel: ObservableObject {
     /// Mensaje pendiente que se enviará automáticamente al abrir el panel.
     @Published var pendingMessage: String? = nil
 
+    // MARK: - Text-to-Speech
+
+    /// Servicio TTS para leer en voz alta los mensajes de Coque.
+    let speech = SpeechService()
+
+    /// ID del mensaje que se está leyendo en voz alta. `nil` = ninguno.
+    /// La UI lo usa para mostrar el botón de "stop" en lugar de "play"
+    /// solo en el mensaje activo.
+    @Published private(set) var currentSpeakingMessageID: UUID? = nil
+
     // MARK: - Dependencias
 
     private var aiService: CGAIServiceProtocol
@@ -60,6 +79,14 @@ final class CGViewModel: ObservableObject {
     init(aiService: CGAIServiceProtocol = CGSimulatedAIService()) {
         self.aiService = aiService
         startProactiveSuggestions()
+
+        // Cuando la lectura termina naturalmente (didFinish), limpiamos el
+        // mensaje activo. NO usamos un sink sobre `speech.$isSpeaking` porque
+        // se dispararía también cuando NOSOTROS cancelamos (.stop, .speak),
+        // borrando el ID inmediatamente y rompiendo el toggle.
+        speech.onNaturalFinish = { [weak self] in
+            self?.currentSpeakingMessageID = nil
+        }
     }
 
     // MARK: - Perfil del visitante
@@ -162,6 +189,29 @@ final class CGViewModel: ObservableObject {
         dismissSuggestion()
         openPanel()
         sendMessage(suggestion.text)
+    }
+
+    /// Toggle inteligente de lectura en voz alta del mensaje:
+    ///   - Si este mensaje está sonando → pausa
+    ///   - Si este mensaje está pausado → reanuda
+    ///   - Si está sonando otro o ninguno → para el actual y empieza este
+    func toggleSpeak(message: CGMessage) {
+        guard let text = message.text, !text.isEmpty else { return }
+
+        if currentSpeakingMessageID == message.id {
+            // Estamos en este mensaje: alternar pause / resume
+            if speech.isPaused {
+                speech.resume()
+            } else {
+                speech.pause()
+            }
+        } else {
+            // No estamos en este mensaje: parar lo anterior y empezar limpio.
+            // Usamos speak() directo para no depender del estado interno de
+            // toggle() que puede no haber actualizado isSpeaking sincrónicamente.
+            currentSpeakingMessageID = message.id
+            speech.speak(text)
+        }
     }
 
     // MARK: - Internals
