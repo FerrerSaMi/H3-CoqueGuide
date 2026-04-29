@@ -353,7 +353,13 @@ struct CamScannerView: View {
 
     private func askCoqueButton(for obj: MuseumObject) -> some View {
         Button {
-            let prompt = L10n.scannerAskPrompt(objectTitle: obj.title)
+            // Prompt enriquecido con era para dar contexto. El catálogo completo
+            // ya vive en el system prompt del backend, así que Coque puede
+            // elaborar con autoridad sobre el objeto.
+            let prompt = L10n.scannerAskPromptDetailed(
+                objectTitle: obj.title,
+                era: obj.era
+            )
             viewModel.dismissInfoPanel()
             coqueGuideVM.openPanelWithMessage(prompt)
         } label: {

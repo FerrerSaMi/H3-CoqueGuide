@@ -30,9 +30,10 @@ struct CGMessageBubble: View {
 
             VStack(alignment: isUser ? .trailing : .leading, spacing: 6) {
 
-                // Burbuja con texto
+                // Burbuja con texto. Parseamos markdown ligero (negritas, itálicas)
+                // así Coque puede usar **énfasis** y se renderiza, no aparece literal.
                 if let text = message.text, !text.isEmpty {
-                    Text(text)
+                    Text(parseMarkdown(text))
                         .font(.body)
                         .foregroundStyle(isUser ? .white : .primary)
                         .padding(.horizontal, 14)
@@ -92,6 +93,15 @@ struct CGMessageBubble: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: isUser ? .trailing : .leading)
+    }
+
+    /// Parsea markdown ligero (negritas, itálicas, links inline). Si falla,
+    /// devuelve el texto plano sin asteriscos para no mostrar `**foo**` literal.
+    private func parseMarkdown(_ text: String) -> AttributedString {
+        if let attributed = try? AttributedString(markdown: text, options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)) {
+            return attributed
+        }
+        return AttributedString(text)
     }
 }
 
