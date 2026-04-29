@@ -78,6 +78,8 @@ struct SurveyView: View {
                         showIdealAttractionSheet = false
                     }
                 )
+                .presentationDetents([.height(420)])
+                .presentationDragIndicator(.visible)
             }
         }
     }
@@ -339,24 +341,31 @@ private extension SurveyView {
                 .buttonStyle(PressableButtonStyle())
                 .padding(.horizontal, 20)
 
-                // Botón para ver atracción ideal generado a partir de la encuesta
+                // Botón para ver atracción ideal generado a partir de la encuesta.
+                // Estilo "secondary" del grupo: borde naranja, texto centrado, ícono.
                 Button {
                     handleViewIdealAttraction()
                 } label: {
-                    HStack {
+                    HStack(spacing: 10) {
+                        if isComputingIdealInSurvey {
+                            FancyLoadingView(size: 22)
+                        } else {
+                            Image(systemName: "sparkles")
+                                .scalingFont(size: 16, weight: .semibold)
+                        }
                         Text(L10n.surveyShowIdealAttraction)
                             .fontWeight(.semibold)
-                            .foregroundStyle(viewModel.canSendToCoque ? .primary : .secondary)
-                        Spacer()
-                        if isComputingIdealInSurvey {
-                            FancyLoadingView(size: 28)
-                        }
                     }
+                    .foregroundStyle(viewModel.canSendToCoque ? Color.orange : Color.orange.opacity(0.5))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
                     .background(
                         RoundedRectangle(cornerRadius: 18, style: .continuous)
-                            .fill(viewModel.canSendToCoque ? Color(.secondarySystemBackground) : Color(.tertiarySystemGroupedBackground))
+                            .fill(Color.orange.opacity(0.08))
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .stroke(viewModel.canSendToCoque ? Color.orange : Color.orange.opacity(0.4), lineWidth: 1.5)
                     )
                 }
                 .buttonStyle(PressableButtonStyle())

@@ -9,9 +9,20 @@
 import SwiftUI
 
 struct ScannerMissionSheetView: View {
-    
-    @StateObject private var viewModel = ScannerMissionViewModel()
+
+    /// Recibe el VM ya creado por `CamScannerViewModel` para que el progreso
+    /// se actualice en vivo cuando se escanea un objeto con la sheet abierta.
+    @ObservedObject var viewModel: ScannerMissionViewModel
     @Environment(\.dismiss) var dismiss
+
+    /// Mapa label → título a mostrar en el idioma del dispositivo.
+    /// Se popula al abrir la sheet via `.task`. Mientras se carga, mostramos
+    /// el label tal cual (en español) para no bloquear la UI.
+    @State private var localizedTitles: [String: String] = [:]
+
+    /// Catálogo cargado del bundle. Se usa para mapear el label CoreML al
+    /// título "humano" del museo (ej: "Vagón Torpedo" en lugar de un ID raw).
+    private let catalog = MuseumObjectsCatalog.load()
     
     var body: some View {
         NavigationStack {
@@ -45,8 +56,11 @@ struct ScannerMissionSheetView: View {
                     .padding(.bottom, 20)
                 }
             }
-            .navigationTitle("Mi Misión")
+            .navigationTitle(L10n.missionSheetNavTitle)
             .navigationBarTitleDisplayMode(.inline)
+            .task {
+                await loadLocalizedTitles()
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -83,12 +97,12 @@ struct ScannerMissionSheetView: View {
         VStack(spacing: 12) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Progreso")
+                    Text(L10n.missionProgressLabel)
                         .font(.subheadline)
                         .fontWeight(.semibold)
                         .foregroundStyle(.secondary)
-                    
-                    Text("\(viewModel.mission.progress.found) de \(viewModel.mission.progress.total)")
+
+                    Text(L10n.missionProgressFraction(viewModel.mission.progress.found, viewModel.mission.progress.total))
                         .font(.title3)
                         .fontWeight(.bold)
                         .foregroundStyle(.primary)
@@ -107,7 +121,7 @@ struct ScannerMissionSheetView: View {
                             .fontWeight(.bold)
                             .foregroundStyle(.orange)
                         
-                        Text("completado")
+                        Text(L10n.missionPercentCompleted)
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -145,7 +159,7 @@ struct ScannerMissionSheetView: View {
     
     private var objectsListSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Objetos a encontrar")
+            Text(L10n.missionObjectsToFind)
                 .font(.subheadline)
                 .fontWeight(.semibold)
                 .foregroundStyle(.secondary)
@@ -166,7 +180,11 @@ struct ScannerMissionSheetView: View {
     
     private func objectRow(label: String) -> some View {
         let isFound = viewModel.mission.isObjectFound(label)
-        let displayName = label.replacingOccurrences(of: "_", with: " ").capitalized
+        // Preferir el título traducido (cargado en .task). Si todavía no está,
+        // caer al título del catálogo (español). Último recurso: el label crudo.
+        let displayName = localizedTitles[label]
+            ?? catalog.objects[label]?.title
+            ?? label.replacingOccurrences(of: "_", with: " ").capitalized
         
         return HStack(spacing: 12) {
             ZStack {
@@ -187,7 +205,7 @@ struct ScannerMissionSheetView: View {
                     .strikethrough(isFound)
                 
                 if isFound {
-                    Text("✓ Encontrado")
+                    Text(L10n.missionObjectFoundLabel)
                         .font(.caption)
                         .foregroundStyle(.orange)
                 }
@@ -215,7 +233,7 @@ struct ScannerMissionSheetView: View {
             HStack {
                 Image(systemName: "arrow.clockwise.circle.fill")
                     .font(.system(size: 16, weight: .semibold))
-                Text("Reiniciar misión")
+                Text(L10n.missionResetButton)
                     .fontWeight(.semibold)
             }
             .foregroundStyle(.white)
@@ -233,8 +251,34 @@ struct ScannerMissionSheetView: View {
             .shadow(color: Color(red: 0.93, green: 0.45, blue: 0.15).opacity(0.3), radius: 6, x: 0, y: 3)
         }
     }
+
+    // MARK: - Localización de títulos
+
+    /// Carga el título de cada `targetObjectLabel` en el idioma del dispositivo.
+    /// Si es español, usa directamente el título del catálogo (sin red).
+    /// En otro idioma, llama al servicio de traducción (con cache, así objetos
+    /// ya escaneados aparecen instantáneos).
+    private func loadLocalizedTitles() async {
+        let isSpanish = AppLanguage.device == .spanish
+        var result: [String: String] = [:]
+        for label in viewModel.mission.targetObjectLabels {
+            guard let entry = catalog.objects[label] else { continue }
+            if isSpanish {
+                result[label] = entry.title
+            } else {
+                let translated = await MuseumTranslationService.shared.translateForDevice(
+                    label: label,
+                    title: entry.title,
+                    era: entry.era,
+                    description: entry.description
+                )
+                result[label] = translated.title
+            }
+        }
+        localizedTitles = result
+    }
 }
 
 #Preview {
-    ScannerMissionSheetView()
+    ScannerMissionSheetView(viewModel: ScannerMissionViewModel())
 }

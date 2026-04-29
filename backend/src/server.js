@@ -25,13 +25,28 @@ const PORT = Number(process.env.PORT) || 8080;
 // CORS abierto por ahora (en producción restringimos a dominios conocidos).
 app.use(cors());
 
-// Parsea JSON entrantes; límite bajo porque no esperamos payloads grandes.
-app.use(express.json({ limit: '256kb' }));
+// Parsea JSON entrantes. 8 MB para soportar imágenes base64 del scanner OCR
+// (una foto de iPhone JPEG quality 0.8 + base64 ronda 1-3 MB).
+app.use(express.json({ limit: '8mb' }));
 
 // Logger simple de cada request entrante.
 app.use((req, _res, next) => {
     console.log(`→ ${req.method} ${req.path}`);
     next();
+});
+
+// Captura errores del body-parser (p.ej. payload too large 413) que de
+// otra forma quedarían silenciosos sin log.
+app.use((err, _req, res, next) => {
+    if (err.type === 'entity.too.large') {
+        console.error(`❌ Body too large: ${err.length} bytes (limit ${err.limit}). ${err.message}`);
+        return res.status(413).json({ ok: false, error: 'payload demasiado grande' });
+    }
+    if (err.type === 'entity.parse.failed') {
+        console.error(`❌ JSON parse failed: ${err.message}`);
+        return res.status(400).json({ ok: false, error: 'JSON inválido' });
+    }
+    next(err);
 });
 
 // --- Endpoints ---
@@ -556,6 +571,8 @@ app.post('/chat/message', async (req, res) => {
 app.post('/scanner/detect-text', async (req, res) => {
     const { image_base64, language } = req.body ?? {};
 
+    console.log(`🔍 /scanner/detect-text: body keys=${Object.keys(req.body ?? {}).join(',')}, image_base64_len=${(image_base64 ?? '').length}`);
+
     if (!image_base64 || typeof image_base64 !== 'string') {
         return res.status(400).json({
             ok: false,
@@ -571,17 +588,21 @@ app.post('/scanner/detect-text', async (req, res) => {
             cleanBase64 = image_base64.split(';base64,')[1];
         }
 
-        // Prompt corto para clasificar rápidamente
-        const prompt = `Analiza esta imagen. ¿Contiene texto dominante que ocupe más del 30% de la imagen?
+        // Prompt para clasificar si es una imagen "de texto" (placa, letrero, página).
+        // Estricto: solo true si el contenido principal es texto legible.
+        const prompt = `Analiza esta imagen. ¿El contenido PRINCIPAL de la imagen es texto legible — como una placa de museo, un letrero, una página de libro, una pantalla con texto, o un cartel?
 
 Responde SOLO con JSON válido (sin markdown, sin comentarios):
 {"has_text": boolean, "text_coverage_percent": 0-100}
 
-Notas:
-- has_text: true solo si el texto ocupa > 30%
-- text_coverage_percent: estimación visual del porcentaje de la imagen ocupado por texto legible
-- Si hay poco texto: has_text=false`;
+Reglas estrictas:
+- has_text=true SOLO si la imagen es predominantemente texto destinado a ser leído por un visitante (placa, letrero, página, texto impreso).
+- has_text=false si la imagen muestra principalmente un objeto físico (vehículo, máquina, escultura, persona, edificio, mueble, comida, etc.) AUNQUE tenga texto pequeño en algún lugar (logos, marcas, subtítulos UI, fechas, etiquetas).
+- has_text=false si hay texto pero no es el contenido principal (ej. un coche con su logo o matrícula).
+- text_coverage_percent: porcentaje real de pixeles que son texto legible y central en la imagen.`;
 
+        console.log(`🤖 /scanner/detect-text: llamando a Gemini Vision (image bytes=${cleanBase64.length})`);
+        const tStart = Date.now();
         const analysisText = await callGemini({
             contents: [
                 {
@@ -598,8 +619,9 @@ Notas:
                 },
             ],
             temperature: 0.2,
-            maxOutputTokens: 200,
+            maxOutputTokens: 1024,
         });
+        console.log(`🤖 /scanner/detect-text: Gemini respondió en ${Date.now() - tStart}ms, raw=${JSON.stringify(analysisText).slice(0, 200)}`);
 
         // Parsear respuesta JSON
         const match = analysisText.match(/\{[\s\S]*\}/);
@@ -734,6 +756,84 @@ Reglas importantes:
         });
     } catch (err) {
         console.error('❌ POST /scanner/extract-text failed:', err.message);
+        res.status(500).json({ ok: false, error: err.message });
+    }
+});
+
+/**
+ * POST /translate
+ * Traduce los campos `title`, `era` y `description` de un objeto del museo
+ * desde español a un idioma destino. Pensado para descripciones del catálogo
+ * que vienen en `MuseumObjects.json` (ver scanner del cliente iOS).
+ *
+ * Body esperado (JSON):
+ * {
+ *   "title": "Televisor Antiguo",
+ *   "era": "GALERÍA DE HISTORIA · Vida cotidiana",
+ *   "description": "Aparato electrónico doméstico...",
+ *   "target_language": "en" | "fr" | "pt" | "ko" | "ar"
+ * }
+ *
+ * Respuesta: { ok: true, title, era, description }
+ */
+app.post('/translate', async (req, res) => {
+    const { title, era, description, target_language } = req.body ?? {};
+
+    if (!target_language || typeof target_language !== 'string') {
+        return res.status(400).json({ ok: false, error: 'target_language requerido.' });
+    }
+
+    if (target_language === 'es') {
+        // No traducir, devolver tal cual.
+        return res.json({ ok: true, title, era, description });
+    }
+
+    const langName = {
+        en: 'English',
+        fr: 'French',
+        pt: 'Portuguese',
+        ko: 'Korean',
+        ar: 'Arabic',
+    }[target_language];
+
+    if (!langName) {
+        return res.status(400).json({ ok: false, error: `Idioma no soportado: ${target_language}` });
+    }
+
+    const prompt = `Translate the following museum object fields from Spanish to ${langName}.
+Preserve the proper noun feel of titles and the punctuation/formatting of "era" labels.
+Do not add explanations. Return ONLY a JSON object with these exact keys: title, era, description.
+
+Input:
+{
+  "title": ${JSON.stringify(title ?? '')},
+  "era": ${JSON.stringify(era ?? '')},
+  "description": ${JSON.stringify(description ?? '')}
+}
+
+Output:`;
+
+    try {
+        const raw = await callGemini({
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            temperature: 0.2,
+            maxOutputTokens: 2048,
+        });
+
+        const match = raw.match(/\{[\s\S]*\}/);
+        if (!match) {
+            return res.status(502).json({ ok: false, error: 'Gemini no devolvió JSON.' });
+        }
+        const parsed = JSON.parse(match[0]);
+
+        res.json({
+            ok: true,
+            title: parsed.title ?? title,
+            era: parsed.era ?? era,
+            description: parsed.description ?? description,
+        });
+    } catch (err) {
+        console.error('❌ POST /translate failed:', err.message);
         res.status(500).json({ ok: false, error: err.message });
     }
 });

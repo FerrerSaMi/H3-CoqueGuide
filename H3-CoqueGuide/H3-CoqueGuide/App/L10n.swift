@@ -574,6 +574,426 @@ enum L10n {
         )
     }
 
+    // MARK: - Cards estáticas que devuelve el backend (map, scan)
+
+    static var cardMapTitle: String {
+        localize(es: "Mapa del museo", en: "Museum map", fr: "Plan du musée", pt: "Mapa do museu", ko: "박물관 지도", ar: "خريطة المتحف")
+    }
+
+    static var cardMapSubtitle: String {
+        localize(
+            es: "Niveles 1 y 2",
+            en: "Levels 1 and 2",
+            fr: "Niveaux 1 et 2",
+            pt: "Níveis 1 e 2",
+            ko: "1층과 2층",
+            ar: "الطابقان 1 و 2"
+        )
+    }
+
+    static var cardMapDescription: String {
+        localize(
+            es: "Consulta el plano interactivo del museo",
+            en: "Browse the museum's interactive map",
+            fr: "Consulte le plan interactif du musée",
+            pt: "Confira o mapa interativo do museu",
+            ko: "박물관의 인터랙티브 지도를 확인하세요",
+            ar: "تصفّح خريطة المتحف التفاعلية"
+        )
+    }
+
+    static var cardScanTitle: String {
+        localize(es: "Abrir escáner", en: "Open scanner", fr: "Ouvrir le scanner", pt: "Abrir scanner", ko: "스캐너 열기", ar: "فتح الماسح")
+    }
+
+    static var cardScanSubtitle: String {
+        localize(
+            es: "Escanea códigos QR de las exhibiciones",
+            en: "Scan QR codes from the exhibits",
+            fr: "Scanne les codes QR des expositions",
+            pt: "Escaneie os QR codes das exposições",
+            ko: "전시품의 QR 코드를 스캔하세요",
+            ar: "امسح رموز QR للمعروضات"
+        )
+    }
+
+    // MARK: - Scanner mode toggle
+
+    static var scannerModeObject: String {
+        localize(es: "Objeto", en: "Object", fr: "Objet", pt: "Objeto", ko: "물체", ar: "قطعة")
+    }
+
+    static var scannerModeText: String {
+        localize(es: "Texto", en: "Text", fr: "Texte", pt: "Texto", ko: "텍스트", ar: "نص")
+    }
+
+    // MARK: - Scanner OCR result panel
+
+    static var ocrTranslationTitle: String {
+        localize(es: "Traducción", en: "Translation", fr: "Traduction", pt: "Tradução", ko: "번역", ar: "ترجمة")
+    }
+
+    static var ocrOriginalLabel: String {
+        localize(es: "Texto original", en: "Original text", fr: "Texte original", pt: "Texto original", ko: "원문", ar: "النص الأصلي")
+    }
+
+    static var ocrShowOriginal: String {
+        localize(es: "Ver original", en: "Show original", fr: "Voir l'original", pt: "Ver original", ko: "원문 보기", ar: "عرض الأصلي")
+    }
+
+    static var ocrHideOriginal: String {
+        localize(es: "Ocultar original", en: "Hide original", fr: "Masquer l'original", pt: "Ocultar original", ko: "원문 숨기기", ar: "إخفاء الأصلي")
+    }
+
+    // MARK: - Scanner overlay (botones y panel info)
+
+    static var scannerOpenMissionLabel: String {
+        localize(es: "Abrir misión", en: "Open mission", fr: "Ouvrir la mission", pt: "Abrir missão", ko: "미션 열기", ar: "افتح المهمة")
+    }
+
+    static var scannerFlashOnLabel: String {
+        localize(es: "Encender flash", en: "Turn flash on", fr: "Allumer le flash", pt: "Ligar o flash", ko: "플래시 켜기", ar: "تشغيل الفلاش")
+    }
+
+    static var scannerFlashOffLabel: String {
+        localize(es: "Apagar flash", en: "Turn flash off", fr: "Éteindre le flash", pt: "Desligar o flash", ko: "플래시 끄기", ar: "إيقاف الفلاش")
+    }
+
+    static func scannerConfidenceLabel(_ percent: Int) -> String {
+        localize(
+            es: "Confianza: \(percent) por ciento",
+            en: "Confidence: \(percent) percent",
+            fr: "Confiance : \(percent) pour cent",
+            pt: "Confiança: \(percent) por cento",
+            ko: "신뢰도: \(percent) 퍼센트",
+            ar: "الثقة: \(percent) بالمئة"
+        )
+    }
+
+    static var scannerCloseInfoLabel: String {
+        localize(es: "Cerrar información", en: "Close info", fr: "Fermer les infos", pt: "Fechar informações", ko: "정보 닫기", ar: "إغلاق المعلومات")
+    }
+
+    static var scannerCloseInfoHint: String {
+        localize(
+            es: "Oculta la descripción del objeto escaneado",
+            en: "Hides the description of the scanned object",
+            fr: "Masque la description de l'objet scanné",
+            pt: "Oculta a descrição do objeto escaneado",
+            ko: "스캔한 객체의 설명을 숨깁니다",
+            ar: "يُخفي وصف الكائن الممسوح"
+        )
+    }
+
+    static var scannerReadingProgressLabel: String {
+        localize(es: "Progreso de lectura", en: "Reading progress", fr: "Progression de la lecture", pt: "Progresso da leitura", ko: "읽기 진행률", ar: "تقدم القراءة")
+    }
+
+    static func scannerPercentValue(_ percent: Int) -> String {
+        localize(
+            es: "\(percent) por ciento",
+            en: "\(percent) percent",
+            fr: "\(percent) pour cent",
+            pt: "\(percent) por cento",
+            ko: "\(percent) 퍼센트",
+            ar: "\(percent) بالمئة"
+        )
+    }
+
+    static var scannerSeeMore: String {
+        localize(es: "Ver más", en: "Show more", fr: "Voir plus", pt: "Ver mais", ko: "더 보기", ar: "عرض المزيد")
+    }
+
+    static var scannerSeeLess: String {
+        localize(es: "Ver menos", en: "Show less", fr: "Voir moins", pt: "Ver menos", ko: "간략히 보기", ar: "عرض أقل")
+    }
+
+    static var scannerToggleExpandHint: String {
+        localize(
+            es: "Expande o contrae la descripción del objeto",
+            en: "Expands or collapses the object's description",
+            fr: "Développe ou réduit la description de l'objet",
+            pt: "Expande ou recolhe a descrição do objeto",
+            ko: "객체 설명을 펼치거나 접습니다",
+            ar: "يوسّع أو يطوي وصف الكائن"
+        )
+    }
+
+    static var scannerListenLabel: String {
+        localize(es: "Escuchar descripción", en: "Listen to description", fr: "Écouter la description", pt: "Ouvir descrição", ko: "설명 듣기", ar: "استمع إلى الوصف")
+    }
+
+    static var scannerStopListeningLabel: String {
+        localize(es: "Detener lectura", en: "Stop reading", fr: "Arrêter la lecture", pt: "Parar leitura", ko: "읽기 중지", ar: "إيقاف القراءة")
+    }
+
+    /// Texto corto del botón (sin "descripción" / "lectura"); para que quepa en el chip naranja.
+    static var scannerListenShort: String {
+        localize(es: "Escuchar", en: "Listen", fr: "Écouter", pt: "Ouvir", ko: "듣기", ar: "استمع")
+    }
+
+    static var scannerStopShort: String {
+        localize(es: "Detener", en: "Stop", fr: "Arrêter", pt: "Parar", ko: "중지", ar: "إيقاف")
+    }
+
+    static var scannerOpenSettingsHint: String {
+        localize(
+            es: "Abre la configuración del sistema para activar el permiso de cámara",
+            en: "Opens system settings to enable camera permission",
+            fr: "Ouvre les réglages système pour activer l'autorisation de la caméra",
+            pt: "Abre as configurações do sistema para ativar a permissão da câmera",
+            ko: "카메라 권한을 활성화하기 위해 시스템 설정을 엽니다",
+            ar: "يفتح إعدادات النظام لتفعيل إذن الكاميرا"
+        )
+    }
+
+    // MARK: - Scanner OCR / errores
+
+    static var scannerTextDetectedTitle: String {
+        localize(es: "📝 Texto detectado", en: "📝 Text detected", fr: "📝 Texte détecté", pt: "📝 Texto detectado", ko: "📝 텍스트 감지됨", ar: "📝 تم رصد نص")
+    }
+
+    static var scannerOcrErrorTitle: String {
+        localize(es: "Error en OCR", en: "OCR error", fr: "Erreur OCR", pt: "Erro de OCR", ko: "OCR 오류", ar: "خطأ في OCR")
+    }
+
+    static var scannerRetryTag: String {
+        localize(es: "REINTENTA", en: "RETRY", fr: "RÉESSAYER", pt: "TENTAR DE NOVO", ko: "다시 시도", ar: "حاول مجددًا")
+    }
+
+    static var scannerOcrErrorDescription: String {
+        localize(
+            es: "No se pudo extraer el texto. Intenta de nuevo con mejor iluminación.",
+            en: "Couldn't extract text. Try again with better lighting.",
+            fr: "Impossible d'extraire le texte. Réessayez avec un meilleur éclairage.",
+            pt: "Não foi possível extrair o texto. Tente novamente com melhor iluminação.",
+            ko: "텍스트를 추출할 수 없습니다. 더 밝은 조명에서 다시 시도하세요.",
+            ar: "تعذر استخراج النص. أعد المحاولة بإضاءة أفضل."
+        )
+    }
+
+    static var scannerScanFailedDescription: String {
+        localize(
+            es: "No se pudo completar el escaneo. Intenta acercarte al objeto, mejorar la iluminación o encuadrarlo dentro del marco del escáner.",
+            en: "Couldn't complete the scan. Try moving closer to the object, improving lighting, or framing it within the scanner.",
+            fr: "Impossible de terminer le scan. Essayez de vous rapprocher de l'objet, d'améliorer l'éclairage ou de le cadrer dans le scanner.",
+            pt: "Não foi possível concluir o escaneamento. Tente se aproximar do objeto, melhorar a iluminação ou enquadrá-lo no escaner.",
+            ko: "스캔을 완료할 수 없습니다. 객체에 더 가까이 다가가거나, 조명을 개선하거나, 스캐너 프레임 안에 맞춰 보세요.",
+            ar: "تعذّر إكمال المسح. اقترب من القطعة، أو حسّن الإضاءة، أو أدخلها داخل إطار الماسح."
+        )
+    }
+
+    static var scannerGenericErrorTitle: String {
+        localize(es: "Error al escanear", en: "Scan error", fr: "Erreur de scan", pt: "Erro ao escanear", ko: "스캔 오류", ar: "خطأ في المسح")
+    }
+
+    static var scannerGenericErrorDescription: String {
+        localize(
+            es: "No se pudo procesar la imagen. Verifica tu conexión a internet y vuelve a intentar.",
+            en: "Couldn't process the image. Check your internet connection and try again.",
+            fr: "Impossible de traiter l'image. Vérifiez votre connexion Internet et réessayez.",
+            pt: "Não foi possível processar a imagem. Verifique sua conexão à internet e tente novamente.",
+            ko: "이미지를 처리할 수 없습니다. 인터넷 연결을 확인하고 다시 시도하세요.",
+            ar: "تعذّرت معالجة الصورة. تحقق من اتصالك بالإنترنت وحاول مرة أخرى."
+        )
+    }
+
+    // MARK: - Scanner mission
+
+    static var missionTitle: String {
+        localize(
+            es: "Misión: Hide and Seek 🎯",
+            en: "Mission: Hide and Seek 🎯",
+            fr: "Mission : Cache-cache 🎯",
+            pt: "Missão: Esconde-esconde 🎯",
+            ko: "미션: 숨바꼭질 🎯",
+            ar: "المهمة: الغميضة 🎯"
+        )
+    }
+
+    static var missionDescription: String {
+        localize(
+            es: "Encuentra todos los objetos destacados del museo. Apunta y escanea cada uno para completar tu misión.",
+            en: "Find all the featured objects of the museum. Aim and scan each one to complete your mission.",
+            fr: "Trouve tous les objets phares du musée. Vise et scanne chacun pour terminer ta mission.",
+            pt: "Encontre todos os objetos em destaque do museu. Aponte e escaneie cada um para concluir sua missão.",
+            ko: "박물관의 주요 물체를 모두 찾으세요. 각 물체를 향해 카메라를 대고 스캔하면 미션을 완료할 수 있습니다.",
+            ar: "ابحث عن جميع القطع المميزة في المتحف. وجّه الكاميرا وامسح كلًا منها لإكمال مهمتك."
+        )
+    }
+
+    static var missionSheetNavTitle: String {
+        localize(es: "Mi Misión", en: "My Mission", fr: "Ma mission", pt: "Minha Missão", ko: "내 미션", ar: "مهمتي")
+    }
+
+    static var missionProgressLabel: String {
+        localize(es: "Progreso", en: "Progress", fr: "Progression", pt: "Progresso", ko: "진행 상황", ar: "التقدم")
+    }
+
+    static func missionProgressFraction(_ found: Int, _ total: Int) -> String {
+        localize(
+            es: "\(found) de \(total)",
+            en: "\(found) of \(total)",
+            fr: "\(found) sur \(total)",
+            pt: "\(found) de \(total)",
+            ko: "\(total) 중 \(found)",
+            ar: "\(found) من \(total)"
+        )
+    }
+
+    static var missionPercentCompleted: String {
+        localize(es: "completado", en: "completed", fr: "terminé", pt: "concluído", ko: "완료", ar: "مكتمل")
+    }
+
+    static var missionObjectsToFind: String {
+        localize(es: "Objetos a encontrar", en: "Objects to find", fr: "Objets à trouver", pt: "Objetos para encontrar", ko: "찾을 물체", ar: "القطع المطلوب إيجادها")
+    }
+
+    static var missionObjectFoundLabel: String {
+        localize(es: "✓ Encontrado", en: "✓ Found", fr: "✓ Trouvé", pt: "✓ Encontrado", ko: "✓ 찾음", ar: "✓ تم العثور عليه")
+    }
+
+    static var missionResetButton: String {
+        localize(es: "Reiniciar misión", en: "Reset mission", fr: "Réinitialiser la mission", pt: "Reiniciar missão", ko: "미션 초기화", ar: "إعادة تعيين المهمة")
+    }
+
+    // MARK: - Scanner onboarding
+
+    static var scannerOnboardingSkip: String {
+        localize(es: "Saltar", en: "Skip", fr: "Passer", pt: "Pular", ko: "건너뛰기", ar: "تخطي")
+    }
+
+    static var scannerOnboardingSkipHint: String {
+        localize(
+            es: "Salta el onboarding del escáner",
+            en: "Skips the scanner onboarding",
+            fr: "Passe l'introduction du scanner",
+            pt: "Pula o onboarding do scanner",
+            ko: "스캐너 온보딩을 건너뜁니다",
+            ar: "تخطي شرح الماسح"
+        )
+    }
+
+    static var scannerOnboardingNext: String {
+        localize(es: "Siguiente", en: "Next", fr: "Suivant", pt: "Próximo", ko: "다음", ar: "التالي")
+    }
+
+    static var scannerOnboardingStart: String {
+        localize(es: "Comenzar a escanear", en: "Start scanning", fr: "Commencer à scanner", pt: "Começar a escanear", ko: "스캔 시작하기", ar: "ابدأ المسح")
+    }
+
+    static var scannerOnboardingWelcomeTitle: String {
+        localize(es: "Escáner del Museo", en: "Museum Scanner", fr: "Scanner du musée", pt: "Scanner do Museu", ko: "박물관 스캐너", ar: "ماسح المتحف")
+    }
+
+    static var scannerOnboardingWelcomeMessage: String {
+        localize(
+            es: "Descubre los objetos del museo apuntando tu cámara",
+            en: "Discover museum objects by pointing your camera",
+            fr: "Découvre les objets du musée en pointant ta caméra",
+            pt: "Descubra os objetos do museu apontando sua câmera",
+            ko: "카메라를 향하면 박물관의 물체를 발견할 수 있습니다",
+            ar: "اكتشف قطع المتحف بتوجيه الكاميرا"
+        )
+    }
+
+    static var scannerOnboardingCapabilitiesTitle: String {
+        localize(es: "¿Qué puedes hacer?", en: "What can you do?", fr: "Que peux-tu faire ?", pt: "O que você pode fazer?", ko: "무엇을 할 수 있나요?", ar: "ماذا يمكنك أن تفعل؟")
+    }
+
+    static var scannerOnboardingCapabilitiesSubtitle: String {
+        localize(
+            es: "Tres formas de explorar Horno3",
+            en: "Three ways to explore Horno3",
+            fr: "Trois façons d'explorer Horno3",
+            pt: "Três formas de explorar Horno3",
+            ko: "Horno3를 탐험하는 세 가지 방법",
+            ar: "ثلاث طرق لاستكشاف Horno3"
+        )
+    }
+
+    static var scannerOnboardingCapIdentifyTitle: String {
+        localize(es: "Identificar objetos", en: "Identify objects", fr: "Identifier les objets", pt: "Identificar objetos", ko: "물체 식별", ar: "تعرّف على القطع")
+    }
+
+    static var scannerOnboardingCapIdentifySubtitle: String {
+        localize(
+            es: "Escanea las piezas del museo para conocer su historia",
+            en: "Scan museum pieces to learn their history",
+            fr: "Scanne les pièces du musée pour connaître leur histoire",
+            pt: "Escaneie as peças do museu para conhecer sua história",
+            ko: "박물관 전시품을 스캔해서 역사를 알아보세요",
+            ar: "امسح قطع المتحف للتعرّف على تاريخها"
+        )
+    }
+
+    static var scannerOnboardingCapTextTitle: String {
+        localize(es: "Extraer texto", en: "Extract text", fr: "Extraire du texte", pt: "Extrair texto", ko: "텍스트 추출", ar: "استخراج النص")
+    }
+
+    static var scannerOnboardingCapTextSubtitle: String {
+        localize(
+            es: "Lee letreros y placas — se traducen automáticamente",
+            en: "Read signs and plaques — translated automatically",
+            fr: "Lis panneaux et plaques — traduits automatiquement",
+            pt: "Leia letreiros e placas — traduzidos automaticamente",
+            ko: "안내판과 명판을 읽으면 자동으로 번역됩니다",
+            ar: "اقرأ اللافتات واللوحات — تُترجَم تلقائيًا"
+        )
+    }
+
+    static var scannerOnboardingCapAskTitle: String {
+        localize(es: "Preguntarle a Coque", en: "Ask Coque", fr: "Demander à Coque", pt: "Perguntar ao Coque", ko: "Coque에게 물어보기", ar: "اسأل Coque")
+    }
+
+    static var scannerOnboardingCapAskSubtitle: String {
+        localize(
+            es: "Haz preguntas sobre lo que escanees",
+            en: "Ask questions about what you scan",
+            fr: "Pose des questions sur ce que tu scannes",
+            pt: "Faça perguntas sobre o que você escaneia",
+            ko: "스캔한 항목에 대해 질문해 보세요",
+            ar: "اطرح أسئلتك عمّا تمسحه"
+        )
+    }
+
+    static func scannerOnboardingStepLabel(_ current: Int, _ total: Int) -> String {
+        localize(
+            es: "Paso \(current) de \(total)",
+            en: "Step \(current) of \(total)",
+            fr: "Étape \(current) sur \(total)",
+            pt: "Passo \(current) de \(total)",
+            ko: "\(total)단계 중 \(current)단계",
+            ar: "الخطوة \(current) من \(total)"
+        )
+    }
+
+    static var scannerShutterLabel: String {
+        localize(es: "Escanear objeto", en: "Scan object", fr: "Scanner un objet", pt: "Escanear objeto", ko: "물체 스캔", ar: "مسح القطعة")
+    }
+
+    static var scannerShutterHint: String {
+        localize(
+            es: "Toma una foto y clasifica el objeto detectado",
+            en: "Takes a photo and classifies the detected object",
+            fr: "Prend une photo et classe l'objet détecté",
+            pt: "Tira uma foto e classifica o objeto detectado",
+            ko: "사진을 찍고 감지된 객체를 분류합니다",
+            ar: "يلتقط صورة ويصنّف القطعة المكتشفة"
+        )
+    }
+
+    static var scannerOnboardingMissionMessage: String {
+        localize(
+            es: "Encuentra todos los objetos destacados del museo. Verás el progreso mientras escaneas.",
+            en: "Find all the featured objects of the museum. You'll see your progress as you scan.",
+            fr: "Trouve tous les objets phares du musée. Tu verras ta progression au fur et à mesure.",
+            pt: "Encontre todos os objetos em destaque do museu. Verá seu progresso enquanto escaneia.",
+            ko: "박물관의 주요 물체를 모두 찾으세요. 스캔할수록 진행 상황을 확인할 수 있습니다.",
+            ar: "ابحث عن جميع القطع المميزة في المتحف. سترى تقدّمك أثناء المسح."
+        )
+    }
+
     static var scannerAccessibilityHint: String {
         localize(
             es: "Cierra el escáner y abre el asistente con el contexto de la pieza",

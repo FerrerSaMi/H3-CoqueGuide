@@ -207,6 +207,7 @@ struct LandingView: View {
                     VStack(alignment: .leading, spacing: 24) {
                         // MARK: - Header
                         headerSection
+                            .padding(.top, 4)
                             .opacity(sectionsAppeared ? 1 : 0)
                             .offset(y: sectionsAppeared ? 0 : -20)
 
@@ -235,13 +236,6 @@ struct LandingView: View {
                             .opacity(sectionsAppeared ? 1 : 0)
                             .offset(y: sectionsAppeared ? 0 : 24)
 
-                        // MARK: - Cómo usar la app
-                        howToUseSection
-                            .padding(.horizontal, 20)
-                            .padding(.top, 10)
-                            .opacity(sectionsAppeared ? 1 : 0)
-                            .offset(y: sectionsAppeared ? 0 : 30)
-
                         // MARK: - Atracciones del museo
                         attractionsSection
                             .padding(.top, 10)
@@ -258,8 +252,8 @@ struct LandingView: View {
                         Spacer(minLength: 20)
                     }
                     .frame(maxWidth: .infinity)
-                    .background(Color(.systemGroupedBackground))
                 }
+                .background(Color(.systemGroupedBackground).ignoresSafeArea())
                 .onAppear {
                     withAnimation(.easeOut(duration: 0.8).delay(0.1)) {
                         sectionsAppeared = true

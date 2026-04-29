@@ -20,6 +20,31 @@ struct MapaView: View {
     @State private var mapTransitionID = UUID()
     @State private var showServices: Bool = true
     @State private var showCoqueHintSheet: Bool = false
+
+    /// Tamaño del contenedor del mapa, capturado en el GeometryReader.
+    /// Se usa para clampar el offset y que el mapa no se pueda dragear fuera de vista.
+    @State private var mapContainerSize: CGSize = .zero
+
+    /// Hint "Pinch to zoom" se oculta tras la primera interacción de zoom o tras unos segundos.
+    @State private var showZoomHint: Bool = true
+
+    /// `true` cuando el mapa fue movido o ampliado y conviene ofrecer reset.
+    private var isMapTransformed: Bool {
+        mapScale > 1.01 || abs(mapOffset.width) > 0.5 || abs(mapOffset.height) > 0.5
+    }
+
+    /// Clampea un offset propuesto al rango válido según el scale y el contenedor.
+    /// Cuando scale=1, no hay pan posible (el mapa cabe completo).
+    /// Cuando scale=S, el pan máximo en cada dirección = (size * (S - 1) / 2).
+    private func clampedOffset(_ proposed: CGSize) -> CGSize {
+        guard mapScale > 1.0 else { return .zero }
+        let maxX = mapContainerSize.width * (mapScale - 1.0) / 2
+        let maxY = mapContainerSize.height * (mapScale - 1.0) / 2
+        return CGSize(
+            width: min(max(proposed.width, -maxX), maxX),
+            height: min(max(proposed.height, -maxY), maxY)
+        )
+    }
     @Environment(NavigationState.self) private var navigationState
     private let mapConfig = MapLocationsConfig.load()
 
@@ -46,7 +71,15 @@ struct MapaView: View {
 
     var body: some View {
         mapBody
-            .onAppear { AnalyticsService.shared.track("map_opened") }
+            .onAppear {
+                AnalyticsService.shared.track("map_opened")
+                // Hint "Pinch to zoom" auto-fade tras 5s para no quedarse colgado.
+                DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                    if showZoomHint {
+                        withAnimation(.easeOut(duration: 0.5)) { showZoomHint = false }
+                    }
+                }
+            }
             .trackScreenTime("map")
             .onChange(of: navigationState.selectedMapLocationID) { _, newLocationID in
                 if let locationID = newLocationID {
@@ -240,10 +273,28 @@ struct MapaView: View {
             .contentShape(Rectangle())
             .gesture(dragGesture)
             .simultaneousGesture(zoomGesture)
+            .onTapGesture(count: 2) {
+                handleDoubleTap()
+            }
+            .onAppear { mapContainerSize = size }
+            .onChange(of: size) { _, newSize in mapContainerSize = newSize }
             .animation(.easeInOut(duration: 0.2), value: mapScale)
             .animation(.easeInOut(duration: 0.2), value: mapOffset)
         }
         .frame(height: 420)
+    }
+
+    /// Double-tap: si el mapa está zoomeado o movido → reset; si está al 1x → zoom a 2.5x.
+    private func handleDoubleTap() {
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+            if isMapTransformed {
+                resetMapTransform()
+            } else {
+                mapScale = 2.5
+                lastMapScale = 2.5
+            }
+            if showZoomHint { showZoomHint = false }
+        }
     }
 
     // MARK: - Pin View
@@ -253,15 +304,7 @@ struct MapaView: View {
         let accentColor = pin.type.accentColor
         return ZStack {
             if isSelected {
-                Circle()
-                    .fill(accentColor.opacity(0.2))
-                    .frame(width: pinButtonSize + 14, height: pinButtonSize + 14)
-                    .scaleEffect(isSelected ? 1.3 : 1.0)
-                    .opacity(isSelected ? 0.0 : 0.5)
-                    .animation(
-                        .easeOut(duration: 1.2).repeatForever(autoreverses: false),
-                        value: isSelected
-                    )
+                PulsingRing(color: accentColor, baseSize: pinButtonSize + 14)
             }
             Circle()
                 .fill(isSelected ? accentColor : Color.white)
@@ -397,30 +440,38 @@ struct MapaView: View {
 
             Spacer()
 
-            Label(L10n.mapPinchToZoom, systemImage: "hand.pinch")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            // Hint de pinch — visible solo hasta el primer zoom o tras unos segundos.
+            if showZoomHint {
+                Label(L10n.mapPinchToZoom, systemImage: "hand.pinch")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
+            }
 
             Spacer()
 
-            Button {
-                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                    resetMapTransform()
+            // Reset visible solo cuando el mapa fue alterado.
+            if isMapTransformed {
+                Button {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                        resetMapTransform()
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "arrow.counterclockwise")
+                            .scalingFont(size: 12, weight: .semibold)
+                        Text(L10n.mapReset)
+                            .scalingFont(size: 12, weight: .semibold, relativeTo: .caption)
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(Color.orange)
+                    .clipShape(Capsule())
+                    .shadow(color: Color.orange.opacity(0.35), radius: 5, y: 2)
                 }
-            } label: {
-                HStack(spacing: 4) {
-                    Image(systemName: "arrow.counterclockwise")
-                        .scalingFont(size: 12, weight: .semibold)
-                    Text(L10n.mapReset)
-                        .scalingFont(size: 12, weight: .semibold, relativeTo: .caption)
-                }
-                .foregroundStyle(.orange)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(Color.orange.opacity(0.12))
-                .clipShape(Capsule())
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
     }
 
@@ -429,10 +480,11 @@ struct MapaView: View {
     private var dragGesture: some Gesture {
         DragGesture()
             .onChanged { value in
-                mapOffset = CGSize(
+                let proposed = CGSize(
                     width: lastMapOffset.width + value.translation.width,
                     height: lastMapOffset.height + value.translation.height
                 )
+                mapOffset = clampedOffset(proposed)
             }
             .onEnded { _ in
                 lastMapOffset = mapOffset
@@ -444,6 +496,12 @@ struct MapaView: View {
             .onChanged { value in
                 let nextScale = lastMapScale * value.magnification
                 mapScale = min(max(nextScale, 1.0), 4.0)
+                // Reclampear offset porque el rango válido depende del scale actual
+                mapOffset = clampedOffset(mapOffset)
+                // Hint de pinch ya no es necesario tras el primer pinch
+                if showZoomHint {
+                    withAnimation(.easeOut(duration: 0.4)) { showZoomHint = false }
+                }
             }
             .onEnded { _ in
                 lastMapScale = mapScale
@@ -453,6 +511,7 @@ struct MapaView: View {
                     mapOffset = .zero
                     lastMapOffset = .zero
                 }
+                lastMapOffset = mapOffset
             }
     }
 
@@ -796,6 +855,29 @@ struct MapLocation: Decodable {
             return .attraction
         }
         return parsed
+    }
+}
+
+// MARK: - PulsingRing
+// Anillo que se expande y desvanece continuamente alrededor del pin seleccionado.
+// Tiene su propio @State para que la animación se repita sola, sin depender
+// de cambios externos de value: que romperían el loop.
+private struct PulsingRing: View {
+    let color: Color
+    let baseSize: CGFloat
+    @State private var animate = false
+
+    var body: some View {
+        Circle()
+            .fill(color.opacity(0.25))
+            .frame(width: baseSize, height: baseSize)
+            .scaleEffect(animate ? 1.7 : 0.9)
+            .opacity(animate ? 0 : 0.6)
+            .onAppear {
+                withAnimation(.easeOut(duration: 1.2).repeatForever(autoreverses: false)) {
+                    animate = true
+                }
+            }
     }
 }
 
