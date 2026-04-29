@@ -39,57 +39,67 @@ struct ScannerMission: Codable, Identifiable {
         foundObjectLabels.contains(label)
     }
     
-    /// Misión predeterminada: encuentra 5 objetos del museo
-    static let defaultMission = ScannerMission(
-        id: UUID(),
-        title: "Misión: Hide and Seek 🎯",
-        description: "Encuentra todos los objetos destacados del museo. Apunta y escanea cada uno para completar tu misión.",
-        targetObjectLabels: [
-            "Molde de fundición",
-            "Carretilla de fundición",
-            "Chevrolet 3100",
-            "Elevador de Carga",
-            "Vagón Torpedo"
-        ],
-        foundObjectLabels: []
-    )
+    /// Misión predeterminada: encuentra 9 objetos del museo.
+    /// `title` y `description` son computed via L10n para reflejar el idioma actual.
+    /// Las `targetObjectLabels` son IDs del modelo CoreML — NO se localizan
+    /// y deben coincidir exactamente con las claves de `MuseumObjects.json`.
+    static var defaultMission: ScannerMission {
+        ScannerMission(
+            id: UUID(),
+            title: L10n.missionTitle,
+            description: L10n.missionDescription,
+            targetObjectLabels: [
+                "Molde de fundición",
+                "Carretilla de fundición",
+                "Chevrolet 3100",
+                "Elevador de Carga",
+                "Vagón Torpedo",
+                "Maqueta Modelo Horno 3",
+                "Reloj Checador",
+                "Tenazas de Garra Industrial",
+                "Televisor Antiguo"
+            ],
+            foundObjectLabels: []
+        )
+    }
 }
 
 // MARK: - UserDefaults Manager
 
 final class ScannerMissionManager {
     static let shared = ScannerMissionManager()
-    
-    private let userDefaultsKey = "scannerMission_v1"
+
+    /// Solo persistimos los labels encontrados — el título y la descripción
+    /// se reconstruyen via L10n en cada `loadMission()` para que respeten
+    /// el idioma actual del dispositivo.
     private let foundObjectsKey = "scannerMission_foundObjects_v1"
-    
-    /// Obtiene la misión actual del almacenamiento, o crea una por defecto
+
+    /// Obtiene la misión actual: skeleton localizado + labels encontrados desde UserDefaults.
     func loadMission() -> ScannerMission {
-        if let data = UserDefaults.standard.data(forKey: userDefaultsKey),
-           let decoded = try? JSONDecoder().decode(ScannerMission.self, from: data) {
-            return decoded
+        var mission = ScannerMission.defaultMission
+        if let data = UserDefaults.standard.data(forKey: foundObjectsKey),
+           let found = try? JSONDecoder().decode([String].self, from: data) {
+            mission.foundObjectLabels = found
         }
-        return .defaultMission
+        return mission
     }
-    
-    /// Guarda la misión en el almacenamiento
+
+    /// Guarda solo el progreso (labels encontrados).
     func saveMission(_ mission: ScannerMission) {
-        if let encoded = try? JSONEncoder().encode(mission) {
-            UserDefaults.standard.set(encoded, forKey: userDefaultsKey)
+        if let encoded = try? JSONEncoder().encode(mission.foundObjectLabels) {
+            UserDefaults.standard.set(encoded, forKey: foundObjectsKey)
         }
     }
-    
-    /// Marca un objeto como encontrado en la misión actual
+
+    /// Marca un objeto como encontrado en la misión actual.
     func markObjectAsFound(_ label: String) {
         var mission = loadMission()
         mission.markObjectAsFound(label)
         saveMission(mission)
     }
-    
-    /// Reinicia la misión
+
+    /// Reinicia la misión.
     func resetMission() {
-        var mission = ScannerMission.defaultMission
-        mission.foundObjectLabels = []
-        saveMission(mission)
+        UserDefaults.standard.removeObject(forKey: foundObjectsKey)
     }
 }

@@ -7,43 +7,48 @@ struct IdealAttractionResultView: View {
     @State private var appeared: Bool = false
 
     var body: some View {
-        VStack(spacing: 16) {
-            HStack(spacing: 12) {
+        VStack(spacing: 18) {
+            // Header con ícono grande centrado
+            VStack(spacing: 12) {
                 ZStack {
                     Circle()
-                        .fill(attraction.color.opacity(0.12))
-                        .frame(width: 64, height: 64)
+                        .fill(attraction.color.opacity(0.15))
+                        .frame(width: 92, height: 92)
                     Image(systemName: attraction.icon)
-                        .scalingFont(size: 24, weight: .bold)
+                        .scalingFont(size: 38, weight: .bold)
                         .foregroundStyle(attraction.color)
                         .pulsingGlow(attraction.color)
                 }
 
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(spacing: 4) {
                     Text(attraction.name)
                         .font(.title2)
                         .fontWeight(.bold)
+                        .multilineTextAlignment(.center)
                     Text(attraction.subtitle)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
                 }
-
-                Spacer()
             }
+            .padding(.top, 4)
 
+            // Mensaje central — la pregunta sugerida para Coque
             Text(attraction.message)
-                .font(.body)
+                .font(.callout)
                 .foregroundStyle(.primary)
-                .multilineTextAlignment(.leading)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 8)
 
-            Spacer()
+            Spacer(minLength: 4)
 
+            // Botones de acción
             HStack(spacing: 12) {
                 Button {
                     if let onMap = onMap { onMap() }
                     else { NotificationCenter.default.post(name: .openMapFromIdealAttraction, object: nil) }
                 } label: {
-                    Text("Ir al mapa")
+                    Text(L10n.idealAttractionGoToMap)
                         .fontWeight(.semibold)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
@@ -56,7 +61,7 @@ struct IdealAttractionResultView: View {
                     if let onAsk = onAskCoque { onAsk() }
                     else { NotificationCenter.default.post(name: .askCoqueFromIdealAttraction, object: nil, userInfo: ["name": attraction.name]) }
                 } label: {
-                    Text("Preguntarle a Coque")
+                    Text(L10n.idealAttractionAskCoqueButton)
                         .fontWeight(.semibold)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)

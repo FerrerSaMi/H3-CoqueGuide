@@ -190,11 +190,33 @@ final class CameraService: NSObject, ObservableObject {
     // MARK: - Private Helpers
 
     /// Convierte UIImage a base64 string.
+    /// Reduce la imagen a max 1280px en su lado mayor antes de codificar
+    /// para que el payload al backend ronde 200-500 KB en lugar de varios MB.
     private func imageToBase64(_ image: UIImage) -> String? {
-        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+        let resized = resize(image, maxDimension: 1280)
+        guard let imageData = resized.jpegData(compressionQuality: 0.7) else {
             return nil
         }
         return imageData.base64EncodedString()
+    }
+
+    /// Escala la imagen para que su lado mayor sea `maxDimension`.
+    /// Si ya es más chica, la devuelve sin tocar.
+    private func resize(_ image: UIImage, maxDimension: CGFloat) -> UIImage {
+        let size = image.size
+        let largest = max(size.width, size.height)
+        guard largest > maxDimension else { return image }
+
+        let scale = maxDimension / largest
+        let newSize = CGSize(width: size.width * scale, height: size.height * scale)
+
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        format.opaque = true
+        let renderer = UIGraphicsImageRenderer(size: newSize, format: format)
+        return renderer.image { _ in
+            image.draw(in: CGRect(origin: .zero, size: newSize))
+        }
     }
 
     // MARK: - Private helpers

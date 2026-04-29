@@ -118,24 +118,28 @@ private struct ChatCard: Decodable {
     func toActionCard() -> CGActionCard? {
         switch type {
         case "map":
+            // Cards estáticas: ignoramos el título/subtítulo del backend (que viene
+            // hardcoded en español) y usamos L10n para que respete el idioma del iPhone.
             return CGActionCard(
                 cardType: .map,
-                title: title ?? "Mapa del museo",
-                subtitle: subtitle ?? "Niveles 1 y 2",
-                description: description ?? "Consulta el plano interactivo del museo",
+                title: L10n.cardMapTitle,
+                subtitle: L10n.cardMapSubtitle,
+                description: L10n.cardMapDescription,
                 action: .navigate(.map)
             )
         case "scan":
             return CGActionCard(
                 cardType: .scan,
-                title: title ?? "Abrir escáner",
-                subtitle: subtitle ?? "Escanea códigos QR de las exhibiciones",
+                title: L10n.cardScanTitle,
+                subtitle: L10n.cardScanSubtitle,
                 action: .navigate(.scanning)
             )
         case "event":
+            // Las cards de evento sí usan los datos del backend porque vienen
+            // del catálogo (nombres reales del museo, localizables en BD).
             return CGActionCard(
                 cardType: .event,
-                title: title ?? "Evento",
+                title: title ?? "",
                 subtitle: subtitle,
                 description: description,
                 icon: icon,

@@ -51,8 +51,8 @@ struct ScannerFrameOverlay: View {
 
     var body: some View {
         GeometryReader { geo in
-            let w = geo.size.width  * 0.78
-            let h = geo.size.height * 0.44
+            let w = geo.size.width  * 0.95
+            let h = geo.size.height * 0.55
             let x = (geo.size.width  - w) / 2
             let y = (geo.size.height - h) / 2
 
