@@ -11,5 +11,16 @@
 		<key>Allow Local Networking</key>
 		<true/>
 	</dict>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>es</string>
+		<string>en</string>
+		<string>fr</string>
+		<string>pt</string>
+		<string>ko</string>
+		<string>ar</string>
+	</array>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>es</string>
 </dict>
 </plist>

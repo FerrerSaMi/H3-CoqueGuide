@@ -56,14 +56,14 @@ struct ScannerOnboardingView: View {
             Button {
                 finish()
             } label: {
-                Text("Saltar")
+                Text(L10n.scannerOnboardingSkip)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundStyle(.secondary)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
             }
-            .accessibilityHint("Salta el onboarding del escáner")
+            .accessibilityHint(L10n.scannerOnboardingSkipHint)
         }
         .padding(.horizontal, 16)
         .padding(.top, 8)
@@ -83,7 +83,7 @@ struct ScannerOnboardingView: View {
                 }
             }
             .accessibilityElement()
-            .accessibilityLabel("Paso \(currentPage + 1) de \(totalPages)")
+            .accessibilityLabel(L10n.scannerOnboardingStepLabel(currentPage + 1, totalPages))
             
             // Botón primario
             primaryButton
@@ -101,14 +101,14 @@ struct ScannerOnboardingView: View {
                     currentPage += 1
                 }
             } label: {
-                primaryButtonLabel(text: "Siguiente")
+                primaryButtonLabel(text: L10n.scannerOnboardingNext)
             }
             .buttonStyle(.plain)
         default:
             Button {
                 finish()
             } label: {
-                primaryButtonLabel(text: "Comenzar a escanear")
+                primaryButtonLabel(text: L10n.scannerOnboardingStart)
             }
             .buttonStyle(.plain)
         }
@@ -165,13 +165,13 @@ private struct ScannerOnboardingWelcomePage: View {
                 )
             
             VStack(spacing: 12) {
-                Text("Escáner del Museo")
+                Text(L10n.scannerOnboardingWelcomeTitle)
                     .font(.title)
                     .fontWeight(.bold)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.primary)
-                
-                Text("Descubre los objetos del museo apuntando tu cámara")
+
+                Text(L10n.scannerOnboardingWelcomeMessage)
                     .font(.body)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.secondary)
@@ -192,13 +192,13 @@ private struct ScannerOnboardingCapabilitiesPage: View {
             Spacer()
             
             VStack(spacing: 8) {
-                Text("¿Qué puedes hacer?")
+                Text(L10n.scannerOnboardingCapabilitiesTitle)
                     .font(.title2)
                     .fontWeight(.bold)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.primary)
-                
-                Text("Tres formas de explorar Horno3")
+
+                Text(L10n.scannerOnboardingCapabilitiesSubtitle)
                     .font(.subheadline)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.secondary)
@@ -208,18 +208,18 @@ private struct ScannerOnboardingCapabilitiesPage: View {
             VStack(spacing: 18) {
                 capabilityRow(
                     icon: "cube.transparent.fill",
-                    title: "Identificar objetos",
-                    subtitle: "Escanea las piezas del museo para conocer su historia"
+                    title: L10n.scannerOnboardingCapIdentifyTitle,
+                    subtitle: L10n.scannerOnboardingCapIdentifySubtitle
                 )
                 capabilityRow(
                     icon: "doc.text.magnifyingglass",
-                    title: "Extraer texto",
-                    subtitle: "Lee letreros y placas — se traducen automáticamente"
+                    title: L10n.scannerOnboardingCapTextTitle,
+                    subtitle: L10n.scannerOnboardingCapTextSubtitle
                 )
                 capabilityRow(
                     icon: "sparkles",
-                    title: "Preguntarle a Coque",
-                    subtitle: "Haz preguntas sobre lo que escanees"
+                    title: L10n.scannerOnboardingCapAskTitle,
+                    subtitle: L10n.scannerOnboardingCapAskSubtitle
                 )
             }
             .padding(.horizontal, 24)
@@ -290,13 +290,13 @@ private struct ScannerOnboardingMissionPage: View {
             }
             
             VStack(spacing: 12) {
-                Text("Misión: Hide and Seek 🎯")
+                Text(L10n.missionTitle)
                     .font(.title2)
                     .fontWeight(.bold)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.primary)
-                
-                Text("Encuentra todos los objetos destacados del museo. Verás el progreso mientras escaneas.")
+
+                Text(L10n.scannerOnboardingMissionMessage)
                     .font(.body)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.secondary)

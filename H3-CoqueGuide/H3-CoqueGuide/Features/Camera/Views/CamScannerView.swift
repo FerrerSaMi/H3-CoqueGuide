@@ -35,6 +35,8 @@ struct CamScannerView: View {
             // 3. UI layers
             VStack(spacing: 0) {
                 topBar
+                modeSelector
+                    .padding(.top, 12)
                 Spacer()
                 bottomArea
             }
@@ -60,7 +62,7 @@ struct CamScannerView: View {
         }
         // Misión sheet
         .sheet(isPresented: $viewModel.showMissionSheet) {
-            ScannerMissionSheetView()
+            ScannerMissionSheetView(viewModel: viewModel.missionViewModel)
         }
     }
 
@@ -70,11 +72,11 @@ struct CamScannerView: View {
         ZStack {
             // Título centrado
             VStack(spacing: 2) {
-                Text("ESCÁNER")
+                Text(L10n.scannerHeaderTitle)
                     .scalingFont(size: 11, weight: .semibold, design: .monospaced)
                     .tracking(3)
                     .foregroundStyle(.white.opacity(0.6))
-                Text("Apunta al objeto del museo")
+                Text(L10n.scannerSubtitle)
                     .scalingFont(size: 13, weight: .medium)
                     .foregroundStyle(.white)
             }
@@ -94,7 +96,7 @@ struct CamScannerView: View {
                         .background(.black.opacity(0.45))
                         .clipShape(Circle())
                 }
-                .accessibilityLabel("Abrir misión")
+                .accessibilityLabel(L10n.scannerOpenMissionLabel)
                 
                 // Flash
                 Button {
@@ -107,12 +109,60 @@ struct CamScannerView: View {
                         .background(.black.opacity(0.45))
                         .clipShape(Circle())
                 }
-                .accessibilityLabel(viewModel.isFlashOn ? "Apagar flash" : "Encender flash")
+                .accessibilityLabel(viewModel.isFlashOn ? L10n.scannerFlashOffLabel : L10n.scannerFlashOnLabel)
             }
         }
         .padding(.horizontal, 20)
         .padding(.top, 16)
         .padding(.bottom, 8)
+    }
+
+    // MARK: - Mode Selector (Objeto / Texto)
+
+    private var modeSelector: some View {
+        HStack(spacing: 0) {
+            modeChip(
+                title: L10n.scannerModeObject,
+                icon: "cube.transparent.fill",
+                isSelected: viewModel.scannerMode == .object
+            ) {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    viewModel.scannerMode = .object
+                    viewModel.dismissInfoPanel()
+                }
+            }
+
+            modeChip(
+                title: L10n.scannerModeText,
+                icon: "doc.text.magnifyingglass",
+                isSelected: viewModel.scannerMode == .text
+            ) {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    viewModel.scannerMode = .text
+                    viewModel.dismissInfoPanel()
+                }
+            }
+        }
+        .padding(4)
+        .background(.black.opacity(0.45))
+        .clipShape(Capsule())
+    }
+
+    private func modeChip(title: String, icon: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .scalingFont(size: 13, weight: .semibold)
+                Text(title)
+                    .scalingFont(size: 13, weight: .semibold)
+            }
+            .foregroundStyle(isSelected ? .black : .white)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(isSelected ? Color.orange : Color.clear)
+            .clipShape(Capsule())
+        }
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 
     // MARK: - Bottom Area
@@ -123,11 +173,94 @@ struct CamScannerView: View {
                 infoPanel(obj)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                     .padding(.bottom, 4)
+            } else if let ocr = viewModel.ocrResult {
+                ocrPanel(ocr)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .padding(.bottom, 4)
             }
             shutterButton
                 .padding(.bottom, 16)
         }
         .animation(.spring(response: 0.45, dampingFraction: 0.82), value: viewModel.detectedObject != nil)
+        .animation(.spring(response: 0.45, dampingFraction: 0.82), value: viewModel.ocrResult != nil)
+    }
+
+    // MARK: - OCR Panel
+
+    @State private var showOcrOriginal: Bool = false
+
+    private func ocrPanel(_ ocr: OCRResult) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 10) {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "doc.text.magnifyingglass")
+                            .scalingFont(size: 14, weight: .semibold)
+                            .foregroundStyle(.cyan)
+                        Text(L10n.ocrTranslationTitle)
+                            .scalingFont(size: 12, weight: .semibold, design: .monospaced)
+                            .foregroundStyle(.cyan)
+                            .tracking(1.5)
+                    }
+                }
+                Spacer()
+
+                Button {
+                    viewModel.dismissInfoPanel()
+                } label: {
+                    Image(systemName: "xmark")
+                        .scalingFont(size: 11, weight: .bold)
+                        .foregroundStyle(.white)
+                        .frame(width: 24, height: 24)
+                        .background(.white.opacity(0.15))
+                        .clipShape(Circle())
+                }
+                .accessibilityLabel(L10n.scannerCloseInfoLabel)
+            }
+
+            // Texto traducido (lo principal)
+            Text(ocr.translated)
+                .scalingFont(size: 16, weight: .medium)
+                .foregroundStyle(.white)
+                .lineSpacing(3)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            // Texto original (collapsible)
+            if showOcrOriginal {
+                Divider()
+                    .background(Color.white.opacity(0.2))
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(L10n.ocrOriginalLabel)
+                        .scalingFont(size: 11, weight: .semibold, design: .monospaced)
+                        .foregroundStyle(.white.opacity(0.6))
+                        .tracking(1.5)
+                    Text(ocr.original)
+                        .scalingFont(size: 14)
+                        .foregroundStyle(.white.opacity(0.85))
+                        .lineSpacing(2)
+                }
+            }
+
+            // Toggle ver/ocultar original (solo si difiere de la traducción)
+            if ocr.original != ocr.translated {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        showOcrOriginal.toggle()
+                    }
+                } label: {
+                    Text(showOcrOriginal ? L10n.ocrHideOriginal : L10n.ocrShowOriginal)
+                        .scalingFont(size: 13, weight: .medium)
+                        .foregroundStyle(.cyan)
+                }
+            }
+        }
+        .padding(18)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(Color.cyan.opacity(0.4), lineWidth: 1)
+        )
+        .padding(.horizontal, 16)
     }
 
     // MARK: - Info Panel
@@ -154,7 +287,7 @@ struct CamScannerView: View {
                     .padding(.vertical, 4)
                     .background(.orange)
                     .clipShape(Capsule())
-                    .accessibilityLabel("Confianza: \(Int(obj.confidence * 100)) por ciento")
+                    .accessibilityLabel(L10n.scannerConfidenceLabel(Int(obj.confidence * 100)))
 
                 Button {
                     viewModel.dismissInfoPanel()
@@ -166,8 +299,8 @@ struct CamScannerView: View {
                         .background(.white.opacity(0.15))
                         .clipShape(Circle())
                 }
-                .accessibilityLabel("Cerrar información")
-                .accessibilityHint("Oculta la descripción del objeto escaneado")
+                .accessibilityLabel(L10n.scannerCloseInfoLabel)
+                .accessibilityHint(L10n.scannerCloseInfoHint)
             }
 
             // Descripción
@@ -181,8 +314,8 @@ struct CamScannerView: View {
             if viewModel.speech.isSpeaking {
                 SpeechProgressBar(progress: viewModel.speech.progress)
                     .transition(.opacity.combined(with: .scale(scale: 0.95)))
-                    .accessibilityLabel("Progreso de lectura")
-                    .accessibilityValue("\(Int(viewModel.speech.progress * 100)) por ciento")
+                    .accessibilityLabel(L10n.scannerReadingProgressLabel)
+                    .accessibilityValue(L10n.scannerPercentValue(Int(viewModel.speech.progress * 100)))
             }
 
             // Acciones
@@ -190,11 +323,11 @@ struct CamScannerView: View {
                 Button {
                     viewModel.togglePanelExpanded()
                 } label: {
-                    Text(viewModel.isPanelExpanded ? "Ver menos" : "Ver más")
+                    Text(viewModel.isPanelExpanded ? L10n.scannerSeeLess : L10n.scannerSeeMore)
                         .scalingFont(size: 13, weight: .medium)
                         .foregroundStyle(.orange)
                 }
-                .accessibilityHint("Expande o contrae la descripción del objeto")
+                .accessibilityHint(L10n.scannerToggleExpandHint)
 
                 Spacer()
 
@@ -242,8 +375,8 @@ struct CamScannerView: View {
             )
             .clipShape(RoundedRectangle(cornerRadius: 14))
         }
-        .accessibilityLabel("Pregúntale a Coque sobre \(obj.title)")
-        .accessibilityHint("Cierra el escáner y abre el asistente con el contexto de la pieza")
+        .accessibilityLabel(L10n.scannerAskCoqueAbout(obj.title))
+        .accessibilityHint(L10n.scannerAccessibilityHint)
     }
 
     // MARK: - Speak Button
@@ -262,7 +395,7 @@ struct CamScannerView: View {
                 .scalingFont(size: 13)
                 .animation(.easeInOut(duration: 0.18), value: viewModel.speech.isSpeaking)
 
-                Text(viewModel.speech.isSpeaking ? "Detener" : "Escuchar")
+                Text(viewModel.speech.isSpeaking ? L10n.scannerStopShort : L10n.scannerListenShort)
                     .scalingFont(size: 13, weight: .semibold)
             }
             .foregroundStyle(.black)
@@ -272,7 +405,7 @@ struct CamScannerView: View {
             .clipShape(Capsule())
             .animation(.easeInOut(duration: 0.2), value: viewModel.speech.isSpeaking)
         }
-        .accessibilityLabel(viewModel.speech.isSpeaking ? "Detener lectura" : "Escuchar descripción")
+        .accessibilityLabel(viewModel.speech.isSpeaking ? L10n.scannerStopListeningLabel : L10n.scannerListenLabel)
     }
 
     // MARK: - Shutter Button
@@ -295,8 +428,8 @@ struct CamScannerView: View {
             }
         }
         .disabled(viewModel.isScanning)
-        .accessibilityLabel("Escanear objeto")
-        .accessibilityHint("Toma una foto y clasifica el objeto detectado")
+        .accessibilityLabel(L10n.scannerShutterLabel)
+        .accessibilityHint(L10n.scannerShutterHint)
     }
 
     // MARK: - Permission Denied Overlay
@@ -307,11 +440,11 @@ struct CamScannerView: View {
                 .scalingFont(size: 40)
                 .foregroundStyle(.orange)
 
-            Text("Sin acceso a la cámara")
+            Text(L10n.scannerNoCameraAccessTitle)
                 .scalingFont(size: 18, weight: .bold)
                 .foregroundStyle(.white)
 
-            Text("Activa el permiso en Configuración para usar el escaneo de objetos.")
+            Text(L10n.scannerNoCameraAccessMessage)
                 .scalingFont(size: 14)
                 .foregroundStyle(.white.opacity(0.75))
                 .multilineTextAlignment(.center)
@@ -321,7 +454,7 @@ struct CamScannerView: View {
                     UIApplication.shared.open(url)
                 }
             } label: {
-                Text("Abrir Configuración")
+                Text(L10n.scannerOpenSettings)
                     .scalingFont(size: 15, weight: .semibold)
                     .foregroundStyle(.black)
                     .padding(.horizontal, 24)
@@ -329,7 +462,7 @@ struct CamScannerView: View {
                     .background(Color.orange)
                     .clipShape(Capsule())
             }
-            .accessibilityHint("Abre la configuración del sistema para activar el permiso de cámara")
+            .accessibilityHint(L10n.scannerOpenSettingsHint)
         }
         .padding(28)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24))

@@ -9,6 +9,20 @@ import SwiftUI
 import Combine
 import AVFoundation
 
+/// Modo del escáner. El usuario lo elige antes de disparar.
+enum ScannerMode {
+    case object   // Identificar pieza del museo (CoreML)
+    case text     // Extraer y traducir texto (OCR + Gemini)
+}
+
+/// Resultado de OCR + traducción para mostrar en el panel dedicado.
+struct OCRResult: Identifiable {
+    let id = UUID()
+    let original: String
+    let translated: String
+    let targetLanguage: String   // Código ISO del idioma destino (en, fr, etc.)
+}
+
 @MainActor
 final class CamScannerViewModel: ObservableObject {
 
@@ -22,9 +36,11 @@ final class CamScannerViewModel: ObservableObject {
 
     // MARK: - Published State
     @Published var detectedObject: MuseumObject? = nil
+    @Published var ocrResult: OCRResult? = nil
     @Published var isPanelExpanded = false
     @Published var isScanning = false
     @Published var isFlashOn = false
+    @Published var scannerMode: ScannerMode = .object
     
     // MARK: - Onboarding
     @AppStorage("hasSeenScannerOnboarding") private var hasSeenScannerOnboarding = false
@@ -75,93 +91,132 @@ final class CamScannerViewModel: ObservableObject {
         guard !isScanning else { return }
         speech.stop()
         detectedObject = nil
+        ocrResult = nil
         isPanelExpanded = false
         isScanning = true
 
         Task {
             do {
-                // 1) Capturar imagen
                 let image = try await camera.capturePhoto()
-
-                // 2) Detectar si hay texto predominante
-                let (hasText, textCoverage) = try await camera.detectTextInImage(image)
-
-                // 3) Si hay texto dominante (> 30%), extraer y traducir
-                if hasText && textCoverage > 30 {
-                    do {
-                        let (original, translated) = try await camera.extractAndTranslateText(
-                            from: image,
-                            targetLanguage: "es"
-                        )
-
-                        withAnimation {
-                            // Mostrar texto extraído como "objeto"
-                            detectedObject = MuseumObject(
-                                title: "📝 Texto detectado",
-                                era: "OCR",
-                                description: translated.isEmpty
-                                    ? original
-                                    : "\(translated)",
-                                confidence: Double(textCoverage) / 100.0
-                            )
-                        }
-                        isScanning = false
-                    } catch {
-                        // Fallback: mostrar error pero mantener UI
-                        print("❌ OCR error: \(error)")
-                        withAnimation {
-                            detectedObject = MuseumObject(
-                                title: "Error en OCR",
-                                era: "REINTENTA",
-                                description: "No se pudo extraer el texto. Intenta de nuevo con mejor iluminación.",
-                                confidence: 0.0
-                            )
-                        }
-                        isScanning = false
-                    }
-                } else {
-                    // 4) Si no hay texto, usar CoreML normal
-                    do {
-                        let result = try await camera.classify(image: image)
-                        
-                        // Verificar si es parte de la misión
-                        if missionViewModel.isPartOfMission(result.label) && !missionViewModel.isObjectFound(result.label) {
-                            missionViewModel.markObjectAsFound(result.label)
-                            // Opcionalmente: mostrar notificación visual (future feature)
-                        }
-                        
-                        withAnimation {
-                            detectedObject = catalog.museumObject(
-                                forLabel: result.label,
-                                confidence: result.confidence
-                            )
-                        }
-                        isScanning = false
-                    } catch {
-                        withAnimation {
-                            detectedObject = MuseumObject(
-                                title: catalog.unknown.title,
-                                era: catalog.unknown.era,
-                                description: "No se pudo completar el escaneo. Intenta acercarte al objeto, mejorar la iluminación o encuadrarlo dentro del marco del escáner.",
-                                confidence: 0.0
-                            )
-                        }
-                        isScanning = false
-                    }
+                switch scannerMode {
+                case .object:
+                    await scanAsObject(image: image)
+                case .text:
+                    await scanAsText(image: image)
                 }
             } catch {
-                // Error en detección de texto o captura
-                print("❌ Scan error: \(error)")
+                print("❌ Capture error: \(error)")
                 isScanning = false
                 withAnimation {
                     detectedObject = MuseumObject(
-                        title: "Error al escanear",
-                        era: "REINTENTA",
-                        description: "No se pudo procesar la imagen. Verifica tu conexión a internet y vuelve a intentar.",
+                        title: L10n.scannerGenericErrorTitle,
+                        era: L10n.scannerRetryTag,
+                        description: L10n.scannerGenericErrorDescription,
                         confidence: 0.0
                     )
                 }
             }
+        }
+    }
+
+    // MARK: - Modo Objeto (CoreML + traducción de catálogo)
+
+    private func scanAsObject(image: UIImage) async {
+        do {
+            let result = try await camera.classify(image: image)
+
+            // Verificar si es parte de la misión
+            if missionViewModel.isPartOfMission(result.label) && !missionViewModel.isObjectFound(result.label) {
+                missionViewModel.markObjectAsFound(result.label)
+            }
+
+            // Mostrar inmediato en español
+            let original = catalog.museumObject(
+                forLabel: result.label,
+                confidence: result.confidence
+            )
+            withAnimation {
+                detectedObject = original
+            }
+            isScanning = false
+
+            // Traducir descripción en background si el idioma no es español
+            if AppLanguage.device != .spanish && !original.isUnknown {
+                Task { [weak self] in
+                    guard let self else { return }
+                    let translated = await MuseumTranslationService.shared.translateForDevice(
+                        label: result.label,
+                        title: original.title,
+                        era: original.era,
+                        description: original.description
+                    )
+                    guard let current = self.detectedObject, current.id == original.id else { return }
+                    withAnimation {
+                        self.detectedObject = MuseumObject(
+                            title: translated.title,
+                            era: translated.era,
+                            description: translated.description,
+                            confidence: original.confidence
+                        )
+                    }
+                }
+            }
+        } catch {
+            withAnimation {
+                detectedObject = MuseumObject(
+                    title: catalog.unknown.title,
+                    era: catalog.unknown.era,
+                    description: L10n.scannerScanFailedDescription,
+                    confidence: 0.0
+                )
+            }
+            isScanning = false
+        }
+    }
+
+    // MARK: - Modo Texto (OCR + traducción server-side)
+
+    private func scanAsText(image: UIImage) async {
+        do {
+            let targetLang = AppLanguage.device.rawValue
+            let (original, translated) = try await camera.extractAndTranslateText(
+                from: image,
+                targetLanguage: targetLang
+            )
+
+            // Si Gemini no extrajo nada legible, mostrar mensaje claro
+            guard !original.isEmpty else {
+                withAnimation {
+                    detectedObject = MuseumObject(
+                        title: L10n.scannerOcrErrorTitle,
+                        era: L10n.scannerRetryTag,
+                        description: L10n.scannerOcrErrorDescription,
+                        confidence: 0.0
+                    )
+                }
+                isScanning = false
+                return
+            }
+
+            withAnimation {
+                ocrResult = OCRResult(
+                    original: original,
+                    translated: translated.isEmpty ? original : translated,
+                    targetLanguage: targetLang
+                )
+            }
+            isScanning = false
+        } catch {
+            print("❌ OCR error: \(error)")
+            withAnimation {
+                detectedObject = MuseumObject(
+                    title: L10n.scannerOcrErrorTitle,
+                    era: L10n.scannerRetryTag,
+                    description: L10n.scannerOcrErrorDescription,
+                    confidence: 0.0
+                )
+            }
+            isScanning = false
         }
     }
 
@@ -182,6 +237,7 @@ final class CamScannerViewModel: ObservableObject {
         speech.stop()
         withAnimation(.easeInOut(duration: 0.25)) {
             detectedObject = nil
+            ocrResult = nil
             isPanelExpanded = false
         }
     }

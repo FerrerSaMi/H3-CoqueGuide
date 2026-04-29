@@ -65,6 +65,9 @@ struct LandingView: View {
     // MARK: - Analytics
     @State private var hasTrackedAppOpen = false
 
+    // MARK: - Eventos de hoy
+    @State private var todaysEvents: [CGEvent] = []
+
     /// Contenido del card de CoqueGuide en home (computado para reflejar el idioma actual).
     private var homeInviteContent: CGHomeInviteContent { .default }
 
@@ -141,7 +144,11 @@ struct LandingView: View {
             }
             .onAppear {
                 coqueGuideVM.loadVisitorProfile(from: modelContext)
-                Task { await CGEventService.shared.refresh() }
+                todaysEvents = CGEventService.shared.todaysEvents()
+                Task {
+                    await CGEventService.shared.refresh()
+                    todaysEvents = CGEventService.shared.todaysEvents()
+                }
 
                 // Analytics: app_opened una sola vez + bindear visitor_id si ya hay perfil.
                 if !hasTrackedAppOpen {
@@ -172,7 +179,7 @@ struct LandingView: View {
             }
             .onReceive(NotificationCenter.default.publisher(for: .askCoqueFromIdealAttraction)) { note in
                 if let name = note.userInfo?["name"] as? String {
-                    coqueGuideVM.openPanelWithMessage("Cuéntame sobre \(name) en Horno3, por favor.")
+                    coqueGuideVM.openPanelWithMessage(L10n.askCoqueAbout(name))
                 }
             }
         }
@@ -200,6 +207,7 @@ struct LandingView: View {
                     VStack(alignment: .leading, spacing: 24) {
                         // MARK: - Header
                         headerSection
+                            .padding(.top, 4)
                             .opacity(sectionsAppeared ? 1 : 0)
                             .offset(y: sectionsAppeared ? 0 : -20)
 
@@ -221,12 +229,12 @@ struct LandingView: View {
                             .opacity(sectionsAppeared ? 1 : 0)
                             .offset(y: sectionsAppeared ? 0 : 18)
 
-                        // MARK: - Cómo usar la app
-                        howToUseSection
+                        // MARK: - Eventos de hoy
+                        eventsSection
                             .padding(.horizontal, 20)
-                            .padding(.top, 10)
+                            .padding(.top, 12)
                             .opacity(sectionsAppeared ? 1 : 0)
-                            .offset(y: sectionsAppeared ? 0 : 30)
+                            .offset(y: sectionsAppeared ? 0 : 24)
 
                         // MARK: - Atracciones del museo
                         attractionsSection
@@ -244,8 +252,8 @@ struct LandingView: View {
                         Spacer(minLength: 20)
                     }
                     .frame(maxWidth: .infinity)
-                    .background(Color(.systemGroupedBackground))
                 }
+                .background(Color(.systemGroupedBackground).ignoresSafeArea())
                 .onAppear {
                     withAnimation(.easeOut(duration: 0.8).delay(0.1)) {
                         sectionsAppeared = true
@@ -282,7 +290,7 @@ struct LandingView: View {
                     .frame(width: 52, height: 52)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Museo del Acero")
+                    Text(L10n.landingMuseumName)
                         .font(.title3)
                         .fontWeight(.bold)
                     Text("Horno3")
@@ -581,7 +589,7 @@ struct LandingView: View {
     private var idealAttractionSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Atracción ideal")
+                Text(L10n.idealAttractionTitle)
                     .font(.title3)
                     .fontWeight(.bold)
 
@@ -624,7 +632,7 @@ struct LandingView: View {
                         Button {
                             selectedTab = 2 // ir al mapa
                         } label: {
-                            Text("Ir al mapa")
+                            Text(L10n.idealAttractionGoToMap)
                                 .fontWeight(.semibold)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 12)
@@ -634,9 +642,9 @@ struct LandingView: View {
                         .buttonStyle(PressableButtonStyle())
 
                         Button {
-                            coqueGuideVM.openPanelWithMessage("Cuéntame sobre \(attraction.name) en Horno3, por favor.")
+                            coqueGuideVM.openPanelWithMessage(L10n.askCoqueAbout(attraction.name))
                         } label: {
-                            Text("Preguntarle a Coque")
+                            Text(L10n.idealAttractionAskCoqueButton)
                                 .fontWeight(.semibold)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 12)
@@ -658,7 +666,7 @@ struct LandingView: View {
                     HStack(spacing: 12) {
                         Image(systemName: "sparkles")
                             .scalingFont(size: 16, weight: .semibold)
-                        Text("Descubrir mi atracción ideal")
+                        Text(L10n.idealAttractionDiscoverButton)
                             .fontWeight(.semibold)
                         Spacer()
                         if isComputingIdeal {
@@ -796,6 +804,76 @@ struct LandingView: View {
         }
 
         return Attraction.museumAttractions.first!
+    }
+
+    // MARK: - Eventos de hoy Section
+
+    private var eventsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: "calendar")
+                    .scalingFont(size: 16, weight: .semibold)
+                    .foregroundStyle(Color.accentColor)
+                Text(L10n.landingEventsTitle)
+                    .font(.title3)
+                    .fontWeight(.bold)
+                Spacer()
+            }
+
+            if todaysEvents.isEmpty {
+                Text(L10n.landingEventsEmpty)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(16)
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            } else {
+                VStack(spacing: 10) {
+                    ForEach(todaysEvents) { event in
+                        Button {
+                            coqueGuideVM.openPanelWithMessage(L10n.askCoqueAbout(event.name))
+                        } label: {
+                            HStack(spacing: 12) {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.accentColor.opacity(0.12))
+                                        .frame(width: 44, height: 44)
+                                    Image(systemName: event.icon)
+                                        .scalingFont(size: 18, weight: .semibold)
+                                        .foregroundStyle(Color.accentColor)
+                                }
+
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(event.name)
+                                        .font(.subheadline)
+                                        .fontWeight(.semibold)
+                                        .foregroundStyle(.primary)
+                                        .lineLimit(2)
+                                        .multilineTextAlignment(.leading)
+                                    if !event.location.isEmpty {
+                                        Text(event.location)
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                            .lineLimit(1)
+                                    }
+                                }
+
+                                Spacer()
+
+                                Image(systemName: "chevron.right")
+                                    .scalingFont(size: 12, weight: .semibold)
+                                    .foregroundStyle(.tertiary)
+                            }
+                            .padding(12)
+                            .background(Color(.secondarySystemGroupedBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        }
+                        .buttonStyle(PressableButtonStyle())
+                    }
+                }
+            }
+        }
     }
 
     // MARK: - Atracciones Section

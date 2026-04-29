@@ -7,6 +7,7 @@
 
 import AVFoundation
 import Combine
+import NaturalLanguage
  
 // MARK: - SpeechService
  
@@ -51,50 +52,72 @@ final class SpeechService: NSObject, ObservableObject {
  
     private func speak(_ text: String) {
         guard !text.isEmpty else { return }
- 
+
         totalLength  = text.count
         spokenLength = 0
         progress     = 0
- 
+
         let utterance = AVSpeechUtterance(string: text)
-        utterance.voice       = resolvedVoice()
+        utterance.voice       = resolvedVoice(forText: text)
         utterance.rate        = AVSpeechUtteranceDefaultSpeechRate * 0.92   // ligeramente más pausado
         utterance.pitchMultiplier = 1.05
         utterance.volume      = 1.0
         utterance.preUtteranceDelay = 0.15
- 
+
         synthesizer.speak(utterance)
- 
+
         DispatchQueue.main.async { self.isSpeaking = true }
     }
- 
-    /// Elige la mejor voz disponible según el locale del sistema.
-    /// Prioriza voz "mejorada" o "premium" si el usuario la tiene descargada.
-    private func resolvedVoice() -> AVSpeechSynthesisVoice? {
-        let systemLocale = Locale.current
-        let langCode     = systemLocale.language.languageCode?.identifier ?? "es"
-        let regionCode   = systemLocale.region?.identifier ?? "MX"
- 
-        // Identificadores candidatos, de mayor a menor preferencia
-        let candidates: [String] = [
-            "\(langCode)-\(regionCode)",   // e.g. es-MX
-            langCode == "es" ? (regionCode == "ES" ? "es-ES" : "es-MX") : "\(langCode)-\(regionCode)",
-            "es-MX",
-            "es-ES",
-            "es-US",
-            "es"
-        ]
- 
-        // Intenta encontrar voz mejorada o premium primero
-        for id in candidates {
-            let voices = AVSpeechSynthesisVoice.speechVoices().filter { $0.language.hasPrefix(id.prefix(5)) }
-            if let premium = voices.first(where: { $0.quality == .premium }) { return premium }
-            if let enhanced = voices.first(where: { $0.quality == .enhanced }) { return enhanced }
-            if let standard = voices.first(where: { $0.quality == .default }) { return standard }
+
+    /// Detecta el idioma dominante del texto (con NaturalLanguage) y elige
+    /// la mejor voz disponible para ese idioma. Prioriza voz "mejorada" o
+    /// "premium" si el usuario la tiene descargada.
+    ///
+    /// Por qué no usamos `Locale.current`: el texto puede estar traducido a un
+    /// idioma distinto al del sistema, o estar todavía en español mientras la
+    /// traducción asíncrona no llega. Detectar desde el texto es robusto.
+    private func resolvedVoice(forText text: String) -> AVSpeechSynthesisVoice? {
+        let detected = detectLanguageCode(in: text) ?? fallbackLanguageCode()
+        return bestVoice(for: detected)
+            ?? AVSpeechSynthesisVoice(language: "\(detected)-\(regionGuess(for: detected))")
+            ?? AVSpeechSynthesisVoice(language: detected)
+            ?? AVSpeechSynthesisVoice(language: "es-MX")
+    }
+
+    /// Detecta el código de idioma ISO (en, es, fr, pt, ko, ar...) del texto.
+    private func detectLanguageCode(in text: String) -> String? {
+        let recognizer = NLLanguageRecognizer()
+        recognizer.processString(text)
+        return recognizer.dominantLanguage?.rawValue
+    }
+
+    /// Idioma del sistema como último recurso si la detección falla.
+    private func fallbackLanguageCode() -> String {
+        Locale.current.language.languageCode?.identifier ?? "es"
+    }
+
+    /// Mejor región por defecto para un código de idioma cuando no se puede inferir
+    /// del sistema (ej: en → US, es → MX, fr → FR).
+    private func regionGuess(for langCode: String) -> String {
+        switch langCode {
+        case "es": return "MX"
+        case "en": return "US"
+        case "fr": return "FR"
+        case "pt": return "BR"
+        case "ko": return "KR"
+        case "ar": return "SA"
+        default:   return Locale.current.region?.identifier ?? "US"
         }
- 
-        // Fallback absoluto
-        return AVSpeechSynthesisVoice(language: "es-MX")
+    }
+
+    /// Busca la mejor voz instalada que arranque con el código de idioma dado.
+    private func bestVoice(for langCode: String) -> AVSpeechSynthesisVoice? {
+        let voices = AVSpeechSynthesisVoice.speechVoices().filter {
+            $0.language.lowercased().hasPrefix(langCode.lowercased())
+        }
+        if let premium = voices.first(where: { $0.quality == .premium }) { return premium }
+        if let enhanced = voices.first(where: { $0.quality == .enhanced }) { return enhanced }
+        return voices.first(where: { $0.quality == .default }) ?? voices.first
     }
  
     private func configureAudioSession() {
