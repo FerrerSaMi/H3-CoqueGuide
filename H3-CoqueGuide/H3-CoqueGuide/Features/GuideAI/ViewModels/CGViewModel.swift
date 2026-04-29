@@ -28,8 +28,22 @@ final class CGViewModel: ObservableObject {
     /// Sugerencia proactiva actualmente visible. `nil` = oculta.
     @Published private(set) var activeSuggestion: CGSuggestion? = nil
 
-    /// Número de sugerencias sin leer (mostrado como badge en el botón flotante).
-    @Published private(set) var pendingSuggestionsCount: Int = 0
+    /// `true` mientras la UI quiere suprimir sugerencias (p.ej. en Landing,
+    /// donde no hay botón flotante y un banner suelto se vería huérfano).
+    /// Al activarlo, esconde inmediatamente cualquier sugerencia visible.
+    @Published var suppressSuggestions: Bool = false {
+        didSet {
+            if suppressSuggestions, activeSuggestion != nil {
+                withAnimation(.easeOut(duration: 0.2)) {
+                    activeSuggestion = nil
+                }
+            }
+        }
+    }
+
+    /// `true` si hay una sugerencia activa visible. La UI usa este flag
+    /// para mostrar un dot pulsante sobre el botón flotante.
+    var hasActiveSuggestion: Bool { activeSuggestion != nil }
 
     /// Mensaje pendiente que se enviará automáticamente al abrir el panel.
     @Published var pendingMessage: String? = nil
@@ -76,7 +90,6 @@ final class CGViewModel: ObservableObject {
     func openPanel(initialMessage: String? = nil) {
         isPanelOpen = true
         activeSuggestion = nil
-        pendingSuggestionsCount = 0
 
         if let initialMessage {
             sendMessage(initialMessage)
@@ -111,7 +124,6 @@ final class CGViewModel: ObservableObject {
 
         isPanelOpen = true
         activeSuggestion = nil
-        pendingSuggestionsCount = 0
 
         // Evita colisionar con otro mensaje pendiente que abriría el chat duplicado.
         pendingMessage = nil
@@ -192,30 +204,31 @@ final class CGViewModel: ObservableObject {
 
     /// Inicia el ciclo de sugerencias proactivas con temporizador.
     private func startProactiveSuggestions() {
-        // Primera sugerencia después de 10 segundos (cuando el usuario ya conoce la app)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 10) { [weak self] in
+        // Primera sugerencia tras 3 segundos (anticipación rápida).
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
             self?.showNextSuggestion()
         }
 
-        // Sugerencias adicionales cada 35 segundos, solo si el panel está cerrado
-        suggestionTimer = Timer.scheduledTimer(withTimeInterval: 35, repeats: true) { [weak self] _ in
+        // Sugerencias adicionales cada 25 segundos.
+        suggestionTimer = Timer.scheduledTimer(withTimeInterval: 25, repeats: true) { [weak self] _ in
             guard let self, !self.isPanelOpen else { return }
             self.showNextSuggestion()
         }
     }
 
     private func showNextSuggestion() {
-        // No muestra si el panel está abierto o hay una sugerencia visible
-        guard !isPanelOpen, activeSuggestion == nil else { return }
+        // No muestra si el panel está abierto, hay una visible, o el view layer
+        // pidió suprimir (p.ej. en el Landing — ver suppressSuggestions).
+        guard !isPanelOpen, activeSuggestion == nil, !suppressSuggestions else { return }
 
         let suggestion = proactiveSuggestions.randomElement()
         withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
             activeSuggestion = suggestion
-            pendingSuggestionsCount += 1
         }
 
-        // Auto-descarta después de 7 segundos para no ser invasiva
-        DispatchQueue.main.asyncAfter(deadline: .now() + 7) { [weak self] in
+        // Auto-descarta después de 8 segundos: tiempo suficiente para leer y
+        // decidir si aceptar la sugerencia, sin invadir la pantalla.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 8) { [weak self] in
             withAnimation(.easeOut(duration: 0.3)) {
                 self?.activeSuggestion = nil
             }

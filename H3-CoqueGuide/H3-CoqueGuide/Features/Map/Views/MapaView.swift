@@ -565,12 +565,12 @@ struct MapaView: View {
                         )
                     )
                 VStack(spacing: 8) {
-                    Text("¡Coque tiene una misión! 🎯")
+                    Text(L10n.coqueHintTitle)
                         .font(.headline)
                         .fontWeight(.bold)
                         .foregroundStyle(.primary)
                         .multilineTextAlignment(.center)
-                    Text("Usa el escáner para encontrar los objetos destacados del museo")
+                    Text(L10n.coqueHintMessage)
                         .font(.body)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
@@ -587,7 +587,7 @@ struct MapaView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "qrcode.viewfinder")
                         .font(.system(size: 14, weight: .semibold))
-                    Text("Ir al escáner")
+                    Text(L10n.coqueHintGoToScanner)
                         .font(.headline)
                         .fontWeight(.semibold)
                 }
@@ -609,7 +609,7 @@ struct MapaView: View {
             Button {
                 showCoqueHintSheet = false
             } label: {
-                Text("Ahora no")
+                Text(L10n.coqueHintNotNow)
                     .font(.subheadline)
                     .fontWeight(.semibold)
                     .foregroundStyle(.secondary)

@@ -256,6 +256,19 @@ enum L10n {
         )
     }
 
+    /// Versión enriquecida: además del título incluye la era para dar contexto
+    /// al modelo y disparar respuestas más específicas.
+    static func scannerAskPromptDetailed(objectTitle: String, era: String) -> String {
+        localize(
+            es: "Acabo de escanear \(objectTitle) (\(era)). Cuéntame más sobre esta pieza y su importancia en el museo.",
+            en: "I just scanned \(objectTitle) (\(era)). Tell me more about this piece and its importance in the museum.",
+            fr: "Je viens de scanner \(objectTitle) (\(era)). Parlez-moi de cette pièce et de son importance dans le musée.",
+            pt: "Acabei de escanear \(objectTitle) (\(era)). Conte-me mais sobre essa peça e sua importância no museu.",
+            ko: "\(objectTitle) (\(era))을(를) 방금 스캔했어요. 이 작품과 박물관에서의 의미에 대해 더 알려주세요.",
+            ar: "لقد قمت بمسح \(objectTitle) (\(era)). أخبرني المزيد عن هذه القطعة وأهميتها في المتحف."
+        )
+    }
+
     // MARK: - Landing
 
     static var landingGreetingSubtitle: String {
@@ -358,6 +371,59 @@ enum L10n {
         )
     }
 
+    // MARK: - Landing status row
+
+    static var landingStatusOpen: String {
+        localize(es: "Abierto", en: "Open", fr: "Ouvert", pt: "Aberto", ko: "운영 중", ar: "مفتوح")
+    }
+
+    static var landingStatusClosed: String {
+        localize(es: "Cerrado", en: "Closed", fr: "Fermé", pt: "Fechado", ko: "운영 종료", ar: "مغلق")
+    }
+
+    static func landingStatusUntil(_ time: String) -> String {
+        localize(
+            es: "hasta \(time)",
+            en: "until \(time)",
+            fr: "jusqu'à \(time)",
+            pt: "até \(time)",
+            ko: "\(time)까지",
+            ar: "حتى \(time)"
+        )
+    }
+
+    static func landingStatusEventCount(_ count: Int) -> String {
+        if count == 1 {
+            return localize(
+                es: "1 evento hoy",
+                en: "1 event today",
+                fr: "1 événement aujourd'hui",
+                pt: "1 evento hoje",
+                ko: "오늘 이벤트 1개",
+                ar: "فعالية واحدة اليوم"
+            )
+        }
+        return localize(
+            es: "\(count) eventos hoy",
+            en: "\(count) events today",
+            fr: "\(count) événements aujourd'hui",
+            pt: "\(count) eventos hoje",
+            ko: "오늘 이벤트 \(count)개",
+            ar: "\(count) فعاليات اليوم"
+        )
+    }
+
+    static var landingStatusNoEvents: String {
+        localize(
+            es: "Sin eventos hoy",
+            en: "No events today",
+            fr: "Aucun événement aujourd'hui",
+            pt: "Sem eventos hoje",
+            ko: "오늘 이벤트 없음",
+            ar: "لا توجد فعاليات اليوم"
+        )
+    }
+
     static var landingEventsTitle: String {
         localize(
             es: "Eventos de hoy",
@@ -393,6 +459,34 @@ enum L10n {
     }
 
     // MARK: - Atracción ideal
+
+    // MARK: - Museum status badge
+
+    static func museumStatusOpen(until: String) -> String {
+        localize(
+            es: "Abierto hasta \(until)",
+            en: "Open until \(until)",
+            fr: "Ouvert jusqu'à \(until)",
+            pt: "Aberto até \(until)",
+            ko: "\(until)까지 영업",
+            ar: "مفتوح حتى \(until)"
+        )
+    }
+
+    static var museumStatusClosed: String {
+        localize(es: "Cerrado", en: "Closed", fr: "Fermé", pt: "Fechado", ko: "휴관", ar: "مغلق")
+    }
+
+    static func museumStatusOpensAt(time: String) -> String {
+        localize(
+            es: "Abre a las \(time)",
+            en: "Opens at \(time)",
+            fr: "Ouvre à \(time)",
+            pt: "Abre às \(time)",
+            ko: "\(time)에 영업 시작",
+            ar: "يفتح في \(time)"
+        )
+    }
 
     static var landingMuseumName: String {
         localize(
@@ -981,6 +1075,45 @@ enum L10n {
             ko: "사진을 찍고 감지된 객체를 분류합니다",
             ar: "يلتقط صورة ويصنّف القطعة المكتشفة"
         )
+    }
+
+    // MARK: - Coque mission hint (mapa)
+
+    static var coqueHintTitle: String {
+        localize(
+            es: "¡Coque tiene una misión! 🎯",
+            en: "Coque has a mission for you! 🎯",
+            fr: "Coque a une mission pour toi ! 🎯",
+            pt: "Coque tem uma missão para você! 🎯",
+            ko: "Coque의 미션이 있어요! 🎯",
+            ar: "لدى Coque مهمة لك! 🎯"
+        )
+    }
+
+    static var coqueHintMessage: String {
+        localize(
+            es: "Usa el escáner para encontrar los objetos destacados del museo",
+            en: "Use the scanner to find the museum's featured objects",
+            fr: "Utilise le scanner pour trouver les objets phares du musée",
+            pt: "Use o scanner para encontrar os objetos em destaque do museu",
+            ko: "스캐너로 박물관의 주요 물체를 찾아보세요",
+            ar: "استخدم الماسح للعثور على القطع المميزة في المتحف"
+        )
+    }
+
+    static var coqueHintGoToScanner: String {
+        localize(
+            es: "Ir al escáner",
+            en: "Go to scanner",
+            fr: "Aller au scanner",
+            pt: "Ir ao scanner",
+            ko: "스캐너로 이동",
+            ar: "إلى الماسح"
+        )
+    }
+
+    static var coqueHintNotNow: String {
+        localize(es: "Ahora no", en: "Not now", fr: "Pas maintenant", pt: "Agora não", ko: "나중에", ar: "ليس الآن")
     }
 
     static var scannerOnboardingMissionMessage: String {

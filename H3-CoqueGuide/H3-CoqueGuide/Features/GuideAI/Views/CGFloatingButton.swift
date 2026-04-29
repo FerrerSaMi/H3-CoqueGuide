@@ -45,9 +45,11 @@ struct CGFloatingButton: View {
                         value: isBouncing
                     )
 
-                // Badge de sugerencias pendientes
-                if viewModel.pendingSuggestionsCount > 0 {
-                    badgeView
+                // Dot pulsante mientras hay sugerencia activa visible.
+                // Se sincroniza con el banner — aparece y desaparece junto
+                // con él, por eso no acumulamos contador.
+                if viewModel.hasActiveSuggestion {
+                    pulsingDot
                         .transition(.scale(scale: 0.5).combined(with: .opacity))
                 }
             }
@@ -64,20 +66,12 @@ struct CGFloatingButton: View {
 
     // MARK: - Subvistas
 
-    private var badgeView: some View {
-        ZStack {
-            Circle()
-                .fill(Color.accentColor)
-                .frame(width: 20, height: 20)
-                .shadow(color: Color.accentColor.opacity(0.5), radius: 4, x: 0, y: 2)
-
-            Text("\(min(viewModel.pendingSuggestionsCount, 9))")
-                .scalingFont(size: 11, weight: .bold)
-                .foregroundStyle(.white)
-        }
-        // En RTL (árabe) el badge va en topLeading, así que el offset
-        // horizontal debe invertirse para que asome fuera del avatar.
-        .offset(x: layoutDirection == .rightToLeft ? -3 : 3, y: -3)
+    /// Dot que pulsa mientras hay una sugerencia activa.
+    private var pulsingDot: some View {
+        PulsingNotificationDot()
+            // En RTL (árabe) va en topLeading, así que el offset horizontal
+            // debe invertirse para que asome fuera del avatar.
+            .offset(x: layoutDirection == .rightToLeft ? -3 : 3, y: -3)
     }
 
     // MARK: - Animación
@@ -142,18 +136,46 @@ struct CGOverlayModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         GeometryReader { proxy in
+            // Posición horizontal del centro del botón en el frame (en sistema
+            // donde 0 = anclaje bottom-trailing). Sirve para decidir si el
+            // banner se ancla a la izquierda o derecha del botón.
+            let buttonOffsetX = clampedOffsetX(in: proxy.size) + dragTranslation.width
+            let buttonRightEdge = proxy.size.width - horizontalPadding + buttonOffsetX
+            let buttonCenter = buttonRightEdge - buttonSize / 2
+            let bannerWidth: CGFloat = 260
+            // Si el botón está en la mitad izquierda, el banner se acomoda a
+            // la derecha del botón (extiende hacia adentro de la pantalla).
+            let bannerOnRightOfButton = buttonCenter < proxy.size.width / 2
+            // Offset que mantiene el banner dentro de la pantalla:
+            //   - si extiende a la derecha: anclamos su borde izquierdo al
+            //     borde izquierdo del botón
+            //   - si extiende a la izquierda: anclamos su borde derecho al
+            //     borde derecho del botón (comportamiento default)
+            let bannerOffsetX: CGFloat = bannerOnRightOfButton
+                ? (buttonOffsetX + bannerWidth - buttonSize)
+                : buttonOffsetX
+
             content
                 .overlay(alignment: .bottomTrailing) {
                     VStack(alignment: .trailing, spacing: 10) {
 
-                        // Banner de sugerencia proactiva (aparece encima del botón)
-                        if let suggestion = viewModel.activeSuggestion {
+                        // Banner de sugerencia proactiva (aparece encima del botón).
+                        // El offset X del banner se calcula para que nunca quede
+                        // fuera de la pantalla, incluso si el botón fue arrastrado
+                        // muy cerca del borde izquierdo.
+                        if let suggestion = viewModel.activeSuggestion, !hideFloatingButton {
                             CGSuggestionBanner(
                                 suggestion: suggestion,
                                 onAccept: { viewModel.acceptSuggestion(suggestion) },
                                 onDismiss: { viewModel.dismissSuggestion() }
                             )
-                            .frame(maxWidth: 260)
+                            .frame(maxWidth: bannerWidth)
+                            .offset(
+                                x: bannerOffsetX,
+                                y: clampedOffsetY(in: proxy.size) + dragTranslation.height
+                            )
+                            .animation(.spring(response: 0.4, dampingFraction: 0.85), value: savedOffsetX)
+                            .animation(.spring(response: 0.4, dampingFraction: 0.85), value: savedOffsetY)
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                         }
 
@@ -250,5 +272,34 @@ struct CGOverlayModifier: ViewModifier {
 
     private func clamp(_ value: Double, min lower: CGFloat, max upper: CGFloat) -> Double {
         Swift.min(Swift.max(value, Double(lower)), Double(upper))
+    }
+}
+
+// MARK: - PulsingNotificationDot
+/// Dot circular con animación de pulse continua para indicar que hay una
+/// sugerencia activa de Coque. Tiene su propio @State para que el loop
+/// no dependa de cambios externos.
+private struct PulsingNotificationDot: View {
+    @State private var animate = false
+
+    var body: some View {
+        ZStack {
+            // Anillo exterior que pulsa
+            Circle()
+                .fill(Color.accentColor.opacity(0.45))
+                .frame(width: 20, height: 20)
+                .scaleEffect(animate ? 1.6 : 1.0)
+                .opacity(animate ? 0 : 0.7)
+            // Dot sólido central
+            Circle()
+                .fill(Color.accentColor)
+                .frame(width: 12, height: 12)
+                .shadow(color: Color.accentColor.opacity(0.6), radius: 3)
+        }
+        .onAppear {
+            withAnimation(.easeOut(duration: 1.0).repeatForever(autoreverses: false)) {
+                animate = true
+            }
+        }
     }
 }
