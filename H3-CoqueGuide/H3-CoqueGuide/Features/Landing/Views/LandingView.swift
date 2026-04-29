@@ -50,7 +50,6 @@ struct LandingView: View {
     /// Permite que el llamador (p.ej. onboarding que eligió "Comenzar encuesta")
     /// seleccione un tab inicial. Por defecto 0 (inicio).
     @Binding var selectedTab: Int
-    @AppStorage("isDarkModeEnabled") private var isDarkModeEnabled: Bool = false
 
     // Inits para mantener compatibilidad con `LandingView()` (sin binding) y
     // con la nueva entrada desde RootView (con binding).
@@ -144,6 +143,8 @@ struct LandingView: View {
             }
             .onAppear {
                 coqueGuideVM.loadVisitorProfile(from: modelContext)
+                // Estado inicial: si arrancamos en Landing, suprimir sugerencias.
+                coqueGuideVM.suppressSuggestions = (selectedTab == 0)
                 todaysEvents = CGEventService.shared.todaysEvents()
                 Task {
                     await CGEventService.shared.refresh()
@@ -167,6 +168,9 @@ struct LandingView: View {
                 if oldTab == 3 && newTab != 3 {
                     coqueGuideVM.loadVisitorProfile(from: modelContext)
                 }
+                // Suprimir banners de sugerencia en Landing (tab 0): no hay
+                // botón flotante visible y un banner suelto se ve huérfano.
+                coqueGuideVM.suppressSuggestions = (newTab == 0)
             }
             .onChange(of: navigationState.tabSelectionIndex) { _, newTabIndex in
                 if let tabIndex = newTabIndex {
@@ -185,7 +189,6 @@ struct LandingView: View {
         }
         .environmentObject(coqueGuideVM)
         .environment(navigationState)
-        .preferredColorScheme(isDarkModeEnabled ? .dark : .light)
     }
 
     // MARK: - Animación de aparición
@@ -300,22 +303,7 @@ struct LandingView: View {
 
                 Spacer()
 
-                Button {
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-                        isDarkModeEnabled.toggle()
-                    }
-                } label: {
-                    Image(systemName: isDarkModeEnabled ? "sun.max.fill" : "moon.fill")
-                        .scalingFont(size: 16, weight: .medium)
-                        .foregroundStyle(isDarkModeEnabled ? .yellow : .secondary)
-                        .frame(width: 36, height: 36)
-                        .background(Color(.secondarySystemGroupedBackground))
-                        .clipShape(Circle())
-                        .rotationEffect(.degrees(isDarkModeEnabled ? 360 : 0))
-                        .animation(.spring(response: 0.5, dampingFraction: 0.6), value: isDarkModeEnabled)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(isDarkModeEnabled ? L10n.landingDarkModeToLight : L10n.landingDarkModeToDark)
+                MuseumStatusBadge()
             }
             .padding(.horizontal, 20)
             .padding(.top, 16)

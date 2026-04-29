@@ -8,6 +8,21 @@
 //   - Los analíticos quedan consistentes (mismo prompt para todos los devices).
 // =============================================================================
 
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+
+// --- Catálogo de objetos del museo (cargado una vez al iniciar el server) ---
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const MUSEUM_OBJECTS_PATH = join(__dirname, '..', 'data', 'MuseumObjects.json');
+let MUSEUM_OBJECTS = { objects: {}, unknown: null };
+try {
+    MUSEUM_OBJECTS = JSON.parse(readFileSync(MUSEUM_OBJECTS_PATH, 'utf8'));
+    console.log(`📚 Catálogo de objetos cargado: ${Object.keys(MUSEUM_OBJECTS.objects ?? {}).length} piezas.`);
+} catch (err) {
+    console.error('⚠️ No se pudo cargar MuseumObjects.json — Coque responderá sin contexto del catálogo.', err.message);
+}
+
 // --- Idiomas soportados y su instrucción para el LLM ---
 const LANGUAGE_INSTRUCTIONS = {
     es: 'Responde siempre en español mexicano.',
@@ -77,6 +92,13 @@ export function buildSystemPrompt({ visitor, todaysEvents, language }) {
         .map((e) => `- ${e.name} (${e.location ?? 'sin ubicación'})`)
         .join('\n') || '(sin eventos hoy)';
 
+    // Catálogo de objetos del museo: título, era y resumen para que Coque
+    // pueda hablar con autoridad cuando el visitante pregunte por una pieza
+    // específica (ej: "¿Qué es el Vagón Torpedo?", "Cuéntame del Chevrolet 3100").
+    const objectsCatalog = Object.entries(MUSEUM_OBJECTS.objects ?? {})
+        .map(([_, obj]) => `- ${obj.title} — ${obj.era}\n  ${obj.description}`)
+        .join('\n') || '(catálogo no disponible)';
+
     let personalityBlock = `PERSONALIDAD:
 - Amable, entusiasta y conocedor de la historia industrial
 - Respuestas concisas pero informativas (máximo 3-4 párrafos cortos)
@@ -113,6 +135,11 @@ INFORMACIÓN DEL MUSEO:
 
 EVENTOS DE HOY:
 ${eventsList}
+
+CATÁLOGO DE OBJETOS DEL MUSEO (uso este detalle cuando el visitante pregunte sobre una pieza específica):
+${objectsCatalog}
+
+Cuando el visitante pregunte sobre un objeto del catálogo, da una respuesta detallada basada en su descripción, su era y su contexto industrial. Puedes elaborar el contexto histórico siempre que sea coherente con la información del catálogo. Si el visitante pregunta por un objeto que NO está en el catálogo, dilo claramente en lugar de inventar información.
 ${visitorBlock}
 
 TARJETAS DE ACCIÓN:
