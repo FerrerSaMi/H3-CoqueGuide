@@ -66,7 +66,7 @@ struct CGPanelView: View {
                 // con tan pocos elementos y genera jank al abrir el chat.
                 VStack(spacing: 14) {
                     ForEach(viewModel.messages) { message in
-                        CGMessageBubble(message: message)
+                        CGMessageBubble(message: message, viewModel: viewModel, speech: viewModel.speech)
                             .id(message.id)
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
