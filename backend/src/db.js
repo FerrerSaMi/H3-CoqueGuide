@@ -26,8 +26,17 @@ export const pool = new Pool({
     ssl: process.env.PGSSLMODE === 'require'
         ? { rejectUnauthorized: false }
         : false,
-    max: 10,                    // máximo de conexiones simultáneas
-    idleTimeoutMillis: 30000,   // cierra conexiones inactivas tras 30s
+    // Tuneado para serverless (Vercel Functions):
+    //   - max:1     → cada instancia caliente abre como máximo 1 conexión.
+    //                 Vercel puede levantar muchas instancias en paralelo, así
+    //                 que mantenerlo bajo evita reventar el límite de
+    //                 conexiones de Cloud SQL Postgres.
+    //   - idleTimeout corto → la conexión se cierra rápido cuando la función
+    //                 deja de recibir tráfico, liberando slots en Postgres.
+    //   - connectionTimeout 5s → si la BD tarda más en aceptar, fallamos rápido
+    //                 antes de chocar con el timeout total de la función.
+    max: 1,
+    idleTimeoutMillis: 10000,
     connectionTimeoutMillis: 5000,
 });
 

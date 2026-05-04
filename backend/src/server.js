@@ -846,22 +846,33 @@ app.use((req, res) => {
 });
 
 // --- Arranque ---
+//
+// En Vercel NO ejecutamos `app.listen()` — Vercel envuelve el `app` exportado
+// como una serverless function. La variable de entorno `VERCEL` la inyecta
+// Vercel automáticamente en builds y en runtime.
+//
+// Cuando corres `npm run dev` o `npm start` localmente, esa variable NO existe,
+// así que sí levantamos el listener tradicional.
 
-app.listen(PORT, () => {
-    console.log('');
-    console.log('🚀 H3-CoqueGuide backend');
-    console.log(`   Listening on http://localhost:${PORT}`);
-    console.log('');
-    console.log('   Prueba:');
-    console.log(`     curl http://localhost:${PORT}/health`);
-    console.log('');
-});
+if (!process.env.VERCEL) {
+    app.listen(PORT, () => {
+        console.log('');
+        console.log('🚀 H3-CoqueGuide backend');
+        console.log(`   Listening on http://localhost:${PORT}`);
+        console.log('');
+        console.log('   Prueba:');
+        console.log(`     curl http://localhost:${PORT}/health`);
+        console.log('');
+    });
 
-// --- Cierre limpio ---
-// Cloud Run manda SIGTERM antes de matar el contenedor; cerramos el pool
-// ordenadamente para no dejar conexiones colgadas en Postgres.
-process.on('SIGTERM', async () => {
-    console.log('⏹  SIGTERM recibido, cerrando pool de Postgres…');
-    await pool.end();
-    process.exit(0);
-});
+    // --- Cierre limpio (solo aplica en local) ---
+    // En Vercel cada invocación es efímera y no recibe SIGTERM tradicional.
+    process.on('SIGTERM', async () => {
+        console.log('⏹  SIGTERM recibido, cerrando pool de Postgres…');
+        await pool.end();
+        process.exit(0);
+    });
+}
+
+// Exportamos el `app` para que `api/index.js` (entry point de Vercel) lo use.
+export default app;
