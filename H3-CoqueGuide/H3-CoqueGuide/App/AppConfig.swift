@@ -15,14 +15,13 @@ enum AppConfig {
     /// URL base del backend H3-CoqueGuide.
     ///   - Debug:   IP LAN del Mac corriendo `npm run dev` (mismo Wi-Fi).
     ///              Cambiar por `http://localhost:8080` si se corre en simulador.
-    ///   - Release: Vercel Serverless (placeholder hasta que se deploye).
+    ///   - Release: Vercel Serverless (URL canónica de producción, estable
+    ///              entre deploys; siempre apunta al último deploy de `main`).
     static let backendBaseURL: URL = {
         #if DEBUG
         return URL(string: "http://192.168.10.176:8080")!
         #else
-        // TODO: reemplazar por la URL de producción que asigna Vercel.
-        //       Va a tener forma `https://<proyecto>.vercel.app`.
-        return URL(string: "https://coqueguide-backend.example.com")!
+        return URL(string: "https://h3-coque-guide.vercel.app")!
         #endif
     }()
 
